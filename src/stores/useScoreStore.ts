@@ -5,6 +5,7 @@ import { defineStore } from "pinia";
 import { saveAs } from "file-saver";
 import { Document, Packer, Paragraph, type IParagraphOptions } from "docx";
 import axios from "axios";
+
 export const useScoreStore = defineStore("score", () => {
   interface Eval {
     username: string;
@@ -90,7 +91,6 @@ export const useScoreStore = defineStore("score", () => {
   const evaluationAssign = () => {
     const tool = JSON.parse(localStorage.getItem("selectedTool") || "{}");
     // console.log(tool);
-
     ratingEvaluation.value.tool = tool.name;
     ratingEvaluation.value.category = tool.category;
     ratingEvaluation.value.content_quality = ratingDimensions.value[0].name;
@@ -104,21 +104,21 @@ export const useScoreStore = defineStore("score", () => {
     fetchEval();
   };
   const fetchEval = async () => {
-    const toolDemo = {
-      username: "测试用户",
-      tool: "ProcessOn",
-      category: "流程图与思维导图",
-      content_quality:
-        "ProcessOn 是一款专业的在线绘图工具，其核心优势体现在建模能力、精准的自动对齐布局以及丰富的模板库，能够满足多种复杂场景的需求。",
-      efficiency: "具备实时协作功能，支持多种文件格式的导出，提升了效率。",
-      Convenience: "交互逻辑清晰，具备便捷的拖拽操作，同时兼容多终端访问。",
-      payment: "提供不同层级的付费方案，以满足个人及企业用户的不同需求。",
-      feedback_level:
-        "提供详尽的文档与教程，有活跃的用户社区，确保产品持续优化。",
-      averageScore: 4.9,
-      comment:
-        "ProcessOn 以其卓越的可视化能力和强大的协作功能，在流程图与思维导图领域树立了行业标杆，特别适用于产品设计、项目管理和业务流程优化场景。",
-    };
+    // const toolDemo = {
+    //   username: "测试用户",
+    //   tool: "ProcessOn",
+    //   category: "流程图与思维导图",
+    //   content_quality:
+    //     "ProcessOn 是一款专业的在线绘图工具，其核心优势体现在建模能力、精准的自动对齐布局以及丰富的模板库，能够满足多种复杂场景的需求。",
+    //   efficiency: "具备实时协作功能，支持多种文件格式的导出，提升了效率。",
+    //   Convenience: "交互逻辑清晰，具备便捷的拖拽操作，同时兼容多终端访问。",
+    //   payment: "提供不同层级的付费方案，以满足个人及企业用户的不同需求。",
+    //   feedback_level:
+    //     "提供详尽的文档与教程，有活跃的用户社区，确保产品持续优化。",
+    //   averageScore: 4.9,
+    //   comment:
+    //     "ProcessOn 以其卓越的可视化能力和强大的协作功能，在流程图与思维导图领域树立了行业标杆，特别适用于产品设计、项目管理和业务流程优化场景。",
+    // };
     await axios
       .post("/llm/evaluate", ratingEvaluation.value)
       .then(async (resp) => {
@@ -145,5 +145,42 @@ export const useScoreStore = defineStore("score", () => {
         console.error(e);
       });
   };
-  return { ratingDimensions, ratingEvaluation, evaluationAssign };
+
+  // 评分传后端
+  const evaluationTransmission = async (toolId: number) => {
+    const score = calculateWeightedAverage();
+    console.log(score);
+    const rate = {
+      rating: score,
+      comment: ratingEvaluation.value.comment,
+    };
+    const token = JSON.parse(localStorage.getItem("user") as string).token;
+    await axios
+      .post(`/api/tools/${toolId}/ratings`, {
+        Authorization: token,
+        rate,
+      })
+      .then((resp) => {
+        console.log("评价数据传输成功", resp.data.message);
+      })
+      .catch((e) => {
+        console.log("评价数据传输失败", e);
+      });
+  };
+  // 均值计算
+  const calculateWeightedAverage = (): number => {
+    const weights = [0.3, 0.25, 0.25, 0.1, 0.1];
+    let weightedSum = 0;
+    ratingDimensions.value.forEach((dimension, index) => {
+      weightedSum += dimension.score * weights[index];
+    });
+    return parseFloat(weightedSum.toFixed(1));
+  };
+  return {
+    ratingDimensions,
+    ratingEvaluation,
+    evaluationAssign,
+    evaluationTransmission,
+    calculateWeightedAverage,
+  };
 });

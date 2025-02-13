@@ -13,8 +13,9 @@
   font-size: 22px;
   font-weight: bold;
   color: #ffffff;
-  text-align: center;
-  margin-left: 30px;
+  text-align: left;
+  padding-left: 40px;
+  position: relative;
 }
 .grid-content .name:hover {
   cursor: pointer;

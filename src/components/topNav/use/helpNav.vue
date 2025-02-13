@@ -1,7 +1,16 @@
 <template>
-  <div class="help-content">使用说明</div>
+  <div class="help-content" @click="fakeHelp">使用说明</div>
 </template>
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { ElMessage } from 'element-plus';
+
+const fakeHelp = () => {
+  ElMessage({
+    message: '模块尚未开发',
+    type: 'warning',
+  })
+};
+</script>
 <style scope>
 .help-content {
   min-height: 55px;
@@ -11,6 +20,5 @@
 .help-content:hover {
   cursor: pointer;
   color: #ffffff;
-  background-color: rgba(205, 188, 61, 0.223);
 }
 </style>

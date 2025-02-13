@@ -31,10 +31,11 @@
   width: 156px;
   height: 143px;
   margin: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #2d2d2d;
   border-radius: 10px;
-  background-color: #f8f8f8;
+  background-color: var(--background-color);
   display: flex;
+  color: var(--text-color);
   flex-direction: column;
   position: relative;
   box-sizing: border-box;
@@ -59,8 +60,7 @@
 .card-body {
   flex: 1;
   height: 40px;
-  padding-left: 10px;
-  padding-bottom: 5px;
+  padding: 0 0 8px 10px;
   font-weight: bold;
   text-align: left;
   display: flex;
@@ -75,12 +75,12 @@
   width: 100%;
   height: 30px;
   font-weight: lighter;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid #2d2d2d;
   box-sizing: border-box;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   text-align: center;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .start,
@@ -89,10 +89,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  color: var(--text-color);
 }
 
 .start {
-  border-right: 1px solid #ccc;
+  border-right: 1px solid #2d2d2d;
   cursor: pointer;
 }
 </style>

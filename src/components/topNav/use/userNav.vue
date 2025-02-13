@@ -1,12 +1,23 @@
 <template>
   <div class="grid-content">
-    <span class="login-container" @click="loginIn">登录</span>
-    <span class="register-container">注册</span>
+    <span class="login-container" @click="fakeLogin">登录</span>
+    <span class="register-container" @click="fakeRegister">注册</span>
   </div>
 </template>
 <script lang="ts" setup>
-const loginIn = () => {
-  console.log("loginIn");
+import { ElMessage } from 'element-plus';
+
+const fakeLogin = () => {
+  ElMessage({
+    message: '请点击开始使用以登入',
+    type: 'warning',
+  })
+};
+const fakeRegister = () => {
+  ElMessage({
+    message: '请点击开始使用以新建账号.',
+    type: 'warning',
+  })
 };
 </script>
 <style scoped>
@@ -18,7 +29,6 @@ const loginIn = () => {
   font-size: 18px;
   font-weight: bolder;
   color: rgba(255, 255, 255, 0.579);
-  margin-left: 90px;
   letter-spacing: 2px;
 }
 .grid-content span {
@@ -27,10 +37,8 @@ const loginIn = () => {
 }
 .login-container:hover {
   color: #ffffff;
-  background-color: rgba(210, 105, 30, 0.836);
 }
 .register-container:hover {
   color: #ffffff;
-  background-color: darkcyan;
 }
 </style>

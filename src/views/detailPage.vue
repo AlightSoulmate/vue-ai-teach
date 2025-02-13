@@ -1,8 +1,8 @@
 <template>
-  <nav>
+  <nav class="top-nav">
     <TopNav />
   </nav>
-  <div>
+  <div class="detail-main">
     <Main />
   </div>
 </template>
@@ -10,4 +10,13 @@
 import TopNav from "@/components/topNav/main/index.vue";
 import Main from "@/components/detail/index.vue";
 </script>
-<style scope></style>
+<style scope>
+.top-nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+.detail-main {
+  margin-top: 55px;
+}
+</style>

@@ -1,5 +1,6 @@
 // mock/mockData.ts
 import Mock from "mockjs";
+import { ref } from "vue";
 Mock.setup({
   timeout: "100-200", // 设置响应延迟
 });
@@ -797,23 +798,45 @@ const tools = [
   },
 ];
 // 1.1 用户注册 未使用
-Mock.mock("/api/user/register", "post", (req) => {});
-// 1.2 用户登录 未使用
-Mock.mock("/api/login", "post", (req) => {
-  const { username, password } = JSON.parse(req.body);
-  if (username === "ycy" && password === "123456") {
-    return {
-      code: 200,
-      message: "用户登录成功",
-      data: { token: "fake_token" },
-    };
-  } else {
-    return {
-      code: 401,
-      message: "Invalid username or password",
-    };
-  }
+Mock.mock("/api/user/register", "post", (req) => {
+  return {
+    Authorization: "jwt token",
+    user: {
+      id: 20,
+      username: "cxt8",
+      role: "user",
+      message: "用户注册成功",
+    },
+  };
 });
+
+// 1.2 用户登录 未使用
+Mock.mock("/api/user/login", "post", (req) => {
+  return {
+    Authorization: "jwt token",
+    user: {
+      id: 20,
+      username: "cxt8",
+      role: "user",
+      message: "用户登录成功",
+    },
+  };
+});
+// Mock.mock("/api/login", "post", (req) => {
+//   const { username, password } = JSON.parse(req.body);
+//   if (username === "ycy" && password === "123456") {
+//     return {
+//       code: 200,
+//       message: "用户登录成功",
+//       data: { token: "fake_token" },
+//     };
+//   } else {
+//     return {
+//       code: 401,
+//       message: "Invalid username or password",
+//     };
+//   }
+// });
 
 // 2.1 获取某一类别下的工具列表 不使用
 Mock.mock("/api/tools", "get", (options) => {
@@ -827,7 +850,6 @@ Mock.mock("/api/tools", "get", (options) => {
   // 筛选符合条件的工具
   const result = tools.filter((tool) => tool.category === category);
 
-  // 返回结果
   return {
     code: 200,
     message: "成功",
@@ -835,12 +857,28 @@ Mock.mock("/api/tools", "get", (options) => {
   };
 });
 
-// 2.2 获取工具类别列表 不使用
+// 2.1 获取类下工具详情
+// 2.1 最新
+// const categories = ref<string[]>([]);
+
+// Mock.mock(/\/api\/tools\?category=\w+/, (options: any) => {
+//   const category = new URLSearchParams(options.url).get("category"); // 获取查询参数 category
+//   const toolss = mockToolsData[category as keyof typeof mockToolsData] || []; // 根据 category 获取模拟数据
+
+//   // 返回模拟的响应数据
+//   return {
+//     code: 200,
+//     message: "请求成功",
+//     data: {
+//       tools: toolss,
+//     },
+//   };
+// });
+
+// 2.2 获取工具类别列表
 Mock.mock("/api/tools/categories", "get", () => {
   return {
-    code: 200,
-    message: "获取工具类别列表成功",
-    data: [
+    categories: [
       "对话模型",
       "办公助手",
       "会议纪要",
@@ -857,6 +895,7 @@ Mock.mock("/api/tools/categories", "get", () => {
 });
 
 // 3.1 用户为工具打分
-Mock.mock("/api/tools/{toolId}/ratings", "post", () => {
-  return {};
-});
+// Mock.mock("/api/tools/{toolId}/ratings", "post", () => {
+//   return {};
+// });
+

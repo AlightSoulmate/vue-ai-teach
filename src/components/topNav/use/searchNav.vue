@@ -1,13 +1,22 @@
 <template>
   <div class="grid-content">
-    <div class="search-container">
+    <div class="search-container" @click="fakeSearch">
       <button class="search-button" type="button">
         <span class="fake-input">Search</span>
       </button>
     </div>
   </div>
 </template>
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { ElMessage } from 'element-plus';
+
+const fakeSearch = () => {
+  ElMessage({
+    message: '模块尚未开发',
+    type: 'warning',
+  })
+};
+</script>
 <style scoped>
 .grid-content {
   min-height: 55px;

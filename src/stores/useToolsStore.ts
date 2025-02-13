@@ -817,17 +817,19 @@ export const useToolsStore = defineStore("tools", () => {
     category: string;
   }
   // 获取所有类别
-  const fetchCategory = () => {
-    axios
+  const fetchCategory = async () => {
+    await axios
       .get("/api/tools/categories")
       .then((resp) => {
-        categories.value = resp.data.data;
-        loadTools(); // 获取工具数据
+        console.log(categories.value);
+        categories.value = resp.data.categories;
+        loadTools();
       })
       .catch((error) => {
         console.error("获取类别列表失败:", error);
       });
   };
+  
   // 获取工具数据 并将工具数据按类别分组
   const loadTools = () => {
     categories.value.forEach((category) => {
@@ -837,17 +839,18 @@ export const useToolsStore = defineStore("tools", () => {
     });
     console.log(toolsByCategory.value);
 
-    // categories.value.forEach((category) => {
-    //   axios
+    // categories.value.forEach(async (category) => {
+    //   await axios
     //     .get(`/api/tools?category=${category}`)
     //     .then((resp) => {
-    //       console.log(resp.data.data);
-    //       toolsByCategory.value[category] = resp.data.data;
+    //       console.log(resp.data);
+    //       toolsByCategory.value[category] = resp.data.tools;
     //     })
     //     .catch((error) => {
     //       console.error(`获取 ${category} 工具失败:`, error);
     //     });
     // });
+    // console.log(toolsByCategory.value);
   };
   return { tools, categories, toolsByCategory, fetchCategory, loadTools };
 });

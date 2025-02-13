@@ -1,0 +1,7 @@
+/* src/styles/light-theme.scss */
+@use './variables' as *;
+
+:root {
+    --background-color: #{$light-background};
+    --text-color: #{$light-text};
+}

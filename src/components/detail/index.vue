@@ -63,7 +63,6 @@ const gotoSite = (url: string) => {
   margin: 30px 30px 10px 30px;
   padding: 0 20px;
   height: 300px;
-  /* background-color: antiquewhite; */
   display: flex;
 }
 .main-info .info {
@@ -124,15 +123,18 @@ const gotoSite = (url: string) => {
   line-height: 32px;
   text-align: center;
   font-size: 12px;
-  color: #979696;
+  color: var(--text-color);
   border: 1px solid #979696;
   border-radius: 100%;
   cursor: pointer;
-  box-shadow: 1px 1px 3px #ccc;
+  /* box-shadow: 1px 1px 3px #ccc; */
 }
 .main-info img {
   margin-right: 30px;
   max-width: 500px;
   max-height: 200px;
+}
+.el-breadcrumb__inner a, .el-breadcrumb__inner.is-link {
+  color: #fff !important;
 }
 </style>

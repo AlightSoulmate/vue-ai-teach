@@ -1,8 +1,8 @@
 <template>
-  <nav>
+  <nav class="top-nav">
     <TopNav />
   </nav>
-  <div>
+  <div class="main-container">
     <div class="bigLogo">
       <video :src="videoSrc" autoplay loop muted>{{ videoSrcTxt }}</video>
     </div>
@@ -72,9 +72,9 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "../stores/useAuthStore";
 import TopNav from "@/components/topNav/login/index.vue";
 import { ElDialog, ElInput, ElButton, ElNotification } from "element-plus";
-import axios from "axios";
 
 const h1Title = ref("AITe👋ach");
 const h2Title = ref("AI驱动的直观教学反馈与改进，以智能化评估帮助教师完成创新");
@@ -82,6 +82,9 @@ const videoSrc = ref("https://a1.x914.com/alight/i/2025/02/02/app.mp4");
 const videoSrcTxt = ref("您的浏览器不支持 HTML5 视频标签");
 const startUse = ref("开始使用");
 const router = useRouter();
+const authStore = useAuthStore();
+const username = ref<string>("");
+const password = ref<string>("");
 
 // 弹窗控制
 const dialogVisible = ref(false);
@@ -105,35 +108,19 @@ const openDialog = () => {
 };
 
 // 登录操作
-const login = () => {
+const login = async () => {
   console.log("登录中", loginForm.value);
-  axios
-    .post("/api/login", loginForm.value)
-    .then(() => {
-      setTimeout(() => {
-        router.push("/home");
-        ElNotification({
-          title: "登录成功",
-          message: "欢迎你 ycy 同学",
-          type: "success",
-        });
-      }, 1000);
-    })
-    .catch((error) => {
-      ElNotification({
-        title: "登录失败",
-        message: "出错了，请重试",
-        type: "error",
-      });
-    });
+
+  const resp = await authStore.login(username.value, password.value);
+  console.log(resp);
 
   dialogVisible.value = false; // 登录成功后关闭弹窗
 };
 
 // 注册操作
-const register = () => {
+const register = async () => {
   console.log("注册中", registerForm.value);
-  // 在这里可以加入注册的 API 调用
+  await authStore.register(username.value, password.value);
   dialogVisible.value = false; // 注册成功后关闭弹窗
 };
 
@@ -156,22 +143,34 @@ const resetForm = () => {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+// @use "@/styles/light-theme.scss" as light;
+// @use "@/styles/dark-theme.scss" as dark;
 * {
   text-align: center;
   margin: 0 auto;
 }
 body {
-  background-color: rgba(127, 150, 255, 0.527);
+  // background-color: var(--background-color);
+  background-color: blue;
+}
+.top-nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+.main-container {
+  margin-top: 80px;
 }
 #h1Title {
   font-size: 4rem;
-  color: #ffb700;
+  color: var(--text-color);
 }
 #h2Title {
   font-size: 1.5rem;
   color: #000;
   margin: 10px 0;
+  color: var(--text-color);
 }
 .bigLogo {
   width: 100%;

@@ -54,6 +54,9 @@ const scoreStore = useScoreStore();
 
 const submitRating = () => {
   console.log("评分结果:", scoreStore.ratingDimensions);
+  const selectedToolId = JSON.parse(localStorage.getItem('selectedTool'));
+  console.log(selectedToolId);
+  scoreStore.evaluationTransmission(selectedToolId.id)
   scoreStore.evaluationAssign();
   ElMessage({
     message: "评分提交成功，请勿重复提交！",
@@ -63,7 +66,6 @@ const submitRating = () => {
 </script>
 <style scoped>
 .main-container {
-  /* background-color: rgba(128, 202, 255, 0.483); */
   margin: 20px 30px 10px 30px;
   padding: 5px 20px;
 }
@@ -81,16 +83,17 @@ const submitRating = () => {
 .content {
   display: inline-block;
   margin: 5px;
+  background-color: #666;
 }
 
-.rating-container {
+/* .rating-container {
   max-width: 800px;
   margin: 20px auto;
   padding: 20px;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
+} */
 
 .rating-item {
   display: flex;

@@ -96,14 +96,19 @@ onMounted(() => {
 .gotoSite {
   cursor: pointer;
   border: none;
+  color: var(--text-color);
   background: transparent;
   font-weight: lighter;
+  font-size: 13px;
 }
 .demo-tabs > .el-tabs__content {
   padding: 32px;
   color: #ff7300;
   font-size: 32px;
   font-weight: 600;
+}
+.el-tabs--top > .el-tabs__header .el-tabs__item {
+  color: #ffffff !important;
 }
 .tool-card {
   cursor: pointer;
