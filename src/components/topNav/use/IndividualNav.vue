@@ -16,8 +16,6 @@
           }}</el-dropdown-item
         >
         <el-dropdown-item>修改密码</el-dropdown-item>
-        <!-- <el-dropdown-item disabled>Action 4</el-dropdown-item> -->
-        <!-- <el-dropdown-item divided>Action 5</el-dropdown-item> -->
       </el-dropdown-menu>
     </template>
   </el-dropdown>
@@ -35,26 +33,21 @@ const authStore = useAuthStore();
   justify-content: center;
   font-size: 16px;
   font-weight: bolder;
-  color: rgba(255, 255, 255, 0.825);
+  color: var(--text-color);
   margin-left: 90px;
   letter-spacing: 1px;
 }
 
-.login-container:hover {
-  cursor: pointer;
-  width: 70px;
-  color: #ffffff;
-}
-
 .el-dropdown-link {
   cursor: pointer;
-  color: #000;
-  /* color: var(--el-color-primary); */
   display: flex;
   align-items: center;
 }
 
-.el-dropdown-link:hover {
+.el-dropdown-link[data-theme="light"]:hover {
   color: #ccc;
+}
+.el-dropdown-link[data-theme="dark"]:hover {
+  color: red;
 }
 </style>

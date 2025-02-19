@@ -1,9 +1,17 @@
 <template>
-  <div class="grid-content">
+  <div class="grid-content" @click="goBackHome">
     <div class="name">AITeach</div>
   </div>
 </template>
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useRouter } from "vue-router";
+
+const route = useRouter()
+
+const goBackHome = () => {
+  route.push('/')
+}
+</script>
 <style scoped>
 .grid-content {
   min-height: 55px;

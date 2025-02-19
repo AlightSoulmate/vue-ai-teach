@@ -27,6 +27,7 @@ import IconNav from "../use/iconNav.vue";
 import SearchNav from "../use/searchNav.vue";
 import IndividualNav from "../use/IndividualNav.vue";
 import HelpNav from "../use/helpNav.vue";
+// import themeNav from "../use/themeNav.vue";
 import themeNav from "../use/themeNav.vue";
 </script>
 
@@ -36,6 +37,6 @@ import themeNav from "../use/themeNav.vue";
   line-height: 55px;
   background-color: rgba(0, 0, 0, 0.473);
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid var(--text-color);
+  border-bottom: 1px solid #2d2d2d;
 }
 </style>

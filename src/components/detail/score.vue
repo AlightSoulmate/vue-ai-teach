@@ -54,9 +54,11 @@ const scoreStore = useScoreStore();
 
 const submitRating = () => {
   console.log("评分结果:", scoreStore.ratingDimensions);
-  const selectedToolId = JSON.parse(localStorage.getItem('selectedTool'));
+  const selectedToolId = JSON.parse(
+    localStorage.getItem("selectedTool") as any
+  );
   console.log(selectedToolId);
-  scoreStore.evaluationTransmission(selectedToolId.id)
+  scoreStore.evaluationTransmission(selectedToolId.id);
   scoreStore.evaluationAssign();
   ElMessage({
     message: "评分提交成功，请勿重复提交！",

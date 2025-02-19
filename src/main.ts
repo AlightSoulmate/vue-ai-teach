@@ -7,6 +7,7 @@ import router from "./router";
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import "./mock/mockData";
+import "@/styles/_variables.scss";
 
 const app = createApp(App);
 app.use(createPinia());
