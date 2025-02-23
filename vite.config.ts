@@ -29,7 +29,7 @@ export default defineConfig({
     allowedHosts: ["99t207r710.zicp.fun"],
     proxy: {
       "/llm": {
-        target: "http://js1.blockelite.cn:26784",
+        target: "http://js1.blockelite.cn:27078",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/llm/, ""), // 去掉 /llm 前缀
       },

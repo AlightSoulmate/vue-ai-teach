@@ -35,7 +35,8 @@ const API_URL = "/api/user";
 // 注册函数
 export const registerUser = async (
   username: string,
-  password: string
+  password: string,
+  role: string
 ): Promise<AuthResponse> => {
   try {
     const response: AxiosResponse<AuthResponse> = await axios.post(
@@ -43,6 +44,7 @@ export const registerUser = async (
       {
         username,
         password,
+        role,
       }
     );
     return response.data;
@@ -52,12 +54,18 @@ export const registerUser = async (
 };
 
 // 登录函数
-export const loginUser = async (username: string, password: string) => {
+export const loginUser = async (
+  username: string,
+  password: string,
+  role: string
+) => {
   try {
     const response = await axios.post("/api/user/login", {
       username,
       password,
+      role,
     });
+    console.log("response.data", response.data);
     return response.data;
   } catch (error: any) {
     throw error.response ? error.response.data : { message: "请求失败" };

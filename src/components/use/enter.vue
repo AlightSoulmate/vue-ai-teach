@@ -8,7 +8,9 @@
       <span class="role-name">我是{{ authStore.currentRole }}</span>
     </div>
     <div v-if="authStore.isLogin">
-      <p class="title">{{ authStore.currentRole }}登录</p>
+      <p class="title" :title="authStore.currentRole">
+        {{ authStore.currentRole }}登录
+      </p>
       <form class="form" @submit.prevent="authStore.enterLogin">
         <div class="input-group">
           <label for="username">用户名</label>
@@ -17,6 +19,7 @@
             name="username"
             id="username"
             placeholder=""
+            :title="authStore.currentRole"
             v-model="authStore.loginForm.username"
           />
           <span class="error-message" v-if="authStore.loginErrors.username">{{
@@ -30,6 +33,7 @@
             name="password"
             id="password"
             placeholder=""
+            :title="authStore.currentRole"
             v-model="authStore.loginForm.password"
           />
           <span class="error-message" v-if="authStore.loginErrors.password">{{
@@ -71,6 +75,7 @@
             name="username"
             id="username"
             placeholder=""
+            :title="authStore.currentRole"
             v-model="authStore.registerForm.username"
           />
           <span
@@ -88,6 +93,7 @@
             name="password"
             id="password"
             placeholder=""
+            :title="authStore.currentRole"
             v-model="authStore.registerForm.password"
           />
           <span
@@ -103,6 +109,7 @@
             name="confirm-password"
             id="confirm-password"
             placeholder=""
+            :title="authStore.currentRole"
             v-model="authStore.registerForm.confirmPassword"
           />
           <span
@@ -195,8 +202,17 @@ const authStore = useAuthStore();
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  color: #f0f0f0;
 }
-
+/* .title[title="学生"] {
+  color: #a78bfa;
+}
+.title[title="教师"] {
+  color: #256cdd;
+}
+.title[title="管理员"] {
+  color: #c27d06;
+} */
 .form {
   margin-top: 1.5rem;
 }
@@ -223,17 +239,40 @@ const authStore = useAuthStore();
   color: rgba(243, 244, 246, 1);
 }
 
-.input-group input:focus {
+.input-group input[title="学生"]:focus {
   border-color: rgba(167, 139, 250);
-  animation: border 0.25s ease-in-out;
+  animation: student-border 0.25s ease-in-out;
 }
-
-@keyframes border {
+.input-group input[title="教师"]:focus {
+  border-color: rgba(37, 108, 221);
+  animation: teacher-border 0.25s ease-in-out;
+}
+.input-group input[title="管理员"]:focus {
+  border-color: rgba(194, 125, 6);
+  animation: admin-border 0.25s ease-in-out;
+}
+@keyframes student-border {
   from {
     border-color: rgba(55, 65, 81, 1);
   }
   to {
     border-color: rgba(167, 139, 250);
+  }
+}
+@keyframes teacher-border {
+  from {
+    border-color: rgba(55, 65, 81, 1);
+  }
+  to {
+    border-color: rgba(37, 108, 221);
+  }
+}
+@keyframes admin-border {
+  from {
+    border-color: rgba(55, 65, 81, 1);
+  }
+  to {
+    border-color: rgba(194, 125, 6);
   }
 }
 

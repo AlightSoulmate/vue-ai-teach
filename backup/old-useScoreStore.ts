@@ -5,25 +5,23 @@ import { defineStore } from "pinia";
 import { saveAs } from "file-saver";
 import { Document, Packer, Paragraph, type IParagraphOptions } from "docx";
 import axios from "axios";
-import { ElMessage } from "element-plus";
 
 export const useScoreStore = defineStore("score", () => {
   interface Eval {
     username: string;
     tool: string;
     category: string;
+    content_quality: string;
+    efficiency: string;
+    Convenience: string;
+    payment: string;
+    feedback_level: string;
     averageScore: number;
     comment: string;
   }
-  const systemFile = ref<File | null>(null);
-  const userFile = ref<File | null>(null);
-  const uploading = ref(false);
-  const systemFileName = ref("");
-  const userFileName = ref("");
   const ratingDimensions = ref([
     {
-      name: "内容质量",
-      percent: 0.3,
+      name: "内容质量 (30%)",
       score: 0,
       criteria: [
         "表达清晰：生成内容易懂、逻辑清晰",
@@ -34,8 +32,7 @@ export const useScoreStore = defineStore("score", () => {
       basis: "",
     },
     {
-      name: "性能高效性",
-      percent: 0.25,
+      name: "性能高效性 (25%)",
       score: 0,
       criteria: [
         "结果精准：生成的结果符合或超出预期",
@@ -46,8 +43,7 @@ export const useScoreStore = defineStore("score", () => {
       basis: "",
     },
     {
-      name: "操作便捷性",
-      percent: 0.25,
+      name: "操作便捷性 (25%)",
       score: 0,
       criteria: [
         "界面交互：美观简洁，功能易查找",
@@ -58,8 +54,7 @@ export const useScoreStore = defineStore("score", () => {
       basis: "",
     },
     {
-      name: "付费合理性",
-      percent: 0.1,
+      name: "付费合理性 (10%)",
       score: 0,
       criteria: [
         "免费使用：提供免费版本，主要功能可试用",
@@ -70,8 +65,7 @@ export const useScoreStore = defineStore("score", () => {
       basis: "",
     },
     {
-      name: "服务反馈水平",
-      percent: 0.1,
+      name: "服务反馈水平 (10%)",
       score: 0,
       criteria: [
         "用户反馈：提供反馈通道，客服响应及时",
@@ -83,9 +77,14 @@ export const useScoreStore = defineStore("score", () => {
     },
   ]);
   const ratingEvaluation = ref<Eval>({
-    username: "默认",
+    username: "于传宇",
     tool: "默认",
     category: "默认",
+    content_quality: "默认",
+    efficiency: "默认",
+    Convenience: "默认",
+    payment: "默认",
+    feedback_level: "默认",
     averageScore: 0,
     comment: "默认",
   });
@@ -94,6 +93,11 @@ export const useScoreStore = defineStore("score", () => {
     // console.log(tool);
     ratingEvaluation.value.tool = tool.name;
     ratingEvaluation.value.category = tool.category;
+    ratingEvaluation.value.content_quality = ratingDimensions.value[0].name;
+    ratingEvaluation.value.efficiency = ratingDimensions.value[1].name;
+    ratingEvaluation.value.Convenience = ratingDimensions.value[2].name;
+    ratingEvaluation.value.payment = ratingDimensions.value[3].name;
+    ratingEvaluation.value.feedback_level = ratingDimensions.value[4].name;
 
     fetchEval();
   };
@@ -101,6 +105,7 @@ export const useScoreStore = defineStore("score", () => {
     await axios
       .post("/llm/evaluate", ratingEvaluation.value)
       .then(async (resp) => {
+        // console.log(resp.data.data);
         const reportText = resp.data.data.evaluation.choices[0].message.content;
         console.log(reportText);
 
@@ -122,83 +127,6 @@ export const useScoreStore = defineStore("score", () => {
       .catch((e) => {
         console.error(e);
       });
-  };
-  // 上传作业 stu-1
-  const handleSystemFileChange = async (e: Event) => {
-    e.preventDefault(); // 阻止默认的文件选择行为
-    const base64Content = localStorage.getItem("fileContent");
-    const fileName = localStorage.getItem("fileName");
-
-    if (base64Content && fileName) {
-      try {
-        // 将 base64 转换回 Blob
-        const response = await fetch(base64Content);
-        const blob = await response.blob();
-
-        systemFile.value = new File([blob], fileName, {
-          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        });
-        systemFileName.value = fileName;
-      } catch (error) {
-        console.error("获取文件失败:", error);
-        ElMessage.error("获取文件失败");
-      }
-    } else {
-      ElMessage.warning("未找到老师上传的文件");
-    }
-  };
-  // 上传作业 stu-2
-  const handleUserFileChange = (e: Event) => {
-    const files = (e.target as HTMLInputElement).files;
-    if (files && files.length > 0) {
-      userFile.value = files[0];
-      userFileName.value = files[0].name;
-    }
-  };
-  // 上传作业 stu-3
-  const handleUpload = async () => {
-    if (!systemFile.value || !userFile.value) {
-      ElMessage.warning("请选择文件");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("system_prompt_file", systemFile.value);
-    formData.append("user_prompt_file", userFile.value);
-
-    uploading.value = true;
-    try {
-      const response = await axios.post("/llm/evaluate", formData);
-      const { code, message, data } = response.data;
-      console.log(data.evaluation);
-      const reportText = data.evaluation;
-      ElMessage.success("正在评估，请稍后");
-
-      if (code === 200) {
-        ElMessage.success("评估完成，正在生成报告");
-        // 创建 Word 文档并下载
-        const paragraphs = reportText
-          .split("\n")
-          .map((line: string | IParagraphOptions) => new Paragraph(line));
-        const doc = new Document({
-          sections: [
-            {
-              properties: {},
-              children: paragraphs,
-            },
-          ],
-        });
-        const blob = await Packer.toBlob(doc);
-        saveAs(blob, "评测报告.docx");
-      } else {
-        ElMessage.error(message || "上传失败");
-      }
-    } catch (error) {
-      ElMessage.error("上传失败");
-      console.error(error);
-    } finally {
-      uploading.value = false;
-    }
   };
 
   // 评分传后端
@@ -222,7 +150,7 @@ export const useScoreStore = defineStore("score", () => {
         console.log("评价数据传输失败", e);
       });
   };
-  // 平均分计算
+  // 均值计算
   const calculateWeightedAverage = (): number => {
     const weights = [0.3, 0.25, 0.25, 0.1, 0.1];
     let weightedSum = 0;
@@ -231,20 +159,10 @@ export const useScoreStore = defineStore("score", () => {
     });
     return parseFloat(weightedSum.toFixed(1));
   };
-
   return {
     ratingDimensions,
     ratingEvaluation,
     evaluationAssign,
-    systemFile,
-    userFile,
-    uploading,
-    systemFileName,
-    userFileName,
-    handleUpload,
-    handleUserFileChange,
-    handleSystemFileChange,
-
     evaluationTransmission,
     calculateWeightedAverage,
   };

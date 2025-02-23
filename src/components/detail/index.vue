@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <el-breadcrumb :separator-icon="ArrowRight">
-      <el-breadcrumb-item :to="{ path: '/home' }">{{
+      <el-breadcrumb-item :to="{ path: '/index/home' }">{{
         cats
       }}</el-breadcrumb-item>
       <el-breadcrumb-item>{{ tool.category }}</el-breadcrumb-item>
@@ -76,6 +76,7 @@ const gotoSite = (url: string) => {
   font-size: 52px;
   text-align: left;
   max-height: 100px;
+  color: var(--text-color);
 }
 .main-info .score {
   display: inline-block;
@@ -83,6 +84,7 @@ const gotoSite = (url: string) => {
   font-weight: bold;
   font-size: 30px;
   margin: 0 10px 0 30px;
+  color: var(--text-color);
 }
 .main-info .score .txt {
   font-size: 20px;
@@ -134,7 +136,8 @@ const gotoSite = (url: string) => {
   max-width: 500px;
   max-height: 200px;
 }
-.el-breadcrumb__inner a, .el-breadcrumb__inner.is-link {
+.el-breadcrumb__inner a,
+.el-breadcrumb__inner.is-link {
   color: #fff !important;
 }
 </style>

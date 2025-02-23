@@ -24,7 +24,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { useThemeStore } from "@/stores/themeStore";
+import { useThemeStore } from "@/stores/useThemeStore";
 
 const themeStore = useThemeStore();
 
@@ -35,6 +35,7 @@ const toggleTheme = () => {
 <style scoped>
 .grid-content {
   min-height: 55px;
+  line-height: 55px;
   display: flex;
 }
 
@@ -42,9 +43,10 @@ const toggleTheme = () => {
   font-size: 17px;
   position: relative;
   display: inline-block;
-  width: 64px;
-  height: 34px;
+  width: 50px;
+  height: 26px;
   margin: 12.5px;
+  margin-top: 15px;
 }
 
 .switch input {
@@ -68,8 +70,8 @@ const toggleTheme = () => {
 .slider:before {
   position: absolute;
   content: "";
-  height: 30px;
-  width: 30px;
+  height: 22px;
+  width: 22px;
   border-radius: 20px;
   left: 2px;
   bottom: 2px;
@@ -80,11 +82,11 @@ const toggleTheme = () => {
 
 .sun svg {
   position: absolute;
-  top: 6px;
-  left: 36px;
+  top: 4px;
+  left: 27px;
   z-index: 1;
-  width: 24px;
-  height: 24px;
+  width: 19px;
+  height: 19px;
 }
 
 .moon svg {
@@ -93,8 +95,8 @@ const toggleTheme = () => {
   top: 5px;
   left: 5px;
   z-index: 1;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
 }
 
 /* .switch:hover */
@@ -144,6 +146,6 @@ const toggleTheme = () => {
 }
 
 .input:checked + .slider:before {
-  transform: translateX(30px);
+  transform: translateX(24px);
 }
 </style>

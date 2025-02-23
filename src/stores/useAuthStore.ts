@@ -1,16 +1,10 @@
 // src/stores/useAuthStore.ts
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, nextTick } from "vue";
 import { registerUser, loginUser } from "../services/AuthService";
 import { useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
-import {
-  ElDialog,
-  ElMessage,
-  ElMessageBox,
-  ElInput,
-  ElButton,
-} from "element-plus";
+import { ElMessageBox } from "element-plus";
 interface User {
   id: number | null;
   username: string;
@@ -32,7 +26,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   const register = async (username: string, password: string) => {
     try {
-      const data = await registerUser(username, password);
+      const data = await registerUser(username, password, currentRole.value);
       user.value.id = data.user.id;
       user.value.username = data.user.username;
       user.value.role = data.user.role;
@@ -40,16 +34,15 @@ export const useAuthStore = defineStore("auth", () => {
       isAuthenticated.value = true;
       errorMessage.value = "";
       localStorage.setItem("user", JSON.stringify(user.value));
+      currentRole.value = data.user.role;
 
-      router.push("/home");
-      setTimeout(() => {
-        router.push("/home");
-        ElNotification({
-          title: "注册成功",
-          message: "注册成功",
-          type: "success",
-        });
-      }, 1000);
+      ElNotification({
+        title: `欢迎你，${user.value.username}`,
+        message: "注册成功",
+        type: "success",
+      });
+
+      router.push("/index/home");
     } catch (error: any) {
       errorMessage.value = error.message || "注册失败";
     }
@@ -57,36 +50,50 @@ export const useAuthStore = defineStore("auth", () => {
 
   const login = async (username: string, password: string) => {
     try {
-      const data = await loginUser(username, password);
-      user.value.id = data.user.id;
-      user.value.username = data.user.username;
-      user.value.role = data.user.role;
-      user.value.token = data.Authorization;
+      console.log("登录中", username, password, currentRole.value);
+      const data = await loginUser(username, password, currentRole.value);
+
+      // 先更新状态
+      user.value = {
+        id: data.user.id,
+        username: data.user.username,
+        role: data.user.role,
+        token: data.Authorization,
+      };
       isAuthenticated.value = true;
       errorMessage.value = "";
+      currentRole.value = data.user.role;
+      // 保存到本地存储
       localStorage.setItem("user", JSON.stringify(user.value));
 
-      setTimeout(() => {
-        router.push("/home");
-        ElNotification({
-          title: "登录成功",
-          message: "登录成功",
-          type: "success",
-        });
-      }, 800);
+      // 显示通知
+      ElNotification({
+        title: `欢迎回来，${user.value.username}`,
+        message: "登录成功",
+        type: "success",
+      });
+
+      // 确保状态已更新后再跳转
+      await nextTick();
+      await router.push("/index/home");
     } catch (error: any) {
       errorMessage.value = error.message || "登录失败";
     }
   };
 
-  const logout = () => {
-    user.value.id = null;
-    user.value.username = "";
-    user.value.role = "";
-    user.value.token = "";
+  const logout = async () => {
+    // 先清除状态
+    user.value = {
+      id: null,
+      username: "",
+      role: "",
+      token: "",
+    };
     isAuthenticated.value = false;
     localStorage.removeItem("user");
-    router.push("/");
+
+    // 最后再跳转
+    await router.push("/");
   };
 
   const checkAuth = () => {
@@ -100,10 +107,8 @@ export const useAuthStore = defineStore("auth", () => {
   //其他登录的函数
   const username = ref<string>("ycy");
   const password = ref<string>("123456");
-  const dialogVisible = ref(false);
   const isLogin = ref(true);
   const roles = ref<string[]>(["管理员", "教师", "学生"]);
-  const rolesColor = ref<string[]>(["#f59e0b", "#256cdd", "#a78bfa"]);
   const currentRole = ref<string>("学生");
 
   const open = () => {
@@ -123,11 +128,6 @@ export const useAuthStore = defineStore("auth", () => {
     password,
     confirmPassword: "",
   });
-
-  const openDialog = () => {
-    dialogVisible.value = true;
-    console.log(dialogVisible.value);
-  };
 
   // 添加表单验证状态
   const loginErrors = ref({
@@ -206,7 +206,6 @@ export const useAuthStore = defineStore("auth", () => {
       loginForm.value.password
     );
     console.log(resp);
-    dialogVisible.value = false;
   };
 
   // 修改注册操作
@@ -215,15 +214,12 @@ export const useAuthStore = defineStore("auth", () => {
 
     console.log("注册中", registerForm.value);
     await register(registerForm.value.username, registerForm.value.password);
-    dialogVisible.value = false;
   };
 
-  // 切换到注册页面
   const switchToRegister = () => {
     isLogin.value = false;
   };
 
-  // 切换到登录页面
   const switchToLogin = () => {
     isLogin.value = true;
   };
@@ -243,35 +239,34 @@ export const useAuthStore = defineStore("auth", () => {
           ? roles.value.indexOf(currentRole.value) - 1
           : 2
       ];
+    console.log(currentRole.value);
   };
 
   return {
     user,
-    errorMessage,
-    isAuthenticated,
-    register,
-    login,
-    logout,
-    checkAuth,
-    resetForm,
-    switchToLogin,
-    switchToRegister,
-    openDialog,
-    registerForm,
-    loginForm,
-    open,
+    roles,
     isLogin,
-    dialogVisible,
     password,
     username,
-    enterLogin,
-    enterRegister,
+    loginForm,
     loginErrors,
+    currentRole,
+    errorMessage,
+    registerForm,
     registerErrors,
+    isAuthenticated,
+    open,
+    login,
+    logout,
+    register,
+    checkAuth,
+    resetForm,
+    enterLogin,
+    switchRole,
+    switchToLogin,
+    enterRegister,
+    switchToRegister,
     validateLoginForm,
     validateRegisterForm,
-    switchRole,
-    roles,
-    currentRole,
-   };
+  };
 });

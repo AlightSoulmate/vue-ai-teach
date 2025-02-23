@@ -2,83 +2,94 @@
   <nav class="top-nav">
     <TopNav />
   </nav>
-  <header class="header">
-    <div class="title">
-      <h1 id="titleH1">{{ titleH1 }}</h1>
-      <h2 id="titleH2">
-        {{ titleH2 }}
-      </h2>
-    </div>
-  </header>
   <el-container>
-    <el-aside class="menus">
-      <Menus />
+    <el-aside :width="isCollapse ? '64px' : '200px'" class="menus">
+      <Menus @collapse="handleCollapse" />
     </el-aside>
-    <el-container>
-      <el-main class="main">
-        <Mains />
-      </el-main>
-      <el-footer>
-        <div class="footer">Footer</div>
-      </el-footer>
-    </el-container>
+    <el-main>
+      <router-view v-slot="{ Component }">
+        <keep-alive :include="[]">
+          <component :is="Component" :key="$route.fullPath" />
+        </keep-alive>
+      </router-view>
+    </el-main>
   </el-container>
 </template>
+
 <script setup lang="ts">
-import { ref } from "vue";
 import TopNav from "@/components/topNav/main/index.vue";
 import Menus from "@/components/menus/index.vue";
-import Mains from "@/components/main/index.vue";
-const titleH1 = ref("AI / LLM 模型工具集");
-const titleH2 = ref(
-  "100+中文 AI / LLM工具本站链接直达、体验工具后可以留下您对它的评价并写下评分的依据，谢谢！"
-);
+import { ref, onMounted } from "vue";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+const authStore = useAuthStore();
+const isCollapse = ref(false);
+
+// 监听菜单组件的折叠状态
+const handleCollapse = (val: boolean) => {
+  isCollapse.value = val;
+};
+
+onMounted(async () => {
+  try {
+    // 确保用户信息已加载
+    const userInfo = localStorage.getItem("user");
+    if (userInfo) {
+      authStore.user = JSON.parse(userInfo);
+      authStore.isAuthenticated = true;
+    }
+  } catch (error) {
+    console.error("Failed to initialize main page:", error);
+    router.push("/");
+  }
+});
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use "@/styles/_variables.scss" as *;
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+
 .top-nav {
   position: fixed;
   top: 0;
   width: 100%;
+  z-index: 1000;
 }
-.menus {
-  width: 60px;
-  background-color: var(--background-color);
+
+.el-container {
+  width: 100%;
+  display: flex;
   min-height: 100vh;
+}
+
+.el-aside {
+  margin-top: $top-nav-height;
+  transition: all 0.3s;
+  background-color: var(--background-color);
+  min-height: calc(100vh - #{$top-nav-height});
   border-right: 1px solid #ebeef5;
   border-top: 1px solid #ebeef5;
+  flex-shrink: 0;
+  overflow: visible;
 }
-.main {
-  border-top: 1px solid #ebeef5;
-  padding: 20px;
-}
-.header {
-  margin-top: 55px;
-  padding: 20px;
+
+.el-main {
+  margin-top: $top-nav-height;
   background-color: var(--background-color);
+  flex: 1;
+  overflow-x: hidden;
+  min-height: calc(100vh - #{$top-nav-height});
+  transition: all 0.3s;
 }
-.title {
-  padding-left: 10px;
-}
-#titleH1 {
-  font-size: 2.5rem;
-  font-style: italic;
-  /* color: #ffb700; */
-  color: var(--text-color);
-}
-#titleH2 {
-  font-size: 1.1rem;
-  color: var(--text-color);
-  margin: 10px 0;
-  font-weight: normal;
-}
-.footer {
-  padding: 20px;
-  background-color: #f0f0f0;
+
+:deep(.el-menu) {
+  border-right: none;
 }
 </style>

@@ -74,7 +74,6 @@
   display: flex;
   width: 100%;
   height: 30px;
-  font-weight: lighter;
   border-top: 1px solid #2d2d2d;
   box-sizing: border-box;
   border-bottom-left-radius: 10px;

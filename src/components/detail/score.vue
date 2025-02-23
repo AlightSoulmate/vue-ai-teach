@@ -1,55 +1,65 @@
 <template>
   <div class="main-container">
-    <div class="title">评分模块</div>
-    <div class="content">
-      <el-collapse>
-        <el-collapse-item
-          v-for="(dimension, index) in scoreStore.ratingDimensions"
-          :key="index"
-          :title="dimension.name"
-        >
-          <div class="rating-item">
-            <span class="rating-title">请打分：</span>
-            <el-rate v-model="dimension.score" :max="5" show-score allow-half />
-            <span class="score-label">{{ dimension.score }} 分</span>
-          </div>
-          <div class="basis">
-            <span class="basis-title">请输入您的打分依据（不少于10字）：</span>
-            <el-input
-              type="textarea"
-              placeholder="在此处输入"
-              class="basis-input"
-              :autosize="{ minRows: 2 }"
-              v-model="scoreStore.ratingDimensions[index].basis"
-            />
-          </div>
-          <p class="criteria-title">细分条目：</p>
-          <ul>
-            <li v-for="(criteria, idx) in dimension.criteria" :key="idx">
-              {{ criteria }}
-            </li>
-          </ul>
-        </el-collapse-item>
-      </el-collapse>
-      <div class="comment">
-        <span class="comment-title">请键入您对工具的整体评价：</span>
-        <el-input
-          type="textarea"
-          placeholder="在此处输入"
-          class="comment-input"
-          :autosize="{ minRows: 2 }"
-          v-model="scoreStore.ratingEvaluation.comment"
-        />
+    <div class="main-score-container">
+      <div class="title">
+        <el-icon><Checked /></el-icon>评分模块
       </div>
-      <el-button type="primary" @click="submitRating" class="submit"
-        >提交评分</el-button
-      >
+      <div class="content">
+        <div class="rating-container">
+          <el-popover
+            v-for="(dimension, index) in scoreStore.ratingDimensions"
+            :key="index"
+            placement="right"
+            :width="400"
+          >
+            <template #reference>
+              <div class="rating-item">
+                <span class="rating-title">{{ dimension.name }}：</span>
+                <el-rate v-model="dimension.score" :max="5" allow-half />
+                <span class="score-label">{{ dimension.score }} 分</span>
+              </div>
+            </template>
+            <template #default class="above-criteria-list">
+              <ul class="criteria-list">
+                <li v-for="(criteria, idx) in dimension.criteria" :key="idx">
+                  {{ criteria }}
+                </li>
+              </ul>
+            </template>
+          </el-popover>
+        </div>
+        <div class="comment">
+          <span class="comment-title">请键入您对工具的整体评价：</span>
+          <el-input
+            type="textarea"
+            placeholder="在此处输入"
+            class="comment-input"
+            :autosize="{ minRows: 2 }"
+            v-model="scoreStore.ratingEvaluation.comment"
+          />
+        </div>
+        <el-button type="primary" @click="submitRating" class="submit"
+          >提交评分</el-button
+        >
+      </div>
+    </div>
+    <div class="main-upload-container">
+      <div class="title main-upload-title">
+        <el-icon><Checked /></el-icon>
+        作业上传批改模块
+      </div>
+      <div class="upload-content">
+        <StudentUpload />
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import { ElMessage } from "element-plus";
+import { Checked } from "@element-plus/icons-vue";
 import { useScoreStore } from "@/stores/useScoreStore";
+import StudentUpload from "@/components/student/index.vue";
+
 const scoreStore = useScoreStore();
 
 const submitRating = () => {
@@ -59,83 +69,101 @@ const submitRating = () => {
   );
   console.log(selectedToolId);
   scoreStore.evaluationTransmission(selectedToolId.id);
-  scoreStore.evaluationAssign();
+  // scoreStore.evaluationAssign();
+
   ElMessage({
     message: "评分提交成功，请勿重复提交！",
     type: "success",
   });
 };
 </script>
-<style scoped>
+<style scoped lang="scss">
+@use "@/styles/_variables.scss" as *;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 .main-container {
   margin: 20px 30px 10px 30px;
   padding: 5px 20px;
+  display: flex;
+  flex-direction: row;
+}
+.main-score-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.main-upload-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-left: 25px;
+  align-items: flex-end;
+}
+.main-upload-container .main-upload-title {
+  margin-top: -1px;
+  margin-right: 135px;
+  align-self: self-end;
+  // align-self: center;
+  white-space: nowrap;
 }
 .title {
+  align-self: flex-start;
   font-style: italic;
   font-weight: bold;
+  color: var(--text-color);
+  margin-left: 10px;
+  margin-bottom: 20px;
 }
-.content-title {
-  display: flex;
-  margin: 10px 5px;
-  padding: 5px;
-  height: 200px;
-  background-color: rgb(157, 100, 210);
+.title .el-icon {
+  font-size: $xxlarge-font-size;
+  top: 4.3px;
+  right: 2px;
+  color: var(--score-title-icon-color);
 }
 .content {
   display: inline-block;
-  margin: 5px;
-  background-color: #666;
+  // margin: 5px;
 }
 
-/* .rating-container {
+.rating-container {
   max-width: 800px;
-  margin: 20px auto;
-  padding: 20px;
+  margin: 0 auto;
+  padding: 5px 15px;
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-} */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
 
 .rating-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-top: 5px;
 }
 .rating-title {
-  font-weight: bold;
-}
-
-.basis-title {
-  font-weight: bold;
-}
-.basis-input {
-  width: 230px;
+  font-weight: medium;
+  font-size: $medium-font-size;
 }
 .score-label {
-  font-size: 14px;
+  font-size: $medium-font-size;
   color: #666;
 }
-
-.criteria-title {
-  font-weight: bold;
-  margin-top: 10px;
+.above-criteria-list {
+  width: 100%;
+  max-width: 800px !important;
+  margin: 0 auto;
 }
 
-ul {
-  padding-left: 20px;
-}
-
-ul li {
-  margin-bottom: 3px;
-  font-size: 14px;
-}
 .submit {
   margin-top: 10px;
-}
-.el-collapse-item {
-  width: 400px;
+  font-size: 14px;
+  padding: 5px 10px;
 }
 .comment {
   margin: 10px 0;
@@ -145,8 +173,48 @@ ul li {
 .comment .comment-title {
   display: block;
   margin: 10px 0;
+  color: var(--text-color);
 }
 .comment .comment-input {
   display: block;
+}
+
+.criteria-list {
+  // width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 5px 0 5px 10px;
+}
+
+.criteria-list li {
+  margin-bottom: 2px;
+  text-align: left;
+  line-height: 1.2;
+  font-size: $small-font-size;
+  // width: 100%;
+}
+
+:deep(.el-popover.el-popper) {
+  max-width: none;
+  width: 300px !important;
+}
+
+.upload-content {
+  width: 450px;
+  transition: width-animation 1s ease;
+}
+@keyframes width-animation {
+  from {
+    width: 600px;
+  }
+  to {
+    width: 300px;
+  }
+}
+@media (max-width: 800px) {
+  .upload-content {
+    max-width: 300px;
+    min-width: 100px;
+  }
 }
 </style>

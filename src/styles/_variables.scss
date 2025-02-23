@@ -1,15 +1,49 @@
 /* src/styles/_variables.scss */
 
-// 定义主题变量
+// 主题变量 白色主题
 $light-background: #ffffff;
-$light-text: #000000;
+$light-text: #033133;
 $light-enter-background: #f0f0f0;
+$light-border-color: #e4e7ed;
+$light-hover-color: #f5f7fa;
+$light-active-background-color: rgba(167, 139, 250, 0.1);
+$light-collapse-hover-color: rgba(139, 92, 246, 0.1);
+$light-page-background: #f5f7fa;
+$light-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+$light-active-text-color: #8b5cf6;
+$light-score-title-icon-color: #1c1c1d;
 
-$dark-background: #090909;
+// 主题变量 黑色主题
+$dark-background: #1e1e1e;
 $dark-text: #ffffff;
 $dark-enter-background: #2c2c2c;
+$dark-border-color: #363636;
+$dark-hover-color: #ababab;
+$dark-active-background-color: rgba(167, 139, 250, 0.2);
+$dark-collapse-hover-color: rgba(167, 139, 250, 0.2);
+$dark-page-background: #141414;
+$dark-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3);
+$dark-active-text-color: #a78bfa;
+$dark-score-title-icon-color: #b4aaaa;
 
-//其他变量
-$student-enter-theme-color:#a78bfa;
-$teacher-enter-theme-color:#256cdd;
-$admin-enter-theme-color:#f59e0b;
+// 用户身份有关变量
+$student-enter-theme-color: #a78bfa;
+$teacher-enter-theme-color: #256cdd;
+$admin-enter-theme-color: #c27d06;
+
+// 其他全局可用变量
+$menu-width: 200px;
+$top-nav-height: 64px;
+$mains-title-margin: 11px 0 30px 45px;
+$mains-title-font-size: 20px;
+$mains-title-font-weight: 600;
+
+//字体
+$super-small-font-size: 10px;
+$small-font-size: 12px;
+$medium-font-size: 14px;
+$standard-font-size: 16px;
+$large-font-size: 18px;
+$xlarge-font-size: 20px;
+$xxlarge-font-size: 22px;
+$xxxlarge-font-size: 24px;

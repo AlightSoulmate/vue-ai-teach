@@ -14,11 +14,11 @@ const fakeHelp = () => {
 <style scope>
 .help-content {
   min-height: 55px;
-  color: rgba(240, 248, 255, 0.685);
+  line-height: 55px;
+  color: var(--text-color);
   font-size: 16px;
 }
 .help-content:hover {
   cursor: pointer;
-  color: #ffffff;
 }
 </style>
