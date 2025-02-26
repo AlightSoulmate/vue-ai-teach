@@ -7,11 +7,9 @@
     <div class="left-section">
       <div class="content-wrapper">
         <div class="big-logo">
-          <!-- <video :src="videoSrc" autoplay loop muted>{{ videoSrcTxt }}</video> -->
           <img :src="logoSrc" ></img>
         </div>
-        <!-- <h1 class="h1-title">{{ h1Title }}</h1> -->
-        <h1 class="h1-title">{{ h3Title }}</h1>
+        <h1 class="h1-title">{{ h1Title }}</h1>
         <h2 class="h2-title">{{ h2Title }}</h2>
       </div>
     </div>
@@ -23,20 +21,15 @@
     </div>
   </div>
 </template>
-
 <script lang="ts" setup>
 import { ref } from "vue";
 import TopNav from "@/components/topNav/login/index.vue";
 import StuEnterDialog from "@/components/use/enter.vue";
 
-const h1Title = ref("AITeach");
+const h1Title = ref("浙江外国语学院AI智能教学平台");
 const h2Title = ref("AI驱动的直观教学反馈与改进，以智能化评估帮助教师完成创新");
-const h3Title = ref("浙江外国语学院AI智能教学平台");
-// const videoSrc = ref("https://a1.x914.com/alight/i/2025/02/02/app.mp4");
 const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
-const videoSrcTxt = ref("您的浏览器不支持 HTML5 视频标签");
 </script>
-
 <style scoped lang="scss">
 * {
   margin: 0;
@@ -100,7 +93,6 @@ const videoSrcTxt = ref("您的浏览器不支持 HTML5 视频标签");
   justify-content: center;
   padding: 0 4rem 3.5rem 0;
   margin-right: 100px;
-  // background: rgba(255, 255, 255, 0.6);
   // backdrop-filter: blur(10px);
 }
 

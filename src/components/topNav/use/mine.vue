@@ -15,7 +15,7 @@
           <el-icon><UserFilled /></el-icon>
           身份: {{ authStore.user.role }}
         </el-dropdown-item>
-        <el-dropdown-item>
+        <el-dropdown-item @click="handleModifyPassword">
           <el-icon><Key /></el-icon>修改密码
         </el-dropdown-item>
         <el-dropdown-item @click="handleLogout" divided>
@@ -27,7 +27,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
 import { ElMessageBox } from "element-plus";
 import { onMounted } from "vue";
 import {
@@ -50,6 +49,10 @@ const handleLogout = () => {
     .catch((e) => {
       console.error(e);
     });
+};
+// 修改密码
+const handleModifyPassword = () => {
+  authStore.changePassword();
 };
 
 onMounted(() => {

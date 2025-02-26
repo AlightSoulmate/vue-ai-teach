@@ -1,7 +1,7 @@
 <template>
   <div class="nav">
     <div class="glass-effect">
-      <!-- 左侧区域：Logo -->
+      <!-- 左侧 -->
       <div class="nav-left">
         <Icon />
         <img
@@ -11,7 +11,7 @@
         />
       </div>
 
-      <!-- 右侧区域：主题切换 + 帮助 + 登录/注册切换 -->
+      <!-- 右侧 -->
       <div class="nav-right">
         <Theme />
         <Illustrate />

@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <el-breadcrumb :separator-icon="ArrowRight">
-      <el-breadcrumb-item :to="{ path: '/index/home' }">{{
+      <el-breadcrumb-item :to="{ path: '/home' }">{{
         cats
       }}</el-breadcrumb-item>
       <el-breadcrumb-item>{{ tool.category }}</el-breadcrumb-item>
@@ -129,7 +129,6 @@ const gotoSite = (url: string) => {
   border: 1px solid #979696;
   border-radius: 100%;
   cursor: pointer;
-  /* box-shadow: 1px 1px 3px #ccc; */
 }
 .main-info img {
   margin-right: 30px;

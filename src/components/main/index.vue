@@ -30,7 +30,7 @@
                 >
                   <template #header>
                     <img
-                      :src="tool.logoUrl"
+                      :src="tool.logo_url"
                       @click="gotoDetail(tool)"
                       :title="tool.name"
                     />
@@ -98,7 +98,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-@use "../../styles/variables.scss" as *;
+@use "@/styles/variables.scss" as *;
 * {
   margin: 0;
   padding: 0;

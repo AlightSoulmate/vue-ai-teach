@@ -28,28 +28,51 @@
           <el-icon><location /></el-icon>
           <span>热门AI工具</span>
         </template>
-        <el-menu-item index="/index/home">工具集</el-menu-item>
-        <el-menu-item index="/index/forum">论坛</el-menu-item>
+        <el-menu-item :index="paths.tools">工具集</el-menu-item>
+        <el-menu-item :index="paths.forum">论坛</el-menu-item>
+      </el-sub-menu>
+      <el-sub-menu
+        :index="paths.admin"
+        v-if="authStore.user.role === '管理员'"
+      >
+        <template #title>
+          <el-icon><location /></el-icon>
+          <span>管理中心</span>
+        </template>
+        <el-menu-item :index="paths.admin">用户管理</el-menu-item>
+        <el-menu-item :index="paths.admin">课程管理</el-menu-item>
       </el-sub-menu>
       <!-- 老师视角 -->
-      <el-menu-item index="/index/teacherCrouse" v-if="authStore.user.role === '教师'">
+      <el-menu-item
+        :index="paths.teacherCrouse"
+        v-if="authStore.user.role === '教师'"
+      >
         <el-icon><icon-menu /></el-icon>
         <span>我的课程（老师）</span>
       </el-menu-item>
-      <el-menu-item index="/index/teacherInbox" v-if="authStore.user.role === '教师'">
+      <el-menu-item
+        :index="paths.teacherInbox"
+        v-if="authStore.user.role === '教师'"
+      >
         <el-icon><Memo /></el-icon>
         <span>收件箱（老师）</span>
       </el-menu-item>
       <!-- 学生视角 -->
-      <el-menu-item index="/index/studentCrouse" v-if="authStore.user.role !== '教师'">
+      <el-menu-item
+        :index="paths.studentCrouse"
+        v-if="authStore.user.role === '学生'"
+      >
         <el-icon><icon-menu /></el-icon>
         <span>我的课程（学生）</span>
       </el-menu-item>
-      <el-menu-item index="/index/studentInbox" v-if="authStore.user.role !== '教师'">
+      <el-menu-item
+        :index="paths.studentInbox"
+        v-if="authStore.user.role === '学生'"
+      >
         <el-icon><Memo /></el-icon>
         <span>收件箱（学生）</span>
       </el-menu-item>
-      <el-menu-item index="/index/setup">
+      <el-menu-item :index="paths.setup">
         <el-icon><setting /></el-icon>
         <span>个性化设置</span>
       </el-menu-item>
@@ -57,7 +80,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import {
   Menu as IconMenu,
   Location,
@@ -67,13 +90,20 @@ import {
   Fold,
 } from "@element-plus/icons-vue";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useRouter } from "vue-router";
 
 const authStore = useAuthStore();
-const router = useRouter();
-const activeMenu = ref(router.currentRoute.value.path);
+const activeMenu = ref("/home");
 const isCollapse = ref(false);
-const teacher = ref(authStore.user.role === "教师" ? 1 : 0);
+const paths = ref<Record<any, string>>({
+  tools: "/home",
+  forum: "/forum",
+  admin: "/admin",
+  teacherCrouse: "/teacherCrouse",
+  teacherInbox: "/teacherInbox",
+  studentCrouse: "/studentCrouse",
+  studentInbox: "/studentInbox",
+  setup: "/setup",
+});
 
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath);
@@ -90,14 +120,9 @@ const toggleCollapse = () => {
 const emit = defineEmits(["collapse"]);
 
 onMounted(() => {
-  console.log("authStore.currentRole", authStore.currentRole);
+  // authStore.currentRole = JSON.parse(localStorage.getItem("currentRole") || "");
+  // console.log("authStore.currentRole", authStore.currentRole);
   console.log("authStore.user.role", authStore.user.role);
-  // watch(
-  //   () => authStore.user.role,
-  //   (newRole) => {
-  //     teacher.value = newRole === "教师";
-  //   }
-  // );
 });
 </script>
 <style scoped>

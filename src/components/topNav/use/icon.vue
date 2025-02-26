@@ -1,6 +1,5 @@
 <template>
   <div class="grid-content" @click="goBackHome">
-    <!-- <div class="name">AITeach</div> -->
     <img
       :src="themeStore.isDarkTheme ? logoSrc : logoSrcDark"
       alt="logo"
@@ -43,19 +42,7 @@ const goBackHome = () => {
 .grid-content .name:hover {
   cursor: pointer;
 }
-/* .grid-content .name::before {
-  content: "";
-  position: absolute;
-  left: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 30px;
-  height: 30px;
-  background-image: url(https://a1.x914.com/alight/i/2025/02/02/logo.png);
-  background-size: cover;
-} */
 .logo {
-  /* width: 100px; */
   height: 50px;
   margin-top: 15px;
 }

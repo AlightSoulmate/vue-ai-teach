@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import axios from "axios";
+import { getCategories } from "@/services/ToolsService";
 
 export const useToolsStore = defineStore("tools", () => {
   const tools = ref([
@@ -809,7 +810,7 @@ export const useToolsStore = defineStore("tools", () => {
   interface Tool {
     id: number;
     name: string;
-    logoUrl: string;
+    logo_url: string;
     url: string;
     description: string;
     score: number;
@@ -818,8 +819,12 @@ export const useToolsStore = defineStore("tools", () => {
   }
   // 获取所有类别
   const fetchCategory = async () => {
+    // fetchCats();
+    const data = await getCategories();
+    categories.value = data.categories;
     await axios
       .get("/api/tools/categories")
+      // .get("https://frp-man.com:49044/tools/categories")
       .then((resp) => {
         console.log(categories.value);
         categories.value = resp.data.categories;
@@ -829,19 +834,22 @@ export const useToolsStore = defineStore("tools", () => {
         console.error("获取类别列表失败:", error);
       });
   };
-  
+
   // 获取工具数据 并将工具数据按类别分组
   const loadTools = () => {
     categories.value.forEach((category) => {
-      toolsByCategory.value[category] = tools.value.filter(
-        (tool) => tool.category === category
-      );
+      toolsByCategory.value[category] = tools.value
+        .filter((tool) => tool.category === category)
+        .map((tool) => ({
+          ...tool,
+          logo_url: tool.logoUrl,
+        }));
     });
     console.log(toolsByCategory.value);
 
     // categories.value.forEach(async (category) => {
     //   await axios
-    //     .get(`/api/tools?category=${category}`)
+    //     .get(`https://frp-man.com:49044/tools?category=${category}`)
     //     .then((resp) => {
     //       console.log(resp.data);
     //       toolsByCategory.value[category] = resp.data.tools;
@@ -850,7 +858,7 @@ export const useToolsStore = defineStore("tools", () => {
     //       console.error(`获取 ${category} 工具失败:`, error);
     //     });
     // });
-    // console.log(toolsByCategory.value);
+    console.log(toolsByCategory.value);
   };
   return { tools, categories, toolsByCategory, fetchCategory, loadTools };
 });

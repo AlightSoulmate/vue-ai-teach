@@ -13,15 +13,10 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { Search } from "@element-plus/icons-vue";
-import { ElMessage } from "element-plus";
 
 const searchText = ref("");
 const fakeSearch = () => {
   console.log('click search');
-  // ElMessage({
-  //   message: "模块尚未开发",
-  //   type: "warning",
-  // });
 };
 </script>
 

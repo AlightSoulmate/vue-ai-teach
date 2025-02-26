@@ -211,15 +211,28 @@ export const useScoreStore = defineStore("score", () => {
     };
     const token = JSON.parse(localStorage.getItem("user") as string).token;
     await axios
-      .post(`/api/tools/${toolId}/ratings`, {
+      .post(`https://frp-man.com:49044/tools/${toolId}/ratings`, {
         Authorization: token,
         rate,
       })
       .then((resp) => {
         console.log("评价数据传输成功", resp.data.message);
+        ToolsDetailGet(toolId);
       })
       .catch((e) => {
         console.log("评价数据传输失败", e);
+      });
+  };
+  const toolsDetail = ref<any>({});
+  const ToolsDetailGet = async (toolId: number) => {
+    await axios
+      .get(`https://frp-man.com:49044/tools/${toolId}`)
+      .then((resp) => {
+        console.log(resp.data);
+        toolsDetail.value = resp.data;
+      })
+      .catch((e) => {
+        console.log("获取工具详情失败", e);
       });
   };
   // 平均分计算
@@ -240,11 +253,12 @@ export const useScoreStore = defineStore("score", () => {
     userFile,
     uploading,
     systemFileName,
+    toolsDetail,
     userFileName,
     handleUpload,
     handleUserFileChange,
     handleSystemFileChange,
-
+    ToolsDetailGet,
     evaluationTransmission,
     calculateWeightedAverage,
   };

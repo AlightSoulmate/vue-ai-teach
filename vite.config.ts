@@ -26,7 +26,7 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173,
-    allowedHosts: ["99t207r710.zicp.fun"],
+    // allowedHosts: ["99t207r710.zicp.fun"],
     proxy: {
       "/llm": {
         target: "http://js1.blockelite.cn:27078",

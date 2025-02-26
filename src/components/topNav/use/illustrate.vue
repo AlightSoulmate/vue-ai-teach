@@ -1,14 +1,14 @@
 <template>
-  <div class="help-content" @click="fakeHelp">使用说明</div>
+  <div class="help-content" @click="Help">使用说明</div>
 </template>
 <script lang="ts" setup>
-import { ElMessage } from 'element-plus';
+import { ElMessage } from "element-plus";
 
-const fakeHelp = () => {
+const Help = () => {
   ElMessage({
-    message: '模块尚未开发',
-    type: 'warning',
-  })
+    message: "模块尚未开发",
+    type: "warning",
+  });
 };
 </script>
 <style scope>

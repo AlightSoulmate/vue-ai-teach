@@ -44,31 +44,42 @@
       </div>
     </div>
     <div class="main-upload-container">
-      <div class="title main-upload-title">
-        <el-icon><Checked /></el-icon>
-        作业上传批改模块
+      <div class="score-title title">
+        <el-icon><Checked /></el-icon>用户评价：
       </div>
-      <div class="upload-content">
-        <StudentUpload />
+      <div class="tool-details">
+        <div
+          class="score-content"
+          v-for="score in scoreStore.toolsDetail.rates"
+          :key="score.id"
+        >
+          <div class="score-content-item">
+            <div class="score-content-item-title">用户：{{ score.user }}</div>
+            <div class="score-content-item-content">
+              评价：{{ score.comment }}
+            </div>
+            <div class="score-content-item-score">评分：{{ score.rating }}</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import { Checked } from "@element-plus/icons-vue";
 import { useScoreStore } from "@/stores/useScoreStore";
-import StudentUpload from "@/components/student/index.vue";
 
 const scoreStore = useScoreStore();
-
+const selectedToolId = ref<any>({});
 const submitRating = () => {
   console.log("评分结果:", scoreStore.ratingDimensions);
-  const selectedToolId = JSON.parse(
+  selectedToolId.value = JSON.parse(
     localStorage.getItem("selectedTool") as any
   );
-  console.log(selectedToolId);
-  scoreStore.evaluationTransmission(selectedToolId.id);
+  console.log(selectedToolId.value);
+  scoreStore.evaluationTransmission(selectedToolId.value.id);
   // scoreStore.evaluationAssign();
 
   ElMessage({
@@ -76,6 +87,12 @@ const submitRating = () => {
     type: "success",
   });
 };
+onMounted(() => {
+  selectedToolId.value = JSON.parse(
+    localStorage.getItem("selectedTool") as any
+  );
+  scoreStore.ToolsDetailGet(selectedToolId.value.id);
+});
 </script>
 <style scoped lang="scss">
 @use "@/styles/_variables.scss" as *;
@@ -109,7 +126,6 @@ const submitRating = () => {
   margin-top: -1px;
   margin-right: 135px;
   align-self: self-end;
-  // align-self: center;
   white-space: nowrap;
 }
 .title {
@@ -128,7 +144,6 @@ const submitRating = () => {
 }
 .content {
   display: inline-block;
-  // margin: 5px;
 }
 
 .rating-container {
@@ -180,7 +195,6 @@ const submitRating = () => {
 }
 
 .criteria-list {
-  // width: 100%;
   max-width: 800px;
   margin: 0 auto;
   padding: 5px 0 5px 10px;
@@ -191,7 +205,6 @@ const submitRating = () => {
   text-align: left;
   line-height: 1.2;
   font-size: $small-font-size;
-  // width: 100%;
 }
 
 :deep(.el-popover.el-popper) {
@@ -199,22 +212,51 @@ const submitRating = () => {
   width: 300px !important;
 }
 
-.upload-content {
-  width: 450px;
-  transition: width-animation 1s ease;
+//工具评分展示
+.tool-details {
+  width: 100%;
+  padding: 20px;
+  background-color: var(--background-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  margin-top: 20px;
 }
-@keyframes width-animation {
-  from {
-    width: 600px;
-  }
-  to {
-    width: 300px;
-  }
+
+.score-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: var(--text-color);
 }
-@media (max-width: 800px) {
-  .upload-content {
-    max-width: 300px;
-    min-width: 100px;
-  }
+
+.score-content {
+  margin-bottom: 15px;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.score-content-item {
+  margin-bottom: 10px;
+}
+
+.score-content-item-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.score-content-item-content {
+  font-size: 14px;
+  color: #7f8c8d;
+  margin: 5px 0;
+}
+
+.score-content-item-score {
+  font-size: 14px;
+  color: #16a085;
+  font-weight: bold;
 }
 </style>

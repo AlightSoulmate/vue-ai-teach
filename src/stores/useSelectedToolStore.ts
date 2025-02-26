@@ -16,7 +16,6 @@ export const useSelectedToolStore = defineStore("selectTool", () => {
   }
   const selectTool = (tool: any) => {
     selectedTool.value = tool;
-    // console.log(selectedTool.value);
     localStorage.setItem('selectedTool', JSON.stringify(selectedTool.value));
   };
   return { selectedTool,selectTool };

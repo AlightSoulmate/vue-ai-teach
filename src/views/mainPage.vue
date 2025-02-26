@@ -6,45 +6,25 @@
     <el-aside :width="isCollapse ? '64px' : '200px'" class="menus">
       <Menus @collapse="handleCollapse" />
     </el-aside>
-    <el-main>
-      <router-view v-slot="{ Component }">
-        <keep-alive :include="[]">
-          <component :is="Component" :key="$route.fullPath" />
-        </keep-alive>
-      </router-view>
-    </el-main>
+    <el-container>
+      <el-main>
+        <router-view> </router-view>
+      </el-main>
+    </el-container>
   </el-container>
 </template>
 
 <script setup lang="ts">
 import TopNav from "@/components/topNav/main/index.vue";
 import Menus from "@/components/menus/index.vue";
-import { ref, onMounted } from "vue";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { useRouter } from "vue-router";
+import { ref } from "vue";
 
-const router = useRouter();
-const authStore = useAuthStore();
 const isCollapse = ref(false);
 
 // 监听菜单组件的折叠状态
 const handleCollapse = (val: boolean) => {
   isCollapse.value = val;
 };
-
-onMounted(async () => {
-  try {
-    // 确保用户信息已加载
-    const userInfo = localStorage.getItem("user");
-    if (userInfo) {
-      authStore.user = JSON.parse(userInfo);
-      authStore.isAuthenticated = true;
-    }
-  } catch (error) {
-    console.error("Failed to initialize main page:", error);
-    router.push("/");
-  }
-});
 </script>
 
 <style scoped lang="scss">

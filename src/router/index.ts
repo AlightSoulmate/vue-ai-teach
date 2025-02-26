@@ -7,18 +7,18 @@ import { nextTick } from "vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: "/",
+      path: "/login",
       name: "Login",
       component: () => import("@/views/loginPage.vue"),
     },
     {
-      path: "/index",
+      path: "/",
       name: "Index",
-      component: () => import("../views/mainPage.vue"),
-      redirect: "/index/home",
+      component: () => import("@/views/mainPage.vue"),
+      redirect: "/home",
       children: [
         {
           path: "home",
@@ -65,44 +65,10 @@ const router = createRouter({
   ],
 });
 
-// 添加全局导航守卫
-router.afterEach((to, from, next) => {
-  // 强制刷新页面
-  const scrollPosition = window.scrollY;
-
-  // next(() => {
-  // 使用 nextTick 确保DOM更新后再执行
-  if (
-    (from.name && (to.name === "Login" || to.name === "Detail")) ||
-    (from.name === "Detail" && to.name === "Home") ||
-    (from.name === "Login" && to.name === "Home")
-  ) {
-    nextTick(() => {
-      // 恢复滚动位置
-      window.scrollTo(0, scrollPosition);
-      // 强制重新渲染
-      window.location.reload();
-    });
+router.beforeEach((to, from) => {
+  if (to.name === "Login" && useAuthStore().isAuthenticated) {
+    router.push("/");
   }
-  // });
-  // 如果不是首次加载（from.name存在）
-  // if (from.name) {
-  //   // 保存当前的滚动位置
-  //   const scrollPosition = window.scrollY;
-
-  //   // 强制刷新页面
-  //   next(() => {
-  //     // 使用 nextTick 确保DOM更新后再执行
-  //     nextTick(() => {
-  //       // 恢复滚动位置
-  //       window.scrollTo(0, scrollPosition);
-  //       // 强制重新渲染
-  //       window.location.reload();
-  //     });
-  //   });
-  // } else {
-  //   next();
-  // }
 });
 
 export default router;

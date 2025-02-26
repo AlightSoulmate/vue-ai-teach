@@ -1,7 +1,7 @@
 <template>
   <div class="nav">
     <div class="glass-effect">
-    <!-- 左侧：Logo + 搜索 -->
+    <!-- 左侧 -->
     <div class="nav-left">
       <Icon />
       <img
@@ -12,7 +12,7 @@
       <Search />
     </div>
 
-    <!-- 右侧：主题 + 说明 + 个人中心 -->
+    <!-- 右侧 -->
     <div class="nav-right">
       <Theme />
       <Illustrate />
