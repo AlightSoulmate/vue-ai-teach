@@ -1,12 +1,13 @@
 // src/stores/useAuthStore.ts
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { registerUser, loginUser } from "@/services/AuthService";
+import { register, login,change } from "@/services/AuthService";
 import { useRouter } from "vue-router";
 import { ElNotification } from "element-plus";
 import { ElMessageBox } from "element-plus";
 interface User {
   id: number | null;
+  nickname: string;
   username: string;
   role: string;
   token: string;
@@ -23,6 +24,7 @@ export const useAuthStore = defineStore("auth", () => {
   const currentRole = ref<string>("学生");
   const user = ref<User>({
     id: null,
+    nickname: "",
     username: "",
     role: "",
     token: "",
@@ -46,65 +48,11 @@ export const useAuthStore = defineStore("auth", () => {
     confirmPassword: "",
   });
 
-  // 注册
-  const register = async (username: string, password: string) => {
-    try {
-      const data = await registerUser(username, password, currentRole.value);
-      user.value = {
-        id: data.user.id,
-        username: data.user.username,
-        role: data.user.role,
-        token: data.Authorization,
-      };
-      isAuthenticated.value = true;
-      errorMessage.value = "";
-      currentRole.value = data.user.role;
-      localStorage.setItem("user", JSON.stringify(user.value));
-
-      ElNotification({
-        title: `欢迎你，${user.value.username}`,
-        message: "注册成功",
-        type: "success",
-      });
-      router.push("/");
-    } catch (error: any) {
-      errorMessage.value = error.message || "注册失败";
-    }
-  };
-
-  // 登录
-  const login = async (username: string, password: string) => {
-    if (currentRole.value !== "管理员" && !validateLoginForm()) return;
-
-    try {
-      const data = await loginUser(username, password, currentRole.value);
-      user.value = {
-        id: data.user.id,
-        username: data.user.username,
-        role: data.user.role,
-        token: data.Authorization,
-      };
-      isAuthenticated.value = true;
-      errorMessage.value = "";
-      currentRole.value = data.user.role;
-      localStorage.setItem("user", JSON.stringify(user.value));
-
-      ElNotification({
-        title: `欢迎回来，${user.value.username}${user.value.role}`,
-        message: "登录成功",
-        type: "success",
-      });
-
-      await router.push("/");
-    } catch (error: any) {
-      errorMessage.value = error.message || "登录失败";
-    }
-  };
-
   // 退出登录
   const logout = async () => {
     user.value = {
       id: null,
+      nickname: "",
       username: "",
       role: "",
       token: "",
@@ -133,18 +81,29 @@ export const useAuthStore = defineStore("auth", () => {
   };
 
   // 修改密码
-  const changePassword = () => {
-    ElMessageBox.prompt("请输入新密码", "修改密码", {
+  const changeUserPassword = () => {};
+  // 修改昵称
+  const changeUserNickname =  () => {
+    ElMessageBox.prompt("请输入新昵称", "修改昵称", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
-      inputPattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$/,
-      inputErrorMessage: "密码长度必须在8-16位之间，且包含大小写字母和数字",
+      inputPattern: /^.{2,10}$/,
+      inputErrorMessage: "昵称长度必须在2-10位之间",
     })
-      .then(({ value }) => {
+      .then(async ({ value }) => {
         console.log(value);
+        const data = await change(user.value.token, value, "", "",user.value.username);
+        user.value.nickname = data.user.nickname;
+        localStorage.setItem("user", JSON.stringify(user.value));
+        ElNotification({
+          title: "修改昵称成功",
+          message: "昵称修改成功",
+          type: "success",
+        });
+        console.log(data.user.nickname);
       })
       .catch(() => {
-        console.log("取消修改密码");
+        console.log("取消修改昵称");
       });
   };
 
@@ -203,23 +162,85 @@ export const useAuthStore = defineStore("auth", () => {
     return isValid;
   };
 
-  // 登录操作
+  // 登录
   const enterLogin = async () => {
     if (currentRole.value !== "管理员" && !validateLoginForm()) return;
+    try {
+      const data = await login(
+        loginForm.value.username,
+        loginForm.value.password,
+        currentRole.value
+      );
+      user.value = {
+        id: data.user.id,
+        nickname:
+          data.user.nickname === null || "" ? "未设置昵称" : data.user.nickname,
+        username: data.user.username,
+        role: data.user.role,
+        token: data.Authorization,
+      };
+      isAuthenticated.value = true;
+      errorMessage.value = "";
+      currentRole.value = data.user.role;
+      localStorage.setItem("user", JSON.stringify(user.value));
 
-    const resp = await login(
-      loginForm.value.username,
-      loginForm.value.password
-    );
-    console.log(resp);
+      ElNotification({
+        title: `欢迎登入，${
+          user.value.nickname === null || "" ? "新" : user.value.nickname
+        }${
+          user.value.role === "学生" || "教师"
+            ? user.value.role === "学生"
+              ? "同学"
+              : "老师"
+            : "管理员"
+        }`,
+        message: "登录成功",
+        type: "success",
+      });
+
+      await router.push("/");
+    } catch (error: any) {
+      errorMessage.value = error.message || "登录失败";
+    }
   };
 
-  // 修改注册操作
+  // 注册
   const enterRegister = async () => {
     if (!validateRegisterForm()) return;
+    try {
+      const data = await register(
+        registerForm.value.username,
+        registerForm.value.password,
+        currentRole.value
+      );
+      user.value = {
+        id: data.user.id,
+        nickname:
+          data.user.nickname === null || "" ? "未设置昵称" : data.user.nickname,
+        username: data.user.username,
+        role: data.user.role,
+        token: data.Authorization,
+      };
+      isAuthenticated.value = true;
+      errorMessage.value = "";
+      currentRole.value = data.user.role;
+      localStorage.setItem("user", JSON.stringify(user.value));
 
-    console.log("注册中 enterRegister", registerForm.value);
-    await register(registerForm.value.username, registerForm.value.password);
+      ElNotification({
+        title: `欢迎你，新${
+          user.value.role === "学生" || "教师"
+            ? user.value.role === "学生"
+              ? "同学"
+              : "老师"
+            : "管理员"
+        }`,
+        message: "注册成功",
+        type: "success",
+      });
+      router.push("/");
+    } catch (error: any) {
+      errorMessage.value = error.message || "注册失败";
+    }
   };
 
   const switchToRegister = () => {
@@ -230,7 +251,6 @@ export const useAuthStore = defineStore("auth", () => {
     isLogin.value = true;
   };
 
-  // 重置表单
   const resetForm = () => {
     loginForm.value.username = "";
     loginForm.value.password = "";
@@ -246,7 +266,6 @@ export const useAuthStore = defineStore("auth", () => {
           : 2
       ];
     localStorage.setItem("currentRole", currentRole.value);
-    console.log(currentRole.value);
   };
 
   return {
@@ -263,16 +282,15 @@ export const useAuthStore = defineStore("auth", () => {
     registerErrors,
     isAuthenticated,
     open,
-    login,
     logout,
-    register,
     checkAuth,
     resetForm,
     enterLogin,
     switchRole,
     switchToLogin,
     enterRegister,
-    changePassword,
+    changeUserNickname,
+    changeUserPassword,
     switchToRegister,
     validateLoginForm,
     validateRegisterForm,

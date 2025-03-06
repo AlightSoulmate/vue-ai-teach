@@ -13,7 +13,7 @@
       </p>
       <form class="form" @submit.prevent="authStore.enterLogin">
         <div class="input-group">
-          <label for="username">用户名</label>
+          <label for="username">账号</label>
           <input
             type="text"
             name="username"
@@ -57,10 +57,9 @@
       <p class="signup">
         还没有账号?
         <a
-          rel="noopener noreferrer"
-          href="#"
+          @click.prevent="authStore.switchToRegister"
+          href="javascript:void(0)"
           class=""
-          @click="authStore.switchToRegister"
           >点击注册</a
         >
       </p>
@@ -69,7 +68,7 @@
       <p class="title">{{ authStore.currentRole }}注册</p>
       <form class="form" @submit.prevent="authStore.enterRegister">
         <div class="input-group">
-          <label for="username">用户名</label>
+          <label for="username">账号</label>
           <input
             type="text"
             name="username"
@@ -130,10 +129,9 @@
       <p class="signup">
         已有账号?
         <a
-          rel="noopener noreferrer"
-          href="#"
+          @click.prevent="authStore.switchToLogin"
+          href="javascript:void(0)"
           class=""
-          @click="authStore.switchToLogin"
           >点击登录</a
         >
       </p>

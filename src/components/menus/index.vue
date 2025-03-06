@@ -19,68 +19,51 @@
       :default-active="activeMenu"
       class="el-menu-vertical-demo"
       @open="handleOpen"
-      @close="handleClose"
       :collapse="isCollapse"
       router
     >
       <el-sub-menu index="1">
         <template #title>
-          <el-icon><location /></el-icon>
+          <el-icon><Location /></el-icon>
           <span>热门AI工具</span>
         </template>
         <el-menu-item :index="paths.tools">工具集</el-menu-item>
         <el-menu-item :index="paths.forum">论坛</el-menu-item>
       </el-sub-menu>
-      <el-sub-menu
-        :index="paths.admin"
-        v-if="authStore.user.role === '管理员'"
-      >
+      <el-sub-menu :index="paths.admin" v-if="role.isAdmin">
         <template #title>
-          <el-icon><location /></el-icon>
+          <el-icon><Location /></el-icon>
           <span>管理中心</span>
         </template>
-        <el-menu-item :index="paths.admin">用户管理</el-menu-item>
-        <el-menu-item :index="paths.admin">课程管理</el-menu-item>
+        <el-menu-item :index="paths.adminTool">工具管理</el-menu-item>
+        <el-menu-item :index="paths.adminStudent">学生管理</el-menu-item>
+        <el-menu-item :index="paths.adminTeacher">教师管理</el-menu-item>
       </el-sub-menu>
-      <!-- 老师视角 -->
-      <el-menu-item
-        :index="paths.teacherCrouse"
-        v-if="authStore.user.role === '教师'"
-      >
-        <el-icon><icon-menu /></el-icon>
+      <el-menu-item :index="paths.teacherCrouse" v-if="role.isTeacher">
+        <el-icon><IconMenu /></el-icon>
         <span>我的课程（老师）</span>
       </el-menu-item>
-      <el-menu-item
-        :index="paths.teacherInbox"
-        v-if="authStore.user.role === '教师'"
-      >
+      <el-menu-item :index="paths.teacherInbox" v-if="role.isTeacher">
         <el-icon><Memo /></el-icon>
         <span>收件箱（老师）</span>
       </el-menu-item>
-      <!-- 学生视角 -->
-      <el-menu-item
-        :index="paths.studentCrouse"
-        v-if="authStore.user.role === '学生'"
-      >
-        <el-icon><icon-menu /></el-icon>
+      <el-menu-item :index="paths.studentCrouse" v-if="role.isStudent">
+        <el-icon><IconMenu /></el-icon>
         <span>我的课程（学生）</span>
       </el-menu-item>
-      <el-menu-item
-        :index="paths.studentInbox"
-        v-if="authStore.user.role === '学生'"
-      >
+      <el-menu-item :index="paths.studentInbox" v-if="role.isStudent">
         <el-icon><Memo /></el-icon>
         <span>收件箱（学生）</span>
       </el-menu-item>
       <el-menu-item :index="paths.setup">
-        <el-icon><setting /></el-icon>
+        <el-icon><Setting /></el-icon>
         <span>个性化设置</span>
       </el-menu-item>
     </el-menu>
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import {
   Menu as IconMenu,
   Location,
@@ -90,14 +73,23 @@ import {
   Fold,
 } from "@element-plus/icons-vue";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { computed } from "vue";
 
 const authStore = useAuthStore();
 const activeMenu = ref("/home");
+
+const role = computed(() => ({
+  isStudent: authStore.user.role === "学生",
+  isTeacher: authStore.user.role === "教师",
+  isAdmin: authStore.user.role === "管理员",
+}));
 const isCollapse = ref(false);
 const paths = ref<Record<any, string>>({
   tools: "/home",
   forum: "/forum",
-  admin: "/admin",
+  adminTool:"/adminTool",
+  adminStudent: "/adminStudent",
+  adminTeacher: "/adminTeacher",
   teacherCrouse: "/teacherCrouse",
   teacherInbox: "/teacherInbox",
   studentCrouse: "/studentCrouse",
@@ -105,11 +97,8 @@ const paths = ref<Record<any, string>>({
   setup: "/setup",
 });
 
-const handleOpen = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath);
-};
-const handleClose = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath);
+const handleOpen = (key: string) => {
+  console.log(key);
 };
 
 const toggleCollapse = () => {
@@ -118,20 +107,15 @@ const toggleCollapse = () => {
 };
 
 const emit = defineEmits(["collapse"]);
-
-onMounted(() => {
-  // authStore.currentRole = JSON.parse(localStorage.getItem("currentRole") || "");
-  // console.log("authStore.currentRole", authStore.currentRole);
-  console.log("authStore.user.role", authStore.user.role);
-});
 </script>
 <style scoped>
 .menu-container {
   display: flex;
   flex-direction: column;
   height: 100%;
-  position: relative;
+  position: fixed;
   background-color: var(--background-color);
+  border-right: 1px solid var(--border-color);
 }
 
 .collapse-trigger {
@@ -174,7 +158,7 @@ onMounted(() => {
   width: 200px;
   min-height: 400px;
   background-color: var(--background-color);
-  border-right: 1px solid var(--border-color);
+  /* border-right: 1px solid var(--border-color); */
 }
 
 .el-menu {

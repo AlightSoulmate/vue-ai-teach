@@ -16,7 +16,7 @@
     <!-- 右侧登录区 -->
     <div class="right-section">
       <div class="login-container">
-        <StuEnterDialog />
+        <EnterDialog />
       </div>
     </div>
   </div>
@@ -24,10 +24,10 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import TopNav from "@/components/topNav/login/index.vue";
-import StuEnterDialog from "@/components/use/enter.vue";
+import EnterDialog from "@/components/use/enter.vue";
 
 const h1Title = ref("浙江外国语学院AI智能教学平台");
-const h2Title = ref("AI驱动的直观教学反馈与改进，以智能化评估帮助教师完成创新");
+const h2Title = ref("AI驱动的直观教学反馈与改进，以智能化评估帮助教师和学生完成创新");
 const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
 </script>
 <style scoped lang="scss">
@@ -37,9 +37,10 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
 }
 
 .page-container {
+  overflow: hidden;
   color: var(--text-color);
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   background-color: var(--background-color);
   background-image: linear-gradient(
       0deg,
@@ -66,7 +67,6 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
       transparent
     );
   background-size: 55px 55px;
-  
   display: flex;
   padding-top: 0;
   position: relative;
@@ -77,7 +77,7 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem 4rem;
+  padding: 10rem 4rem 3rem 4rem;
   animation: fadeIn 1s ease-out;
 }
 

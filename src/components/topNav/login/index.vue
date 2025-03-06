@@ -15,6 +15,7 @@
       <div class="nav-right">
         <Theme />
         <Illustrate />
+        <Github />
         <div class="auth-buttons">
           <el-button
             type="primary"
@@ -42,6 +43,7 @@ import { ref } from "vue";
 import Icon from "../use/icon.vue";
 import Illustrate from "../use/illustrate.vue";
 import Theme from "../use/theme.vue";
+import Github from "../use/github.vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useThemeStore } from "@/stores/useThemeStore";
 const authStore = useAuthStore();

@@ -1,23 +1,24 @@
 <template>
   <div class="nav">
     <div class="glass-effect">
-    <!-- 左侧 -->
-    <div class="nav-left">
-      <Icon />
-      <img
-        :src="themeStore.isDarkTheme ? logo : logoDark"
-        alt="logo"
-        class="logo"
-      />
-      <Search />
-    </div>
+      <!-- 左侧 -->
+      <div class="nav-left">
+        <Icon />
+        <img
+          :src="themeStore.isDarkTheme ? logo : logoDark"
+          alt="logo"
+          class="logo"
+        />
+        <Search />
+      </div>
 
-    <!-- 右侧 -->
-    <div class="nav-right">
-      <Theme />
-      <Illustrate />
-      <Mine />
-    </div>
+      <!-- 右侧 -->
+      <div class="nav-right">
+        <Theme />
+        <Illustrate />
+        <Github />
+        <Mine />
+      </div>
     </div>
   </div>
 </template>
@@ -30,6 +31,7 @@ import Search from "../use/search.vue";
 import Mine from "../use/mine.vue";
 import Illustrate from "../use/illustrate.vue";
 import Theme from "../use/theme.vue";
+import Github from "../use/github.vue";
 
 const themeStore = useThemeStore();
 const logo = ref("https://a1.x914.com/alight/i/AITeach/white-zisu-logo.png");
@@ -70,13 +72,12 @@ const logoDark = ref(
   justify-content: space-between;
   align-items: center;
   padding: 0 15px;
-  background: rgba(255, 255, 255, 0.1);  /* 半透明背景 */
-  backdrop-filter: blur(10px);  /* 磨砂效果 */
-  -webkit-backdrop-filter: blur(10px);  /* Safari 支持 */
+  background: rgba(255, 255, 255, 0.1); /* 半透明背景 */
+  backdrop-filter: blur(10px); /* 磨砂效果 */
+  -webkit-backdrop-filter: blur(10px); /* Safari 支持 */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   z-index: 1000;
   transition: all 0.3s ease-in-out;
 }
-
 </style>

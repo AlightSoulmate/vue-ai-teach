@@ -819,23 +819,16 @@ export const useToolsStore = defineStore("tools", () => {
   }
   // 获取所有类别
   const fetchCategory = async () => {
-    // fetchCats();
-    const data = await getCategories();
-    categories.value = data.categories;
-    await axios
-      .get("/api/tools/categories")
-      // .get("https://frp-man.com:49044/tools/categories")
-      .then((resp) => {
-        console.log(categories.value);
-        categories.value = resp.data.categories;
-        loadTools();
-      })
-      .catch((error) => {
-        console.error("获取类别列表失败:", error);
-      });
+    try {
+      const data = await getCategories();
+      categories.value = data.categories;
+      loadTools();
+    } catch {
+      console.error("类别列表获取异常");
+    }
   };
 
-  // 获取工具数据 并将工具数据按类别分组
+  // 获取工具数据并封装
   const loadTools = () => {
     categories.value.forEach((category) => {
       toolsByCategory.value[category] = tools.value
@@ -845,7 +838,6 @@ export const useToolsStore = defineStore("tools", () => {
           logo_url: tool.logoUrl,
         }));
     });
-    console.log(toolsByCategory.value);
 
     // categories.value.forEach(async (category) => {
     //   await axios

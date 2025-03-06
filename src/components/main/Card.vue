@@ -1,85 +1,99 @@
 <template>
   <div class="card">
-    <!-- 顶部插槽 -->
-    <div class="card-header">
-      <slot name="header">
-        <img src="#" alt="默认图片" />
-      </slot>
+    <div class="card-content">
+      <div class="card-header">
+        <slot name="header">
+          <img src="#" alt="默认图片" />
+        </slot>
+      </div>
+      <div class="card-body">
+        <slot>
+          <p>未知工具</p>
+        </slot>
+      </div>
+      <div class="card-info">
+        <slot name="info">
+          <span>暂无评分</span>
+        </slot>
+      </div>
     </div>
-    <!-- 中间插槽 -->
-    <div class="card-body">
-      <slot>
-        <p>未知工具</p>
-      </slot>
-    </div>
-    <!-- 底部插槽 -->
-    <div class="card-footer">
+    <!-- <div class="card-footer">
       <div class="start">
         <slot name="footer-left">未知评分</slot>
       </div>
       <div class="go">
         <slot name="footer-right">无内容</slot>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script lang="ts" setup></script>
 
-<style scoped>
+<style scoped lang="scss">
 .card {
-  width: 156px;
-  height: 143px;
-  margin: 10px;
-  border: 1px solid #2d2d2d;
-  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
   background-color: var(--background-color);
   display: flex;
-  color: var(--text-color);
   flex-direction: column;
-  position: relative;
-  box-sizing: border-box;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.card-content {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
 }
 
 .card-header {
-  height: 80px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
+  margin-bottom: 12px;
 
-.card-header img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain; /* 保证图片在容器内完整显示，且不被拉伸 */
-  border-radius: 5px;
+  img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    padding: 4px;
+  }
 }
 
 .card-body {
   flex: 1;
-  height: 40px;
-  padding: 0 0 8px 10px;
-  font-weight: bold;
-  text-align: left;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  position: relative;
-  text-overflow: ellipsis;
+
+  p {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.card-info {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 8px;
 }
 
 .card-footer {
   display: flex;
-  width: 100%;
-  height: 30px;
-  border-top: 1px solid #2d2d2d;
-  box-sizing: border-box;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  text-align: center;
-  font-size: 13px;
+  height: 40px;
+  border-top: 1px solid #f0f0f0;
 }
 
 .start,
@@ -88,11 +102,23 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: var(--text-color);
+  font-size: 14px;
 }
 
 .start {
-  border-right: 1px solid #2d2d2d;
+  border-right: 1px solid #f0f0f0;
+  color: #ff9800;
+  font-weight: 500;
+}
+
+.go {
+  color: #409eff;
+  font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: rgba(64, 158, 255, 0.1);
+  }
 }
 </style>

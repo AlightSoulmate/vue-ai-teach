@@ -1,71 +1,102 @@
 <template>
   <el-container>
-    <header class="header">
-      <div class="title">
-        <h1 id="titleH1">{{ titleH1 }}</h1>
-        <!-- <h2 id="titleH2">
-          {{ titleH2 }}
-        </h2> -->
-      </div>
-    </header>
-    <el-main class="main">
-      <div>
-        <div class="main">
-          <el-tabs
-            v-model="activeName"
-            class="demo-tabs"
-            @tab-click="handleClick"
-          >
-            <el-tab-pane
-              v-for="category in toolsStore.categories"
-              :label="category"
-              :name="category"
-              :key="category"
-            >
-              <div class="cat-main">
-                <Card
-                  v-for="(tool, index) in toolsStore.toolsByCategory[category]"
-                  :key="index"
-                  class="tool-card"
-                >
-                  <template #header>
-                    <img
-                      :src="tool.logo_url"
-                      @click="gotoDetail(tool)"
-                      :title="tool.name"
-                    />
-                  </template>
-                  <p @click="gotoDetail" :title="tool.name" class="name">
-                    {{ tool.name }}
-                  </p>
-                  <template #footer-left>
-                    <span class="star">{{ tool.score }} ⭐</span>
-                  </template>
-                  <template #footer-right>
-                    <button @click="gotoSite(tool.url)" class="gotoSite">
-                      直达
-                    </button>
-                  </template>
-                </Card>
-              </div>
-            </el-tab-pane>
-          </el-tabs>
+    <div class="main-container">
+      <div class="header">
+        <div class="title">
+          <h1 id="titleH1">{{ titleH1 }}</h1>
+          <!-- <h2 id="titleH2">{{ titleH2 }}</h2> -->
         </div>
       </div>
-    </el-main>
-    <el-footer>
-      <div class="footer">Footer</div>
-    </el-footer>
+      <el-main class="main">
+        <div
+          v-for="category in toolsStore.categories"
+          :label="category"
+          :name="category"
+          :key="category"
+        >
+          <div class="card-title" :id="category">{{ category }}</div>
+          <div class="cat-main">
+            <Card
+              v-for="(tool, index) in toolsStore.toolsByCategory[category]"
+              :key="index"
+              class="tool-card"
+              @click="gotoDetail(tool)"
+            >
+              <template #header>
+                <div class="tool-logo">
+                  <img :src="tool.logo_url" :title="tool.name" />
+                  <div class="tool-name">{{ tool.name }}</div>
+                </div>
+              </template>
+              <template #default>
+                <p class="tool-desc" @click="gotoDetail(tool)">
+                  {{ tool.description || "暂无描述" }}
+                </p>
+              </template>
+              <template #info>
+                <div class="tool-info">
+                  <div class="rating">
+                    <span class="rating-score">{{ tool.score }}</span>
+                    <div class="rating-stars">
+                      <el-rate
+                        v-model="tool.score"
+                        disabled
+                        text-color="#ff9800"
+                        score-template="{value}"
+                        :show-score="false"
+                      />
+                    </div>
+                  </div>
+                  <div class="rating-count">
+                    已有
+                    {{ tool.ratingCount || Math.floor(Math.random() * 1000) }}
+                    人评分
+                  </div>
+                </div>
+              </template>
+            </Card>
+          </div>
+        </div>
+      </el-main>
+      <el-footer>
+        <div class="footer">Footer</div>
+      </el-footer>
+    </div>
+    <aside class="side-nav">
+      <el-anchor
+        :offset="65"
+        direction="vertical"
+        type="default"
+        @click="handleClick"
+        class="anchor"
+        select-scroll-top="true"
+      >
+        <div class="anchor-title">分类导航</div>
+        <el-anchor-link
+          v-for="category in toolsStore.categories"
+          :key="category"
+          :href="`#${category}`"
+          :title="category"
+        ></el-anchor-link>
+      </el-anchor>
+    </aside>
+    <div class="backTop">
+      <BackTop />
+    </div>
   </el-container>
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
 import Card from "@/components/main/Card.vue";
+import BackTop from "@/components/use/backTop.vue";
 import { useRouter } from "vue-router";
-import type { TabsPaneContext } from "element-plus";
 import { useToolsStore } from "@/stores/useToolsStore";
 import { useSelectedToolStore } from "@/stores/useSelectedToolStore";
+
+const handleClick = (e: MouseEvent) => {
+  e.preventDefault();
+};
 const route = useRouter();
 const toolsStore = useToolsStore();
 const selectToolStore = useSelectedToolStore();
@@ -74,12 +105,6 @@ const titleH2 = ref(
   "100+中文 AI / LLM工具本站链接直达、体验工具后可以留下您对它的评价并写下评分的依据，谢谢！"
 );
 const activeName = ref("对话模型");
-
-const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event);
-  activeName.value = tab.paneName as string;
-  localStorage.setItem("activeName", JSON.stringify(activeName.value));
-};
 
 const gotoSite = (url: string) => {
   window.location.href = url;
@@ -98,72 +123,233 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-@use "@/styles/variables.scss" as *;
+@use "@/styles/_variables.scss" as *;
+@use "@/styles/_mixins.scss" as *;
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+
+// 布局容器
 .el-container {
   background-color: var(--background-color);
-}
-#titleH1 {
-  margin: $mains-title-margin;
-  font-size: $mains-title-font-size;
-  font-weight: $mains-title-font-weight;
-  color: var(--text-color);
-}
-#titleH2 {
-  margin: $mains-title-margin;
-
-  font-size: 1.1rem;
-  color: var(--text-color);
-  font-weight: normal;
-}
-.main {
-  border-top: 1px solid #ebeef5;
-  padding: 0 5px;
-}
-.cat-main {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: start;
-}
-.gotoSite {
-  cursor: pointer;
-  border: none;
-  color: var(--text-color);
-  background: transparent;
-  font-size: 13px;
-}
-.demo-tabs > .el-tabs__content {
-  padding: 32px;
-  color: #ff7300;
-  font-size: 32px;
-  font-weight: 600;
-}
-.el-tabs--top > .el-tabs__header .el-tabs__item {
-  color: #ffffff !important;
-}
-.tool-card {
-  cursor: pointer;
-}
-.tool-card img {
-  width: 68px !important;
-}
+  padding: 10px 0 10px 10px;
+  width: 100%;
+  min-height: 100vh;
 
-.name {
-  max-width: 100%;
-  white-space: nowrap; /* 禁止换行 */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: bold;
-  text-align: left;
-  padding-left: 10px;
-}
+  .main-container {
+    flex: 1;
+    max-width: calc(100% - 220px);
+    min-width: 0;
+    text-align: left;
+    margin-right: 20px; // 减小右侧间距
+  }
 
-.footer {
-  padding: 20px;
-  background-color: #f0f0f0;
+  // 头部样式
+  .header {
+    background-color: var(--background-color);
+    border-bottom: 1px solid #ebeef5;
+    width: 100%;
+
+    #titleH1 {
+      margin: $mains-title-margin;
+      font: {
+        size: $mains-title-font-size;
+        weight: $mains-title-font-weight;
+      }
+      color: var(--text-color);
+    }
+  }
+
+  // 主要内容区
+  .main {
+    padding: 5px 10px 0 20px;
+
+    .card-title {
+      font: {
+        size: 20px;
+        weight: bold;
+      }
+      color: var(--text-color);
+      padding: 10px 0 10px 20px;
+      position: relative;
+      cursor: pointer;
+
+      &:hover::before {
+        content: "#";
+        color: #409eff;
+        font-size: 22px;
+        position: absolute;
+        left: 0;
+      }
+    }
+    .card-title:focus:after,
+    .card-title:hover:after {
+      width: 100%;
+      left: 0%;
+    }
+
+    .card-title:after {
+      content: "";
+      pointer-events: none;
+      bottom: -2px;
+      left: 50%;
+      position: absolute;
+      width: 0%;
+      height: 2px;
+      color: var(--text-color);
+      background-color: var(--text-color);
+      // background-color: #000;
+      transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+      transition-duration: 400ms;
+      transition-property: width, left;
+    }
+
+    // .card-title:focus:before,
+    // .card-title:hover:before {
+    //   width: 100%;
+    //   left: 0%;
+    // }
+    // .card-title:before {
+    //   content: "";
+    //   pointer-events: none;
+    //   top: -2px;
+    //   left: 50%;
+    //   position: absolute;
+    //   width: 0%;
+    //   height: 2px;
+    //   background-color: #fff;
+    //   transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+    //   transition-duration: 400ms;
+    //   transition-property: width, left;
+    // }
+
+    .cat-main {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .tool-card {
+      height: 160px; // 稍微增加高度
+      cursor: pointer;
+      max-width: 220px;
+      justify-self: center;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .tool-logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+
+      img {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+        border-radius: 6px;
+      }
+
+      .tool-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-color);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+    .tool-desc {
+      font-size: 12px;
+      color: var(--text-color-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      line-height: 1.3;
+      margin: 0 0 4px 0;
+      cursor: pointer;
+      flex-grow: 1;
+    }
+    .tool-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .rating {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        .rating-score {
+          font-size: 14px;
+          font-weight: 600;
+          color: #ff9800;
+        }
+
+        .rating-stars {
+          line-height: 1;
+          transform: scale(0.8);
+          transform-origin: left;
+        }
+      }
+
+      .rating-count {
+        font-size: 11px;
+        color: #999;
+      }
+    }
+    // 其他工具类
+    .gotoSite {
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: #409eff;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: rgba(64, 158, 255, 0.1);
+      }
+    }
+    .star {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: #ff9800;
+      font-weight: 500;
+    }
+  }
+}
+.side-nav {
+  position: fixed;
+  right: 90px;
+  top: 120px;
+  .anchor-title {
+    font: {
+      size: 14px;
+      weight: bold;
+    }
+    color: var(--text-color);
+    padding-bottom: 10px;
+  }
+  .el-anchor__list,
+  .el-anchor {
+    background-color: var(--background-color);
+  }
+}
+@media screen and (max-width: 768px) {
+  .side-nav {
+    display: none;
+    width: 0;
+  }
 }
 </style>

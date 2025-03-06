@@ -4,7 +4,8 @@ import type { AxiosResponse } from "axios";
 
 interface User {
   id: number;
-  username: string;
+  nickname: any;
+  username: any;
   role: string;
   message: string;
 }
@@ -18,7 +19,7 @@ interface AuthResponse {
 axios.interceptors.request.use(
   (config) => {
     console.log("Request URL:", config.url); // 打印请求的 URL
-    console.log("Request data:", config.data); // 打印请求的请求体数据
+    console.log("Request data:", config.data || "接口无请求体或请求出错"); // 打印请求的请求体数据
     return config;
   },
   (error) => {
@@ -27,7 +28,7 @@ axios.interceptors.request.use(
 );
 
 // 注册
-export const registerUser = async (
+export const register = async (
   username: string,
   password: string,
   role: string
@@ -39,7 +40,7 @@ export const registerUser = async (
       //   {
       //     username,
       //     password,
-      //     // role,
+      //     role,
       //   }
       // );
       const response = await axios.post("/api/user/register", {
@@ -58,26 +59,65 @@ export const registerUser = async (
 };
 
 // 登录
-export const loginUser = async (
+export const login = async (
   username: string,
   password: string,
   role: string
 ): Promise<AuthResponse> => {
   try {
-    const response = await axios.post("/api/auth/login", {
-      username,
+    if (role === "管理员") {
+      const response = await axios.post("/api/auth/login", {
+        username,
+        password,
+        role,
+      });
+      // const response = await axios.post(
+      //   "https://frp-man.com:49044/auth/login",
+      //   {
+      //     username,
+      //     password,
+      //     role,
+      //   }
+      // );
+      console.log(response.data);
+      return response.data;
+    } else {
+      const response = await axios.post("/api/user/login", {
+        username,
+        password,
+        role,
+      });
+      // const response = await axios.post(
+      //   "https://frp-man.com:49044/user/login",
+      //   {
+      //     username,
+      //     password,
+      //     role,
+      //   }
+      // );
+      console.log(response.data);
+      return response.data;
+    }
+  } catch (error: any) {
+    throw error.response ? error.response.data : { message: "请求失败" };
+  }
+};
+// 用户修改信息
+export const change = async (
+  Authorization: string,
+  nickname: string,
+  old_password: string,
+  password: string,
+  username: string
+): Promise<AuthResponse> => {
+  try {
+    const response = await axios.put("/api/user", {
+      Authorization,
+      nickname,
+      old_password,
       password,
-      role,
+      username,
     });
-    // const response = await axios.post(
-    //   "https://frp-man.com:49044/auth/login",
-    //   {
-    //     username,
-    //     password,
-    //     // role,
-    //   }
-    // );
-    console.log(response.data);
     return response.data;
   } catch (error: any) {
     throw error.response ? error.response.data : { message: "请求失败" };

@@ -21,6 +21,16 @@ const router = createRouter({
       redirect: "/home",
       children: [
         {
+          path: "adminStudent",
+          name: "AdminStudent",
+          component: () => import("@/views/admin/StudentManagePage.vue"),
+        },
+        {
+          path: "adminTeacher",
+          name: "AdminTeacher",
+          component: () => import("@/views/admin/teacherManagePage.vue"),
+        },
+        {
           path: "home",
           name: "Home",
           component: () => import("@/components/main/index.vue"),
