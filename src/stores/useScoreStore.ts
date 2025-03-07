@@ -1,5 +1,5 @@
 // @/stores/useScoreStore.ts
-// 传递评分给后端、模型端
+// 传递评分给后端
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import { saveAs } from "file-saver";
@@ -89,40 +89,7 @@ export const useScoreStore = defineStore("score", () => {
     averageScore: 0,
     comment: "默认",
   });
-  const evaluationAssign = () => {
-    const tool = JSON.parse(localStorage.getItem("selectedTool") || "{}");
-    // console.log(tool);
-    ratingEvaluation.value.tool = tool.name;
-    ratingEvaluation.value.category = tool.category;
 
-    fetchEval();
-  };
-  const fetchEval = async () => {
-    await axios
-      .post("/llm/evaluate", ratingEvaluation.value)
-      .then(async (resp) => {
-        const reportText = resp.data.data.evaluation.choices[0].message.content;
-        console.log(reportText);
-
-        // 创建 Word 文档并下载
-        const paragraphs = reportText
-          .split("\n")
-          .map((line: string | IParagraphOptions) => new Paragraph(line));
-        const doc = new Document({
-          sections: [
-            {
-              properties: {},
-              children: paragraphs,
-            },
-          ],
-        });
-        const blob = await Packer.toBlob(doc);
-        saveAs(blob, "评测报告.docx");
-      })
-      .catch((e) => {
-        console.error(e);
-      });
-  };
   // 上传作业 stu-1
   const handleSystemFileChange = async (e: Event) => {
     e.preventDefault(); // 阻止默认的文件选择行为
@@ -157,39 +124,113 @@ export const useScoreStore = defineStore("score", () => {
   };
   // 上传作业 stu-3
   const handleUpload = async () => {
-    if (!systemFile.value || !userFile.value) {
+    if (!userFile.value) {
       ElMessage.warning("请选择文件");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("system_prompt_file", systemFile.value);
-    formData.append("user_prompt_file", userFile.value);
+    // 自动获取系统文件（如果尚未获取）
+    if (!systemFile.value) {
+      try {
+        const base64Content = localStorage.getItem("fileContent");
+        const fileName = localStorage.getItem("fileName");
 
+        if (base64Content && fileName) {
+          // 将 base64 转换回 Blob
+          const response = await fetch(base64Content);
+          const blob = await response.blob();
+
+          systemFile.value = new File([blob], fileName, {
+            type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          });
+          systemFileName.value = fileName;
+        } else {
+          // 如果没有系统文件，只使用用户文件
+          ElMessage.info("未找到系统文件，将只使用您上传的文件进行评估");
+        }
+      } catch (error) {
+        console.error("获取系统文件失败:", error);
+        ElMessage.info("获取系统文件失败，将只使用您上传的文件进行评估");
+      }
+    }
+
+    const formData = new FormData();
+    // 如果有系统文件则添加
+    // if (systemFile.value) {
+    //   formData.append("system_prompt_file", systemFile.value);
+    // }
+    // formData.append("user_prompt_file", userFile.value);
+    formData.append("file", userFile.value);
+    const Authorization = JSON.parse(
+      localStorage.getItem("user") as string
+    ).token;
+    formData.append("Authorization", Authorization);
+    console.log(Authorization, formData.get("file"));
     uploading.value = true;
     try {
-      const response = await axios.post("/llm/evaluate", formData);
-      const { code, message, data } = response.data;
-      console.log(data.evaluation);
-      const reportText = data.evaluation;
+      const response = await axios.post(
+        "https://frp-man.com:49044/evaluation/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      const { message } = response.data;
+      console.log(message);
       ElMessage.success("正在评估，请稍后");
 
-      if (code === 200) {
-        ElMessage.success("评估完成，正在生成报告");
-        // 创建 Word 文档并下载
-        const paragraphs = reportText
-          .split("\n")
-          .map((line: string | IParagraphOptions) => new Paragraph(line));
-        const doc = new Document({
-          sections: [
-            {
-              properties: {},
-              children: paragraphs,
-            },
-          ],
-        });
-        const blob = await Packer.toBlob(doc);
-        saveAs(blob, "评测报告.docx");
+      if (message === "上传成功") {
+        // 创建轮询函数
+        const pollEvaluation = async () => {
+          try {
+            const Authorization = JSON.parse(
+              localStorage.getItem("user") as string
+            ).token;
+            const resp = await axios.post(
+              "https://frp-man.com:49044/evaluation",
+              {
+                Authorization,
+              }
+            );
+            
+            // 如果获取到评估结果
+            if (resp.data.message && resp.data.status !== "processing") {
+              const reportText = resp.data.message;
+              ElMessage.success("评估完成，正在生成报告");
+              
+              // 创建 Word 文档并下载
+              const paragraphs = reportText
+                .split("\n")
+                .map((line: string | IParagraphOptions) => new Paragraph(line));
+              const doc = new Document({
+                sections: [
+                  {
+                    properties: {},
+                    children: paragraphs,
+                  },
+                ],
+              });
+              const blob = await Packer.toBlob(doc);
+              saveAs(blob, "评测报告.docx");
+              
+              return true; // 表示评估完成
+            }
+            return false; // 继续轮询
+          } catch (error) {
+            console.error("轮询评估结果失败:", error);
+            return false; // 出错时继续轮询
+          }
+        };
+
+        // 开始轮询
+        const interval = setInterval(async () => {
+          const isComplete = await pollEvaluation();
+          if (isComplete) {
+            clearInterval(interval); // 评估完成后停止轮询
+          }
+        }, 800);
       } else {
         ElMessage.error(message || "上传失败");
       }
@@ -248,7 +289,6 @@ export const useScoreStore = defineStore("score", () => {
   return {
     ratingDimensions,
     ratingEvaluation,
-    evaluationAssign,
     systemFile,
     userFile,
     uploading,

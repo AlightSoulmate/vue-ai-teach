@@ -36,7 +36,7 @@
           </el-popover>
         </div>
         <div class="comment">
-          <span class="comment-title">请键入您对工具的整体评价：</span>
+          <span class="comment-title">可以在此处留下您的宝贵评价：</span>
           <el-input
             type="textarea"
             placeholder="在此处输入您的评价，帮助其他用户了解这个工具..."

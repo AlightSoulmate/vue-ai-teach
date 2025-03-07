@@ -35,19 +35,20 @@ export const register = async (
 ): Promise<AuthResponse> => {
   try {
     if (role !== "管理员") {
-      // const response = await axios.post(
-      //   "https://frp-man.com:49044/user/register",
-      //   {
-      //     username,
-      //     password,
-      //     role,
-      //   }
-      // );
-      const response = await axios.post("/api/user/register", {
-        username,
-        password,
-        role,
-      });
+      role = role === "学生" ? "student" : "teacher";
+      const response = await axios.post(
+        "https://frp-man.com:49044/user/register",
+        {
+          username,
+          password,
+          role,
+        }
+      );
+      // const response = await axios.post("/api/user/register", {
+      //   username,
+      //   password,
+      //   role,
+      // });
       console.log(response.data);
       return response.data;
     } else {
@@ -66,35 +67,37 @@ export const login = async (
 ): Promise<AuthResponse> => {
   try {
     if (role === "管理员") {
-      const response = await axios.post("/api/auth/login", {
-        username,
-        password,
-        role,
-      });
-      // const response = await axios.post(
-      //   "https://frp-man.com:49044/auth/login",
-      //   {
-      //     username,
-      //     password,
-      //     role,
-      //   }
-      // );
+      role = "admin";
+      // const response = await axios.post("/api/auth/login", {
+      //   username,
+      //   password,
+      //   role,
+      // });
+      const response = await axios.post(
+        "https://frp-man.com:49044/auth/login",
+        {
+          username,
+          password,
+          role,
+        }
+      );
       console.log(response.data);
       return response.data;
     } else {
-      const response = await axios.post("/api/user/login", {
-        username,
-        password,
-        role,
-      });
-      // const response = await axios.post(
-      //   "https://frp-man.com:49044/user/login",
-      //   {
-      //     username,
-      //     password,
-      //     role,
-      //   }
-      // );
+      role = role === "学生" ? "student" : "teacher";
+      // const response = await axios.post("/api/user/login", {
+      //   username,
+      //   password,
+      //   role,
+      // });
+      const response = await axios.post(
+        "https://frp-man.com:49044/user/login",
+        {
+          username,
+          password,
+          role,
+        }
+      );
       console.log(response.data);
       return response.data;
     }
@@ -111,11 +114,11 @@ export const change = async (
   username: string
 ): Promise<AuthResponse> => {
   try {
-    const response = await axios.put("/api/user", {
+    const response = await axios.put("https://frp-man.com:49044/user", {
       Authorization,
-      nickname,
       old_password,
       password,
+      nickname,
       username,
     });
     return response.data;

@@ -26,8 +26,14 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173,
+    // allowedHosts: ["https://frp-man.com:49044"],
     // allowedHosts: ["99t207r710.zicp.fun"],
     proxy: {
+      "/api": {
+        target: "https://frp-man.com:49044",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""), // 去掉 /llm 前缀
+      },
       "/llm": {
         target: "http://js1.blockelite.cn:27078",
         changeOrigin: true,

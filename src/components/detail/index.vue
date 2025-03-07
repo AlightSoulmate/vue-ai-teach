@@ -20,7 +20,7 @@
         <div class="description">{{ tool.description }}</div>
 
         <div class="tag-section">
-          <span class="tag-label">标签：</span>
+          <!-- <span class="tag-label">标签：</span> -->
           <div class="tag-list">
             <span class="tag-item">{{ tool.category }}</span>
             <span class="tag-item">AI工具</span>
@@ -29,21 +29,25 @@
 
         <div class="action-section">
           <button class="url-button" @click="gotoSite(tool.url)">
-            <el-icon><Link /></el-icon> 访问官网
+            <!-- <el-icon><Link /></el-icon>  -->
+            访问官网
           </button>
-          <div class="feedback">
+          <!-- <div class="feedback">
             <el-icon><ChatDotRound /></el-icon>
-          </div>
+          </div> -->
         </div>
       </div>
 
       <div class="logo-container">
-        <img :src="tool.logoUrl" alt="工具logo" />
+        <img :src="tool.logo_url" :alt="tool.name" />
       </div>
     </div>
 
     <div class="score-section">
       <Score />
+    </div>
+    <div class="score-section">
+      <Upload />
     </div>
   </div>
 </template>
@@ -53,6 +57,7 @@ import { ArrowRight, Link, ChatDotRound } from "@element-plus/icons-vue";
 import { useSelectedToolStore } from "@/stores/useSelectedToolStore";
 import { ref, onMounted } from "vue";
 import Score from "./score.vue";
+import Upload from "./upload.vue";
 
 const cats = ref("全部工具");
 const selectToolStore = useSelectedToolStore();
@@ -93,7 +98,30 @@ const gotoSite = (url: string) => {
 }
 
 .main-info {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  margin-bottom: 40px;
+
   .info {
+    flex: 1;
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+
+      .name {
+        font-size: 48px;
+        font-weight: bold;
+        color: var(--text-color);
+      }
+    }
     .score {
       display: flex;
       align-items: center;
@@ -113,14 +141,14 @@ const gotoSite = (url: string) => {
       font-size: 18px;
       line-height: 1.6;
       color: var(--text-color-secondary);
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       max-width: 800px;
     }
 
     .tag-section {
       display: flex;
       align-items: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
 
       .tag-label {
         font-size: 16px;
@@ -130,11 +158,11 @@ const gotoSite = (url: string) => {
       .tag-list {
         display: flex;
         gap: 10px;
-        margin-left: 10px;
+        // margin-left: 10px;
 
         .tag-item {
-          padding: 6px 16px;
-          border-radius: 20px;
+          padding: 6px 14px;
+          border-radius: 14px;
           font-size: 14px;
           background: rgba(64, 158, 255, 0.1);
           color: #409eff;
@@ -198,23 +226,31 @@ const gotoSite = (url: string) => {
     }
   }
   .logo-container {
-    width: 300px;
-    height: 200px;
-    padding: 20px;
+    width: 320px;
+    height: 220px;
+    padding: 25px;
     background: white;
-    border-radius: 12px;
+    border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
     img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
-      transition: transform 0.3s ease;
+      transition: transform 0.4s ease;
+
       &:hover {
-        transform: scale(1.05);
+        transform: scale(1.15);
       }
     }
   }

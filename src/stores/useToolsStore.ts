@@ -830,26 +830,26 @@ export const useToolsStore = defineStore("tools", () => {
 
   // 获取工具数据并封装
   const loadTools = () => {
-    categories.value.forEach((category) => {
-      toolsByCategory.value[category] = tools.value
-        .filter((tool) => tool.category === category)
-        .map((tool) => ({
-          ...tool,
-          logo_url: tool.logoUrl,
-        }));
-    });
-
-    // categories.value.forEach(async (category) => {
-    //   await axios
-    //     .get(`https://frp-man.com:49044/tools?category=${category}`)
-    //     .then((resp) => {
-    //       console.log(resp.data);
-    //       toolsByCategory.value[category] = resp.data.tools;
-    //     })
-    //     .catch((error) => {
-    //       console.error(`获取 ${category} 工具失败:`, error);
-    //     });
+    // categories.value.forEach((category) => {
+    //   toolsByCategory.value[category] = tools.value
+    //     .filter((tool) => tool.category === category)
+    //     .map((tool) => ({
+    //       ...tool,
+    //       logo_url: tool.logoUrl,
+    //     }));
     // });
+
+    categories.value.forEach(async (category) => {
+      await axios
+        .get(`https://frp-man.com:49044/tools?category=${category}`)
+        .then((resp) => {
+          console.log(resp.data);
+          toolsByCategory.value[category] = resp.data.tools;
+        })
+        .catch((error) => {
+          console.error(`获取 ${category} 工具失败:`, error);
+        });
+    });
     console.log(toolsByCategory.value);
   };
   return { tools, categories, toolsByCategory, fetchCategory, loadTools };

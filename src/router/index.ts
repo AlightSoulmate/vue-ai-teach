@@ -7,7 +7,7 @@ import { nextTick } from "vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const router = createRouter({
-  history: createWebHashHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/login",
@@ -23,7 +23,7 @@ const router = createRouter({
         {
           path: "adminStudent",
           name: "AdminStudent",
-          component: () => import("@/views/admin/StudentManagePage.vue"),
+          component: () => import("@/views/admin/studentManagePage.vue"),
         },
         {
           path: "adminTeacher",

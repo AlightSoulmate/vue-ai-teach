@@ -1,10 +1,9 @@
 // src/stores/useAuthStore.ts
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { register, login,change } from "@/services/AuthService";
+import { register, login, change } from "@/services/AuthService";
 import { useRouter } from "vue-router";
-import { ElNotification } from "element-plus";
-import { ElMessageBox } from "element-plus";
+import { ElNotification, ElMessageBox } from "element-plus";
 interface User {
   id: number | null;
   nickname: string;
@@ -83,7 +82,7 @@ export const useAuthStore = defineStore("auth", () => {
   // 修改密码
   const changeUserPassword = () => {};
   // 修改昵称
-  const changeUserNickname =  () => {
+  const changeUserNickname = () => {
     ElMessageBox.prompt("请输入新昵称", "修改昵称", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
@@ -92,7 +91,13 @@ export const useAuthStore = defineStore("auth", () => {
     })
       .then(async ({ value }) => {
         console.log(value);
-        const data = await change(user.value.token, value, "", "",user.value.username);
+        const data = await change(
+          user.value.token,
+          value,
+          "",
+          "",
+          user.value.username
+        );
         user.value.nickname = data.user.nickname;
         localStorage.setItem("user", JSON.stringify(user.value));
         ElNotification({
@@ -174,7 +179,9 @@ export const useAuthStore = defineStore("auth", () => {
       user.value = {
         id: data.user.id,
         nickname:
-          data.user.nickname === null || "" ? "未设置昵称" : data.user.nickname,
+          data.user.nickname === null || "" || " "
+            ? "未设置昵称"
+            : data.user.nickname,
         username: data.user.username,
         role: data.user.role,
         token: data.Authorization,
@@ -186,7 +193,7 @@ export const useAuthStore = defineStore("auth", () => {
 
       ElNotification({
         title: `欢迎登入，${
-          user.value.nickname === null || "" ? "新" : user.value.nickname
+          user.value.nickname === null || "" || " " ? "新" : user.value.nickname
         }${
           user.value.role === "学生" || "教师"
             ? user.value.role === "学生"
@@ -216,7 +223,9 @@ export const useAuthStore = defineStore("auth", () => {
       user.value = {
         id: data.user.id,
         nickname:
-          data.user.nickname === null || "" ? "未设置昵称" : data.user.nickname,
+          data.user.nickname === null || "" || " "
+            ? "未设置昵称"
+            : data.user.nickname,
         username: data.user.username,
         role: data.user.role,
         token: data.Authorization,

@@ -6,6 +6,47 @@
           <h1 id="titleH1">{{ titleH1 }}</h1>
           <!-- <h2 id="titleH2">{{ titleH2 }}</h2> -->
         </div>
+        <!-- 添加搜索框 -->
+        <div class="search-container">
+          <el-input
+            v-model="searchQuery"
+            placeholder="搜索AI工具..."
+            class="search-input"
+            clearable
+            @keyup.enter="handleSearch"
+          >
+            <template #prefix>
+              <el-icon><Search /></el-icon>
+            </template>
+            <template #append>
+              <el-button @click="handleSearch">搜索</el-button>
+            </template>
+          </el-input>
+
+          <!-- 搜索结果弹出框 -->
+          <div v-if="showSearchResults" class="search-results">
+            <div v-if="searchResults.length > 0">
+              <div
+                v-for="result in searchResults"
+                :key="result.id"
+                class="search-result-item"
+                @click="selectTool(result)"
+              >
+                <div class="result-logo">
+                  <img :src="result.logoUrl" :alt="result.name" />
+                </div>
+                <div class="result-info">
+                  <div class="result-name">{{ result.name }}</div>
+                  <div class="result-category">{{ result.category }}</div>
+                </div>
+                <div class="result-score">{{ result.score }} ⭐</div>
+              </div>
+            </div>
+            <div v-else-if="hasSearched" class="no-results">
+              没有找到相关工具
+            </div>
+          </div>
+        </div>
       </div>
       <el-main class="main">
         <div
@@ -87,12 +128,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import Card from "@/components/main/Card.vue";
 import BackTop from "@/components/use/backTop.vue";
 import { useRouter } from "vue-router";
 import { useToolsStore } from "@/stores/useToolsStore";
 import { useSelectedToolStore } from "@/stores/useSelectedToolStore";
+import { Search } from "@element-plus/icons-vue";
+import axios from "axios";
 
 const handleClick = (e: MouseEvent) => {
   e.preventDefault();
@@ -106,6 +149,56 @@ const titleH2 = ref(
 );
 const activeName = ref("对话模型");
 
+// 搜索相关
+const searchQuery = ref("");
+const searchResults = ref<any[]>([]);
+const showSearchResults = ref(false);
+const hasSearched = ref(false);
+
+// 处理搜索
+const handleSearch = async () => {
+  if (!searchQuery.value.trim()) {
+    searchResults.value = [];
+    showSearchResults.value = false;
+    return;
+  }
+
+  try {
+    const response = await axios.get(
+      `/api/tools/search?q=${encodeURIComponent(searchQuery.value.trim())}`
+    );
+    searchResults.value = response.data.data || [];
+    showSearchResults.value = true;
+    hasSearched.value = true;
+  } catch (error) {
+    console.error("搜索失败:", error);
+    searchResults.value = [];
+  }
+};
+
+// 选择工具
+const selectTool = (selectedTool: any) => {
+  // 保存选中的工具
+  localStorage.setItem("selectedTool", JSON.stringify(selectedTool));
+  selectToolStore.selectTool(selectedTool);
+
+  // 关闭搜索结果
+  showSearchResults.value = false;
+  searchQuery.value = "";
+
+  // 跳转到详情页
+  route.push("/detail");
+};
+
+// 点击页面其他地方关闭搜索结果
+const handleClickOutside = (event: MouseEvent) => {
+  const searchContainer = document.querySelector(".search-container");
+  if (searchContainer && !searchContainer.contains(event.target as Node)) {
+    showSearchResults.value = false;
+  }
+};
+
+// 现有代码
 const gotoSite = (url: string) => {
   window.location.href = url;
 };
@@ -119,6 +212,14 @@ onMounted(() => {
   toolsStore.fetchCategory();
   activeName.value =
     localStorage.getItem("activeName")?.split('"')[1] || "对话模型";
+
+  // 添加点击事件监听
+  document.addEventListener("click", handleClickOutside);
+});
+
+// 组件卸载时移除事件监听
+onUnmounted(() => {
+  document.removeEventListener("click", handleClickOutside);
 });
 </script>
 
@@ -152,6 +253,11 @@ onMounted(() => {
     background-color: var(--background-color);
     border-bottom: 1px solid #ebeef5;
     width: 100%;
+    padding-bottom: 20px;
+
+    .title {
+      margin-bottom: 20px;
+    }
 
     #titleH1 {
       margin: $mains-title-margin;
@@ -161,6 +267,101 @@ onMounted(() => {
       }
       color: var(--text-color);
     }
+  }
+  /* 添加搜索相关样式 */
+  .search-container {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .search-input {
+    width: 100%;
+
+    :deep(.el-input__inner) {
+      border-radius: 8px;
+      height: 46px;
+      font-size: 16px;
+    }
+
+    :deep(.el-input-group__append) {
+      background-color: var(--el-color-primary);
+      border-color: var(--el-color-primary);
+      color: white;
+      padding: 0 20px;
+      font-weight: 500;
+    }
+  }
+
+  .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    margin-top: 8px;
+  }
+
+  .search-result-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: var(--el-fill-color-light);
+    }
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--el-border-color-lighter);
+    }
+  }
+
+  .result-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-right: 12px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .result-info {
+    flex: 1;
+  }
+
+  .result-name {
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--el-text-color-primary);
+    margin-bottom: 4px;
+  }
+
+  .result-category {
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+  }
+
+  .result-score {
+    font-weight: bold;
+    color: #ff9800;
+  }
+
+  .no-results {
+    padding: 16px;
+    text-align: center;
+    color: var(--el-text-color-secondary);
   }
 
   // 主要内容区
