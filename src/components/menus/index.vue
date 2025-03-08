@@ -79,9 +79,9 @@ const authStore = useAuthStore();
 const activeMenu = ref("/home");
 
 const role = computed(() => ({
-  isStudent: authStore.user.role === "学生",
-  isTeacher: authStore.user.role === "教师",
-  isAdmin: authStore.user.role === "管理员",
+  isStudent: authStore.user.role === "student",
+  isTeacher: authStore.user.role === "teacher",
+  isAdmin: authStore.user.role === "admin",
 }));
 const isCollapse = ref(false);
 const paths = ref<Record<any, string>>({

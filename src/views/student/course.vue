@@ -1,20 +1,8 @@
 <template>
   <div class="crouse-page">
-    <h1 class="title">学生-我的课程</h1>
+    <h1 class="title">敬请期待</h1>
 
-    <div class="upload-section">
-      <div class="file-input">
-        <label>获取老师上传的作业批改标准文件：</label>
-        <div class="input-wrapper">
-          <input
-            type="file"
-            accept=".docx"
-            @click.prevent="(e) => scoreStore.handleSystemFileChange(e)"
-          />
-          <span class="file-name">{{ scoreStore.systemFileName || "未选择文件" }}</span>
-        </div>
-      </div>
-
+    <!-- <div class="upload-section">
       <div class="file-input">
         <label>作业文件：</label>
         <div class="input-wrapper">
@@ -23,7 +11,9 @@
             accept=".docx"
             @change="(e) => scoreStore.handleUserFileChange(e)"
           />
-          <span class="file-name">{{ scoreStore.userFileName || "未选择文件" }}</span>
+          <span class="file-name">{{
+            scoreStore.userFileName || "未选择文件"
+          }}</span>
         </div>
       </div>
 
@@ -35,7 +25,7 @@
       >
         上传文件
       </el-button>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -60,7 +50,7 @@ const scoreStore = useScoreStore();
 
 .title {
   color: var(--text-color);
-  margin: $mains-title-margin;
+  margin: 11px 0 20px 45px;
   font-size: $mains-title-font-size;
   font-weight: $mains-title-font-weight;
 }

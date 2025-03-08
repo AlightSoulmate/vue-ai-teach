@@ -3,11 +3,10 @@ import {
   createWebHistory,
   createWebHashHistory,
 } from "vue-router";
-import { nextTick } from "vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/login",
@@ -23,12 +22,17 @@ const router = createRouter({
         {
           path: "adminStudent",
           name: "AdminStudent",
-          component: () => import("@/views/admin/studentManagePage.vue"),
+          component: () => import("@/views/admin/studentManage.vue"),
         },
         {
           path: "adminTeacher",
           name: "AdminTeacher",
-          component: () => import("@/views/admin/teacherManagePage.vue"),
+          component: () => import("@/views/admin/teacherManage.vue"),
+        },
+        {
+          path: "adminTool",
+          name: "AdminTool",
+          component: () => import("@/views/admin/toolManage.vue"),
         },
         {
           path: "home",
@@ -43,22 +47,22 @@ const router = createRouter({
         {
           path: "teacherCrouse",
           name: "TeacherCrouse",
-          component: () => import("@/views/teacher/crousePage.vue"),
+          component: () => import("@/views/teacher/course.vue"),
         },
         {
           path: "teacherInbox",
           name: "TeacherInbox",
-          component: () => import("@/views/teacher/inboxPage.vue"),
+          component: () => import("@/views/teacher/inbox.vue"),
         },
         {
           path: "studentCrouse",
           name: "StudentCrouse",
-          component: () => import("@/views/student/crousePage.vue"),
+          component: () => import("@/views/student/course.vue"),
         },
         {
           path: "studentInbox",
           name: "StudentInbox",
-          component: () => import("@/views/student/inboxPage.vue"),
+          component: () => import("@/views/student/inbox.vue"),
         },
         {
           path: "setup",
@@ -76,8 +80,14 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from) => {
-  if (to.name === "Login" && useAuthStore().isAuthenticated) {
-    router.push("/");
+  const authStore = useAuthStore();
+  const isToLoginPage = to.name === "Login";
+
+  if (isToLoginPage && authStore.isAuthenticated) {
+    return { name: "Home" };
+  }
+  if (!isToLoginPage && !authStore.isAuthenticated) {
+    return { name: "Login" };
   }
 });
 

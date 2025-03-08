@@ -1,8 +1,8 @@
 <template>
   <div class="crouse-page">
-    <h1 class="title">老师-我的课程</h1>
+    <h1 class="title">敬请期待</h1>
 
-    <div class="upload-section">
+    <!-- <div class="upload-section">
       <div class="file-input">
         <label>作业批改标准文件：</label>
         <div class="input-wrapper">
@@ -19,7 +19,7 @@
       >
         上传文件
       </el-button>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -51,7 +51,6 @@ const handleUpload = async () => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64Content = e.target?.result as string;
-      // 存储文件内容和文件名
       localStorage.setItem("fileContent", base64Content);
       localStorage.setItem("fileName", systemFile.value!.name);
       ElMessage.success("上传成功");

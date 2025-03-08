@@ -87,34 +87,9 @@ export const useScoreStore = defineStore("score", () => {
     tool: "默认",
     category: "默认",
     averageScore: 0,
-    comment: "默认",
+    comment: "",
   });
-
-  // 上传作业 stu-1
-  const handleSystemFileChange = async (e: Event) => {
-    e.preventDefault(); // 阻止默认的文件选择行为
-    const base64Content = localStorage.getItem("fileContent");
-    const fileName = localStorage.getItem("fileName");
-
-    if (base64Content && fileName) {
-      try {
-        // 将 base64 转换回 Blob
-        const response = await fetch(base64Content);
-        const blob = await response.blob();
-
-        systemFile.value = new File([blob], fileName, {
-          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        });
-        systemFileName.value = fileName;
-      } catch (error) {
-        console.error("获取文件失败:", error);
-        ElMessage.error("获取文件失败");
-      }
-    } else {
-      ElMessage.warning("未找到老师上传的文件");
-    }
-  };
-  // 上传作业 stu-2
+  // 上传作业 - 选择文件
   const handleUserFileChange = (e: Event) => {
     const files = (e.target as HTMLInputElement).files;
     if (files && files.length > 0) {
@@ -122,44 +97,13 @@ export const useScoreStore = defineStore("score", () => {
       userFileName.value = files[0].name;
     }
   };
-  // 上传作业 stu-3
+  // 上传作业 - 点击上传btn
   const handleUpload = async () => {
     if (!userFile.value) {
       ElMessage.warning("请选择文件");
       return;
     }
-
-    // 自动获取系统文件（如果尚未获取）
-    if (!systemFile.value) {
-      try {
-        const base64Content = localStorage.getItem("fileContent");
-        const fileName = localStorage.getItem("fileName");
-
-        if (base64Content && fileName) {
-          // 将 base64 转换回 Blob
-          const response = await fetch(base64Content);
-          const blob = await response.blob();
-
-          systemFile.value = new File([blob], fileName, {
-            type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-          });
-          systemFileName.value = fileName;
-        } else {
-          // 如果没有系统文件，只使用用户文件
-          ElMessage.info("未找到系统文件，将只使用您上传的文件进行评估");
-        }
-      } catch (error) {
-        console.error("获取系统文件失败:", error);
-        ElMessage.info("获取系统文件失败，将只使用您上传的文件进行评估");
-      }
-    }
-
     const formData = new FormData();
-    // 如果有系统文件则添加
-    // if (systemFile.value) {
-    //   formData.append("system_prompt_file", systemFile.value);
-    // }
-    // formData.append("user_prompt_file", userFile.value);
     formData.append("file", userFile.value);
     const Authorization = JSON.parse(
       localStorage.getItem("user") as string
@@ -168,38 +112,47 @@ export const useScoreStore = defineStore("score", () => {
     console.log(Authorization, formData.get("file"));
     uploading.value = true;
     try {
-      const response = await axios.post(
-        "https://frp-man.com:49044/evaluation/upload",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      const { message } = response.data;
+      // const response = await axios.post(
+      //   "https://frp-man.com:49044/evaluation/upload",
+      //   formData,
+      //   {
+      //     headers: {
+      //       "Content-Type": "multipart/form-data",
+      //     },
+      //   }
+      // );
+      const response = await axios.post("/api/evaluation/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      const message = response.data.message;
       console.log(message);
       ElMessage.success("正在评估，请稍后");
 
-      if (message === "上传成功") {
+      if (message) {
         // 创建轮询函数
         const pollEvaluation = async () => {
           try {
             const Authorization = JSON.parse(
               localStorage.getItem("user") as string
             ).token;
-            const resp = await axios.post(
-              "https://frp-man.com:49044/evaluation",
-              {
-                Authorization,
-              }
-            );
-            
+            // const resp = await axios.post(
+            //   "https://frp-man.com:49044/evaluation",
+            //   {
+            //     Authorization,
+            //   }
+            // );
+            const resp = await axios.post("/api/evaluation", {
+              Authorization,
+            });
+
             // 如果获取到评估结果
-            if (resp.data.message && resp.data.status !== "processing") {
+            // && resp.data.status !== "processing"
+            if (resp.data.message) {
               const reportText = resp.data.message;
               ElMessage.success("评估完成，正在生成报告");
-              
+
               // 创建 Word 文档并下载
               const paragraphs = reportText
                 .split("\n")
@@ -214,13 +167,13 @@ export const useScoreStore = defineStore("score", () => {
               });
               const blob = await Packer.toBlob(doc);
               saveAs(blob, "评测报告.docx");
-              
-              return true; // 表示评估完成
+
+              return true; // 评估完成
             }
             return false; // 继续轮询
           } catch (error) {
             console.error("轮询评估结果失败:", error);
-            return false; // 出错时继续轮询
+            return false; // 出错继续轮询
           }
         };
 
@@ -230,7 +183,7 @@ export const useScoreStore = defineStore("score", () => {
           if (isComplete) {
             clearInterval(interval); // 评估完成后停止轮询
           }
-        }, 800);
+        }, 1500);
       } else {
         ElMessage.error(message || "上传失败");
       }
@@ -252,10 +205,14 @@ export const useScoreStore = defineStore("score", () => {
     };
     const token = JSON.parse(localStorage.getItem("user") as string).token;
     await axios
-      .post(`https://frp-man.com:49044/tools/${toolId}/ratings`, {
+      .post(`/api/tools/${toolId}/ratings`, {
         Authorization: token,
         rate,
       })
+      // .post(`https://frp-man.com:49044/tools/${toolId}/ratings`, {
+      //   Authorization: token,
+      //   rate,
+      // })
       .then((resp) => {
         console.log("评价数据传输成功", resp.data.message);
         ToolsDetailGet(toolId);
@@ -266,8 +223,17 @@ export const useScoreStore = defineStore("score", () => {
   };
   const toolsDetail = ref<any>({});
   const ToolsDetailGet = async (toolId: number) => {
+    // await axios
+    //   .get(`https://frp-man.com:49044/tools/${toolId}`)
+    //   .then((resp) => {
+    //     console.log(resp.data);
+    //     toolsDetail.value = resp.data;
+    //   })
+    //   .catch((e) => {
+    //     console.log("获取工具详情失败", e);
+    //   });
     await axios
-      .get(`https://frp-man.com:49044/tools/${toolId}`)
+      .get(`/api/tools/${toolId}`)
       .then((resp) => {
         console.log(resp.data);
         toolsDetail.value = resp.data;
@@ -297,7 +263,6 @@ export const useScoreStore = defineStore("score", () => {
     userFileName,
     handleUpload,
     handleUserFileChange,
-    handleSystemFileChange,
     ToolsDetailGet,
     evaluationTransmission,
     calculateWeightedAverage,

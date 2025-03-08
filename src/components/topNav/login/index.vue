@@ -61,8 +61,6 @@ const logoDark = ref(
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* background: var(--background-color); */
-  /* box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); */
   border-bottom: 3px solid #2d2d2d;
   position: relative;
 }
@@ -76,9 +74,9 @@ const logoDark = ref(
   justify-content: space-between;
   align-items: center;
   padding: 0 15px;
-  background: rgba(255, 255, 255, 0.1); /* 半透明背景 */
-  backdrop-filter: blur(10px); /* 磨砂效果 */
-  -webkit-backdrop-filter: blur(10px); /* Safari 支持 */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   z-index: 1000;

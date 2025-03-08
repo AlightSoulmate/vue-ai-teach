@@ -1,5 +1,4 @@
-import path from "path";
-import { fileURLToPath, URL } from "node:url";
+import { fileURLToPath, resolve, URL } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import vueDevTools from "vite-plugin-vue-devtools";
@@ -7,9 +6,9 @@ import {
   createStyleImportPlugin,
   ElementPlusResolve,
 } from "vite-plugin-style-import";
-import ViteSvgIconsPlugin from "vite-plugin-svg-icons";
+import viteCompression from "vite-plugin-compression"; // gzip压缩减少包体积
+import { visualizer } from "rollup-plugin-visualizer"; // 打包分析工具
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
@@ -17,7 +16,10 @@ export default defineConfig({
     createStyleImportPlugin({
       resolves: [ElementPlusResolve()],
     }),
+    viteCompression(),
+    visualizer({ open: true }), // 打包后自动打开分析页面
   ],
+  base: "./",
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
@@ -26,19 +28,17 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173,
-    // allowedHosts: ["https://frp-man.com:49044"],
-    // allowedHosts: ["99t207r710.zicp.fun"],
     proxy: {
-      "/api": {
-        target: "https://frp-man.com:49044",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""), // 去掉 /llm 前缀
-      },
-      "/llm": {
-        target: "http://js1.blockelite.cn:27078",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/llm/, ""), // 去掉 /llm 前缀
-      },
+      // "/api": {
+      //   target: "https://frp-man.com:49044",
+      //   changeOrigin: true,
+      //   rewrite: (path) => path.replace(/^\/api/, ""),
+      // },
+      // "/llm": {
+      //   target: "http://js1.blockelite.cn:27078",
+      //   changeOrigin: true,
+      //   rewrite: (path) => path.replace(/^\/llm/, ""),
+      // },
     },
   },
 });

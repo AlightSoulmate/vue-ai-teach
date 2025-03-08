@@ -3,28 +3,20 @@
     <div class="card-content">
       <div class="card-header">
         <slot name="header">
-          <img src="#" alt="默认图片" />
+          <img src="#" alt="Default picture" />
         </slot>
       </div>
       <div class="card-body">
         <slot>
-          <p>未知工具</p>
+          <p>unknown tool</p>
         </slot>
       </div>
       <div class="card-info">
         <slot name="info">
-          <span>暂无评分</span>
+          <span>unknown rating</span>
         </slot>
       </div>
     </div>
-    <!-- <div class="card-footer">
-      <div class="start">
-        <slot name="footer-left">未知评分</slot>
-      </div>
-      <div class="go">
-        <slot name="footer-right">无内容</slot>
-      </div>
-    </div> -->
   </div>
 </template>
 

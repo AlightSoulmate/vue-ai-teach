@@ -21,7 +21,7 @@ const logoSrcDark = ref(
 );
 
 const goBackHome = () => {
-  const path = authStore.isAuthenticated ? "/index/home" : "/";
+  const path = authStore.isAuthenticated ? "/home" : "/";
   router.push(path);
 };
 </script>

@@ -4,48 +4,6 @@
       <div class="header">
         <div class="title">
           <h1 id="titleH1">{{ titleH1 }}</h1>
-          <!-- <h2 id="titleH2">{{ titleH2 }}</h2> -->
-        </div>
-        <!-- 添加搜索框 -->
-        <div class="search-container">
-          <el-input
-            v-model="searchQuery"
-            placeholder="搜索AI工具..."
-            class="search-input"
-            clearable
-            @keyup.enter="handleSearch"
-          >
-            <template #prefix>
-              <el-icon><Search /></el-icon>
-            </template>
-            <template #append>
-              <el-button @click="handleSearch">搜索</el-button>
-            </template>
-          </el-input>
-
-          <!-- 搜索结果弹出框 -->
-          <div v-if="showSearchResults" class="search-results">
-            <div v-if="searchResults.length > 0">
-              <div
-                v-for="result in searchResults"
-                :key="result.id"
-                class="search-result-item"
-                @click="selectTool(result)"
-              >
-                <div class="result-logo">
-                  <img :src="result.logoUrl" :alt="result.name" />
-                </div>
-                <div class="result-info">
-                  <div class="result-name">{{ result.name }}</div>
-                  <div class="result-category">{{ result.category }}</div>
-                </div>
-                <div class="result-score">{{ result.score }} ⭐</div>
-              </div>
-            </div>
-            <div v-else-if="hasSearched" class="no-results">
-              没有找到相关工具
-            </div>
-          </div>
         </div>
       </div>
       <el-main class="main">
@@ -134,8 +92,6 @@ import BackTop from "@/components/use/backTop.vue";
 import { useRouter } from "vue-router";
 import { useToolsStore } from "@/stores/useToolsStore";
 import { useSelectedToolStore } from "@/stores/useSelectedToolStore";
-import { Search } from "@element-plus/icons-vue";
-import axios from "axios";
 
 const handleClick = (e: MouseEvent) => {
   e.preventDefault();
@@ -148,55 +104,6 @@ const titleH2 = ref(
   "100+中文 AI / LLM工具本站链接直达、体验工具后可以留下您对它的评价并写下评分的依据，谢谢！"
 );
 const activeName = ref("对话模型");
-
-// 搜索相关
-const searchQuery = ref("");
-const searchResults = ref<any[]>([]);
-const showSearchResults = ref(false);
-const hasSearched = ref(false);
-
-// 处理搜索
-const handleSearch = async () => {
-  if (!searchQuery.value.trim()) {
-    searchResults.value = [];
-    showSearchResults.value = false;
-    return;
-  }
-
-  try {
-    const response = await axios.get(
-      `/api/tools/search?q=${encodeURIComponent(searchQuery.value.trim())}`
-    );
-    searchResults.value = response.data.data || [];
-    showSearchResults.value = true;
-    hasSearched.value = true;
-  } catch (error) {
-    console.error("搜索失败:", error);
-    searchResults.value = [];
-  }
-};
-
-// 选择工具
-const selectTool = (selectedTool: any) => {
-  // 保存选中的工具
-  localStorage.setItem("selectedTool", JSON.stringify(selectedTool));
-  selectToolStore.selectTool(selectedTool);
-
-  // 关闭搜索结果
-  showSearchResults.value = false;
-  searchQuery.value = "";
-
-  // 跳转到详情页
-  route.push("/detail");
-};
-
-// 点击页面其他地方关闭搜索结果
-const handleClickOutside = (event: MouseEvent) => {
-  const searchContainer = document.querySelector(".search-container");
-  if (searchContainer && !searchContainer.contains(event.target as Node)) {
-    showSearchResults.value = false;
-  }
-};
 
 // 现有代码
 const gotoSite = (url: string) => {
@@ -212,15 +119,8 @@ onMounted(() => {
   toolsStore.fetchCategory();
   activeName.value =
     localStorage.getItem("activeName")?.split('"')[1] || "对话模型";
-
-  // 添加点击事件监听
-  document.addEventListener("click", handleClickOutside);
 });
 
-// 组件卸载时移除事件监听
-onUnmounted(() => {
-  document.removeEventListener("click", handleClickOutside);
-});
 </script>
 
 <style scoped lang="scss">
@@ -268,101 +168,6 @@ onUnmounted(() => {
       color: var(--text-color);
     }
   }
-  /* 添加搜索相关样式 */
-  .search-container {
-    position: relative;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  .search-input {
-    width: 100%;
-
-    :deep(.el-input__inner) {
-      border-radius: 8px;
-      height: 46px;
-      font-size: 16px;
-    }
-
-    :deep(.el-input-group__append) {
-      background-color: var(--el-color-primary);
-      border-color: var(--el-color-primary);
-      color: white;
-      padding: 0 20px;
-      font-weight: 500;
-    }
-  }
-
-  .search-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    max-height: 400px;
-    overflow-y: auto;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    margin-top: 8px;
-  }
-
-  .search-result-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: var(--el-fill-color-light);
-    }
-
-    &:not(:last-child) {
-      border-bottom: 1px solid var(--el-border-color-lighter);
-    }
-  }
-
-  .result-logo {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-right: 12px;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-  }
-
-  .result-info {
-    flex: 1;
-  }
-
-  .result-name {
-    font-weight: 500;
-    font-size: 16px;
-    color: var(--el-text-color-primary);
-    margin-bottom: 4px;
-  }
-
-  .result-category {
-    font-size: 12px;
-    color: var(--el-text-color-secondary);
-  }
-
-  .result-score {
-    font-weight: bold;
-    color: #ff9800;
-  }
-
-  .no-results {
-    padding: 16px;
-    text-align: center;
-    color: var(--el-text-color-secondary);
-  }
 
   // 主要内容区
   .main {
@@ -401,31 +206,12 @@ onUnmounted(() => {
       width: 0%;
       height: 2px;
       color: var(--text-color);
-      background-color: var(--text-color);
-      // background-color: #000;
+      // background-color: var(--text-color);
+      background-color: #000;
       transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
       transition-duration: 400ms;
       transition-property: width, left;
     }
-
-    // .card-title:focus:before,
-    // .card-title:hover:before {
-    //   width: 100%;
-    //   left: 0%;
-    // }
-    // .card-title:before {
-    //   content: "";
-    //   pointer-events: none;
-    //   top: -2px;
-    //   left: 50%;
-    //   position: absolute;
-    //   width: 0%;
-    //   height: 2px;
-    //   background-color: #fff;
-    //   transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
-    //   transition-duration: 400ms;
-    //   transition-property: width, left;
-    // }
 
     .cat-main {
       display: grid;
@@ -435,7 +221,7 @@ onUnmounted(() => {
     }
 
     .tool-card {
-      height: 160px; // 稍微增加高度
+      height: 160px;
       cursor: pointer;
       max-width: 220px;
       justify-self: center;
@@ -471,7 +257,7 @@ onUnmounted(() => {
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      // -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       line-height: 1.3;
       margin: 0 0 4px 0;
