@@ -15,10 +15,8 @@ export const useScoreStore = defineStore("score", () => {
     averageScore: number;
     comment: string;
   }
-  const systemFile = ref<File | null>(null);
   const userFile = ref<File | null>(null);
   const uploading = ref(false);
-  const systemFileName = ref("");
   const userFileName = ref("");
   const ratingDimensions = ref([
     {
@@ -89,6 +87,10 @@ export const useScoreStore = defineStore("score", () => {
     averageScore: 0,
     comment: "",
   });
+  function unicodeToUtf8(str: string) {
+    return JSON.parse('"' + str + '"');
+  }
+
   // 上传作业 - 选择文件
   const handleUserFileChange = (e: Event) => {
     const files = (e.target as HTMLInputElement).files;
@@ -131,7 +133,7 @@ export const useScoreStore = defineStore("score", () => {
       ElMessage.success("正在评估，请稍后");
 
       if (message) {
-        // 创建轮询函数
+        // 轮询函数
         const pollEvaluation = async () => {
           try {
             const Authorization = JSON.parse(
@@ -147,13 +149,17 @@ export const useScoreStore = defineStore("score", () => {
               Authorization,
             });
 
-            // 如果获取到评估结果
-            // && resp.data.status !== "processing"
-            if (resp.data.message) {
-              const reportText = resp.data.message;
+            // 获取到评估结果
+            const status = resp.status;
+            console.log("状态码为", status);
+            if (status === 200) {
+              const originalText = resp.data.message;
+              const reportText = JSON.parse(
+                '"' + originalText.replace(/\\\\/g, "\\") + '"'
+              ); // 将unicode转为中文
+              console.log(reportText);
               ElMessage.success("评估完成，正在生成报告");
-
-              // 创建 Word 文档并下载
+              // 创建Word文档并下载
               const paragraphs = reportText
                 .split("\n")
                 .map((line: string | IParagraphOptions) => new Paragraph(line));
@@ -166,24 +172,31 @@ export const useScoreStore = defineStore("score", () => {
                 ],
               });
               const blob = await Packer.toBlob(doc);
-              saveAs(blob, "评测报告.docx");
+              const user = JSON.parse(localStorage.getItem("user") as string);
+              saveAs(blob, `${user.username}的评测报告.docx`);
 
-              return true; // 评估完成
+              console.log("评估完成");
+              return true;
+            } else if (status === 204) {
+              console.log("继续轮询");
+              return false;
             }
-            return false; // 继续轮询
-          } catch (error) {
-            console.error("轮询评估结果失败:", error);
-            return false; // 出错继续轮询
+            console.log("继续轮询");
+            return false;
+          } catch (e) {
+            console.error("轮询评估结果失败", e);
+            console.log("出错继续轮询");
+            return false;
           }
         };
-
-        // 开始轮询
+        // 轮询
         const interval = setInterval(async () => {
           const isComplete = await pollEvaluation();
           if (isComplete) {
-            clearInterval(interval); // 评估完成后停止轮询
+            console.log("停止轮询");
+            clearInterval(interval);
           }
-        }, 1500);
+        }, 2000);
       } else {
         ElMessage.error(message || "上传失败");
       }
@@ -255,10 +268,8 @@ export const useScoreStore = defineStore("score", () => {
   return {
     ratingDimensions,
     ratingEvaluation,
-    systemFile,
     userFile,
     uploading,
-    systemFileName,
     toolsDetail,
     userFileName,
     handleUpload,

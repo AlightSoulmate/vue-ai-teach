@@ -20,6 +20,19 @@ export default defineConfig({
     visualizer({ open: true }), // 打包后自动打开分析页面
   ],
   base: "./",
+  // build: {
+  //   rollupOptions: {
+  //     output: {
+  //       manualChunks(id) {
+  //         if (id.includes("node_modules")) {
+  //           if (id.includes("vue")) return "vendor-vue"; // Vue 相关的库单独打包
+  //           if (id.includes("lodash")) return "vendor-lodash"; // lodash 单独打包
+  //           return "vendor"; // 其他第三方库
+  //         }
+  //       },
+  //     },
+  //   },
+  // },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

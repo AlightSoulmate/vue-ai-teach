@@ -40,7 +40,10 @@
             authStore.loginErrors.password
           }}</span>
           <div class="forgot">
-            <a rel="noopener noreferrer" plain @click="authStore.open"
+            <a
+              rel="noopener noreferrer"
+              plain
+              @click="authStore.open(() => '找回密码')"
               >忘记密码</a
             >
           </div>
@@ -172,9 +175,7 @@ const authStore = useAuthStore();
   text-align: center;
   margin-bottom: 0.5rem;
   font-size: 1.1rem;
-  /* font-weight: 600; */
   color: #f3f4f6;
-  /* background-color: coral; */
   transition: role 0.5s ease-in-out;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -202,15 +203,7 @@ const authStore = useAuthStore();
   user-select: none;
   color: #f0f0f0;
 }
-/* .title[title="学生"] {
-  color: #a78bfa;
-}
-.title[title="教师"] {
-  color: #256cdd;
-}
-.title[title="管理员"] {
-  color: #c27d06;
-} */
+
 .form {
   margin-top: 1.5rem;
 }
@@ -289,11 +282,9 @@ const authStore = useAuthStore();
   color: rgba(243, 244, 246, 1);
   text-decoration: none;
   font-size: 14px;
-}
-
-.forgot a:hover,
-.signup a:hover {
-  text-decoration: underline rgba(167, 139, 250, 1);
+  &:hover {
+    text-decoration: underline rgba(167, 139, 250, 1);
+  }
 }
 
 .sign {

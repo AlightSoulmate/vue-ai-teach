@@ -48,7 +48,7 @@
                   </div>
                   <div class="rating-count">
                     已有
-                    {{ tool.ratingCount || Math.floor(Math.random() * 1000) }}
+                    {{ tool.ratingCount || Math.floor(Math.random() * 100) }}
                     人评分
                   </div>
                 </div>
@@ -120,7 +120,6 @@ onMounted(() => {
   activeName.value =
     localStorage.getItem("activeName")?.split('"')[1] || "对话模型";
 });
-
 </script>
 
 <style scoped lang="scss">
@@ -132,7 +131,6 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-// 布局容器
 .el-container {
   background-color: var(--background-color);
   display: flex;
@@ -145,19 +143,13 @@ onMounted(() => {
     max-width: calc(100% - 220px);
     min-width: 0;
     text-align: left;
-    margin-right: 20px; // 减小右侧间距
+    margin-right: 20px;
   }
 
-  // 头部样式
   .header {
     background-color: var(--background-color);
-    border-bottom: 1px solid #ebeef5;
+    // border-bottom: 1px solid #ebeef5;
     width: 100%;
-    padding-bottom: 20px;
-
-    .title {
-      margin-bottom: 20px;
-    }
 
     #titleH1 {
       margin: $mains-title-margin;
@@ -221,7 +213,7 @@ onMounted(() => {
     }
 
     .tool-card {
-      height: 160px;
+      // height: 160px;
       cursor: pointer;
       max-width: 220px;
       justify-self: center;
@@ -253,13 +245,15 @@ onMounted(() => {
     }
     .tool-desc {
       font-size: 12px;
-      color: var(--text-color-secondary);
+      color: var(--text-color);
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
-      // -webkit-line-clamp: 2;
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
       -webkit-box-orient: vertical;
       line-height: 1.3;
+      max-height: 3em;
       margin: 0 0 4px 0;
       cursor: pointer;
       flex-grow: 1;

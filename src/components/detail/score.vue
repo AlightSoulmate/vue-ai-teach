@@ -36,7 +36,7 @@
           </el-popover>
         </div>
         <div class="comment">
-          <span class="comment-title">可以在此处留下您的宝贵评价：</span>
+          <span class="comment-title">留下您的宝贵评价：(一天内只能提交1次)</span>
           <el-input
             type="textarea"
             placeholder="在此处输入您的评价，帮助其他用户了解这个工具..."
@@ -219,7 +219,8 @@ onMounted(() => {
 
   .el-icon {
     font-size: $xxlarge-font-size;
-    color: var(--score-title-icon-color);
+    color: var(--text-color);
+    // color: var(--score-title-icon-color);
   }
 }
 
@@ -273,11 +274,13 @@ onMounted(() => {
   color: #409eff;
   border-bottom: 1px solid #eaeaea;
   padding-bottom: 5px;
+  background-color: var(--background-color);
 }
 
 .criteria-list {
   max-width: 100%;
   padding: 0 0 0 20px;
+  background-color: var(--background-color);
 
   li {
     margin-bottom: 8px;
@@ -285,6 +288,7 @@ onMounted(() => {
     line-height: 1.4;
     font-size: $small-font-size;
     color: var(--text-color);
+    background-color: var(--background-color);
   }
 }
 
@@ -410,11 +414,14 @@ onMounted(() => {
     font-weight: normal;
   }
 }
-
+.el-popper {
+  background-color: var(--background-color) !important;
+}
 :deep(.el-popover.el-popper) {
   max-width: none;
   width: 300px !important;
   border-radius: 8px;
+  background-color: var(--background-color) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 </style>

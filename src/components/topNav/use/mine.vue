@@ -94,7 +94,7 @@ import {
 } from "@element-plus/icons-vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 import type { FormInstance, FormRules } from "element-plus";
-import { change } from '@/services/AuthService'
+import { change } from "@/services/AuthService";
 const authStore = useAuthStore();
 const userAvatar = "";
 const passwordDialogVisible = ref(false);
@@ -131,25 +131,25 @@ const passwordRules = reactive<FormRules>({
 
 // 提交密码修改
 const submitPasswordChange = () => {
-  passwordFormRef.value?.validate( async (valid) => {
+  passwordFormRef.value?.validate(async (valid) => {
     if (valid) {
-      try{
+      try {
         const data = await change(
-        authStore.user.token,
-        passwordForm.oldPassword,
-        passwordForm.newPassword,
-        authStore.user.nickname,
-        authStore.user.username
-      );
-      authStore.user.token = data.Authorization;
-      localStorage.setItem("user", JSON.stringify(authStore.user));
-      ElMessage.success("密码修改成功");
-      passwordDialogVisible.value = false;
-      // 重置表单
-      passwordForm.oldPassword = "";
-      passwordForm.newPassword = "";
-      passwordForm.confirmPassword = "";
-      }catch{
+          authStore.user.token,
+          passwordForm.oldPassword,
+          passwordForm.newPassword,
+          authStore.user.nickname,
+          authStore.user.username
+        );
+        authStore.user.token = data.Authorization;
+        localStorage.setItem("user", JSON.stringify(authStore.user));
+        ElMessage.success("密码修改成功");
+        passwordDialogVisible.value = false;
+        // 重置表单
+        passwordForm.oldPassword = "";
+        passwordForm.newPassword = "";
+        passwordForm.confirmPassword = "";
+      } catch {
         ElMessage.error("密码修改失败,请重试");
       }
     }

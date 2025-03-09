@@ -24,6 +24,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { onMounted } from "vue";
 import { useThemeStore } from "@/stores/useThemeStore";
 
 const themeStore = useThemeStore();
@@ -31,6 +32,9 @@ const themeStore = useThemeStore();
 const toggleTheme = () => {
   themeStore.toggleTheme();
 };
+onMounted(() => {
+  themeStore.initTheme();
+});
 </script>
 <style scoped>
 .grid-content {

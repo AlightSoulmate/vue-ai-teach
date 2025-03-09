@@ -20,7 +20,6 @@
         <div class="description">{{ tool.description }}</div>
 
         <div class="tag-section">
-          <!-- <span class="tag-label">标签：</span> -->
           <div class="tag-list">
             <span class="tag-item">{{ tool.category }}</span>
             <span class="tag-item">AI工具</span>
@@ -28,13 +27,9 @@
         </div>
 
         <div class="action-section">
-          <button class="url-button" @click="gotoSite(tool.url)">
-            <!-- <el-icon><Link /></el-icon>  -->
+          <button class="url-button" @click="gotoSite(() => tool.url)">
             访问官网
           </button>
-          <!-- <div class="feedback">
-            <el-icon><ChatDotRound /></el-icon>
-          </div> -->
         </div>
       </div>
 
@@ -53,18 +48,20 @@
 </template>
 
 <script lang="ts" setup>
+import { ref, onMounted } from "vue";
 import { ArrowRight, Link, ChatDotRound } from "@element-plus/icons-vue";
 import { useSelectedToolStore } from "@/stores/useSelectedToolStore";
-import { ref, onMounted } from "vue";
 import Score from "./score.vue";
 import Upload from "./upload.vue";
 
 const cats = ref("全部工具");
-const selectToolStore = useSelectedToolStore();
 const tool = ref<any>({});
+const selectToolStore = useSelectedToolStore();
 
+const gotoSite = (url: () => string) => {
+  window.open(url(), "_blank", "noopener,noreferrer");
+};
 onMounted(() => {
-  // 从localStorage拿selectedTool用，顺便赋给selectToolStore.selectedTool
   const selectedTool = localStorage.getItem("selectedTool");
   if (selectedTool) {
     selectToolStore.selectedTool = JSON.parse(selectedTool);
@@ -72,10 +69,6 @@ onMounted(() => {
   }
   console.log(tool.value);
 });
-
-const gotoSite = (url: string) => {
-  window.location.href = url;
-};
 </script>
 
 <style scoped lang="scss">
@@ -102,10 +95,11 @@ const gotoSite = (url: string) => {
   gap: 40px;
   align-items: flex-start;
   margin-bottom: 40px;
+  align-items: stretch;
 
   .info {
     flex: 1;
-    background: white;
+    background: var(--background-color);
     padding: 30px;
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -158,7 +152,6 @@ const gotoSite = (url: string) => {
       .tag-list {
         display: flex;
         gap: 10px;
-        // margin-left: 10px;
 
         .tag-item {
           padding: 6px 14px;
@@ -184,7 +177,7 @@ const gotoSite = (url: string) => {
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 12px 24px;
+        padding: 10px 20px;
         border: none;
         border-radius: 8px;
         background: linear-gradient(135deg, #ff7a18, #af002d);
@@ -226,10 +219,12 @@ const gotoSite = (url: string) => {
     }
   }
   .logo-container {
-    width: 320px;
-    height: 220px;
+    flex: 0.7;
+    // height: 100%;
+    // width: 320px;
+    // height: 220px;
     padding: 25px;
-    background: white;
+    background: var(--background-color);
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     display: flex;
@@ -259,7 +254,7 @@ const gotoSite = (url: string) => {
   margin-top: 40px;
   border-radius: 16px;
   overflow: hidden;
-  background: white;
+  background: var(--background-color);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 :deep(.el-breadcrumb__inner),

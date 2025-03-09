@@ -15,13 +15,12 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
 import TopNav from "@/components/topNav/main/index.vue";
 import Menus from "@/components/menus/index.vue";
-import { ref } from "vue";
 
 const isCollapse = ref(false);
 
-// 监听菜单组件的折叠状态
 const handleCollapse = (val: boolean) => {
   isCollapse.value = val;
 };
@@ -54,8 +53,6 @@ const handleCollapse = (val: boolean) => {
   transition: all 0.3s;
   background-color: var(--background-color);
   min-height: calc(100vh - #{$top-nav-height});
-  border-right: 1px solid #ebeef5;
-  border-top: 1px solid #ebeef5;
   flex-shrink: 0;
   overflow: visible;
 }

@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import { getCategories, getTools } from "@/services/ToolsService";
+import { tools } from "../../backup/tools";
 
 export const useToolsStore = defineStore("tools", () => {
   const categories = ref<string[]>([]);
@@ -29,22 +30,22 @@ export const useToolsStore = defineStore("tools", () => {
 
   // 获取工具数据并封装
   const loadTools = () => {
-    // categories.value.forEach((category) => {
-    //   toolsByCategory.value[category] = tools.value
-    //     .filter((tool) => tool.category === category)
-    //     .map((tool) => ({
-    //       ...tool,
-    //     }));
-    // });
-    categories.value.forEach(async (category) => {
-      try {
-        const resp = await getTools(category);
-        console.log(resp.tools);
-        toolsByCategory.value[category] = resp.tools.map(mapTool);
-      } catch (e) {
-        console.error(`获取 ${category} 工具失败:`, e);
-      }
+    categories.value.forEach((category) => {
+      toolsByCategory.value[category] = tools.value
+        .filter((tool) => tool.category === category)
+        .map((tool) => ({
+          ...tool,
+        }));
     });
+    // categories.value.forEach(async (category) => {
+    //   try {
+    //     const resp = await getTools(category);
+    //     console.log(resp.tools);
+    //     toolsByCategory.value[category] = resp.tools.map(mapTool);
+    //   } catch (e) {
+    //     console.error(`获取 ${category} 工具失败:`, e);
+    //   }
+    // });
     console.log(toolsByCategory.value);
   };
 
@@ -61,7 +62,6 @@ export const useToolsStore = defineStore("tools", () => {
   });
 
   return {
-    // tools,
     categories,
     toolsByCategory,
     fetchCategory,

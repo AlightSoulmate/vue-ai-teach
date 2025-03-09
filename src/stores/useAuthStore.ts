@@ -19,6 +19,7 @@ export const useAuthStore = defineStore("auth", () => {
   const username = ref<string>("ycy");
   const password = ref<string>("123456");
   const isLogin = ref(true);
+  const isFresh = ref(true); //临时变量，用于判断是否需要强制被批量导入的学生在首登时修改密码
   const roles = ref<string[]>(["管理员", "教师", "学生"]);
   const currentRole = ref<string>("学生");
   const user = ref<User>({
@@ -72,8 +73,8 @@ export const useAuthStore = defineStore("auth", () => {
   };
 
   // 找回密码
-  const open = () => {
-    ElMessageBox.alert("Contact 18868717143@163.com", "找回密码", {
+  const open = (Value: () => string) => {
+    ElMessageBox.alert("Contact 18868717143@163.com", Value(), {
       confirmButtonText: "好的",
       center: true,
     });
@@ -178,10 +179,7 @@ export const useAuthStore = defineStore("auth", () => {
       );
       user.value = {
         id: data.user.id,
-        nickname:
-          data.user.nickname === null || "" || " "
-            ? "未设置昵称"
-            : data.user.nickname,
+        nickname: data.user.nickname?.trim() || "未设置昵称",
         username: data.user.username,
         role: data.user.role,
         token: data.Authorization,
@@ -192,11 +190,9 @@ export const useAuthStore = defineStore("auth", () => {
       localStorage.setItem("user", JSON.stringify(user.value));
 
       ElNotification({
-        title: `欢迎登入，${
-          user.value.nickname === null || "" || " " ? "新" : user.value.nickname
-        }${
-          user.value.role === "学生" || "教师"
-            ? user.value.role === "学生"
+        title: `欢迎登入，${data.user.nickname?.trim() || "未设置昵称"}${
+          ["student", "teacher"].includes(user.value.role)
+            ? user.value.role === "student"
               ? "同学"
               : "老师"
             : "管理员"
@@ -222,10 +218,7 @@ export const useAuthStore = defineStore("auth", () => {
       );
       user.value = {
         id: data.user.id,
-        nickname:
-          data.user.nickname === null || "" || " "
-            ? "未设置昵称"
-            : data.user.nickname,
+        nickname: data.user.nickname?.trim() || "未设置昵称",
         username: data.user.username,
         role: data.user.role,
         token: data.Authorization,
@@ -236,13 +229,7 @@ export const useAuthStore = defineStore("auth", () => {
       localStorage.setItem("user", JSON.stringify(user.value));
 
       ElNotification({
-        title: `欢迎你，新${
-          user.value.role === "学生" || "教师"
-            ? user.value.role === "学生"
-              ? "同学"
-              : "老师"
-            : "管理员"
-        }`,
+        title: `欢迎你，新${user.value.role === "student" ? "同学" : "老师"}`,
         message: "注册成功",
         type: "success",
       });

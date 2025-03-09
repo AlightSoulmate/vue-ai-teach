@@ -83,10 +83,10 @@ router.beforeEach((to, from) => {
   const authStore = useAuthStore();
   const isToLoginPage = to.name === "Login";
 
-  if (isToLoginPage && authStore.isAuthenticated) {
+  if (isToLoginPage && authStore.isAuthenticated && from.name !== "Login") {
     return { name: "Home" };
   }
-  if (!isToLoginPage && !authStore.isAuthenticated) {
+  if (!isToLoginPage && !authStore.isAuthenticated && from.name === "Login") {
     return { name: "Login" };
   }
 });

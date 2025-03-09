@@ -93,7 +93,6 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   justify-content: center;
   padding: 0 4rem 3.5rem 0;
   margin-right: 100px;
-  // backdrop-filter: blur(10px);
 }
 
 .login-container {
