@@ -1,6 +1,9 @@
 // mock/mockData.ts
 import Mock from "mockjs";
+// import axios from "axios";
+// import MockAdapter from "axios-mock-adapter";
 
+// const mock = new MockAdapter(axios, { delayResponse: 300 });
 // 1.1 用户注册
 Mock.mock("/api/user/register", "post", (req) => {
   const { username, role } = JSON.parse(req.body);
@@ -27,6 +30,7 @@ Mock.mock("/api/user/login", "post", (req) => {
       username,
       role,
       message: "用户登录成功",
+      is_fresh: 1,
     },
   };
 });
@@ -75,6 +79,96 @@ Mock.mock("/api/tools/categories", "get", () => {
       "音频处理",
       "视频制作",
       "数字人",
+    ],
+  };
+});
+
+//2.7 上传评分
+Mock.mock(new RegExp(`/api/tools/\\d+/ratings`), "post", (options: any) => {
+  console.log("上传评分", options);
+  const match = options.url.match(/\/api\/tools\/(\d+)\/ratings/);
+  if (!match) {
+    return {
+      message: "请求路径不正确",
+    };
+  }
+  const toolId = match[1];
+  const body = JSON.parse(options.body);
+  if (
+    !body.Authorization ||
+    !body.rate ||
+    typeof body.rate.rating !== "number"
+  ) {
+    return {
+      message: "缺少必要的评分数据",
+    };
+  }
+  console.log(`工具 ${toolId} 评分成功:`, body.rate);
+  return {
+    message: "评分提交成功",
+  };
+});
+//2.3 获取工具详情
+Mock.mock(new RegExp(`/api/tools/\\d+`), "get", (options: any) => {
+  console.log("获取工具详情", options);
+  const toolId = options.url.match(/\/api\/tools\/(\d+)/)[1];
+  return {
+    id: Number(toolId),
+    name: "AiPPT",
+    category: "办公助手",
+    cat_id: 4,
+    url: "https://www.aippt.cn",
+    logoUrl: "xxx",
+    description: "自动生成PPT大纲、模板、Word-PPT……",
+    score: 4.5,
+    ratingCount: 200,
+    rates: [
+      //评分列表
+      {
+        user: Mock.Random.cname(), //昵称
+        rating: 5, //评分
+        comment: "comment-one", //评价
+      },
+      {
+        user: Mock.Random.cname(),
+        rating: 3.5,
+        comment: "comment-two",
+      },
+      {
+        user: Mock.Random.cname(),
+        rating: 5,
+        comment: "comment-three",
+      },
+      {
+        user: Mock.Random.cname(),
+        rating: 4.5,
+        comment: "comment-four",
+      },
+      {
+        user: Mock.Random.cname(),
+        rating: 2.5,
+        comment: "comment-five",
+      },
+      {
+        user: Mock.Random.cname(),
+        rating: 1.5,
+        comment: "comment-six",
+      },
+      {
+        user: Mock.Random.cname(),
+        rating: 1.5,
+        comment: "comment-four",
+      },
+      {
+        user: Mock.Random.cname(),
+        rating: 5,
+        comment: "comment-five",
+      },
+      {
+        user: Mock.Random.cname(),
+        rating: 4,
+        comment: "comment-six",
+      },
     ],
   };
 });

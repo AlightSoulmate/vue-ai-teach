@@ -36,7 +36,7 @@ const scoreStore = useScoreStore();
 </script>
 
 <style scoped lang="scss">
-@use "../../styles/variables.scss" as *;
+// @use "../../styles/variables.scss" as *;
 
 * {
   margin: 0;

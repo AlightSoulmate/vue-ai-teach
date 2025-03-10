@@ -20,6 +20,36 @@ const router = createRouter({
       redirect: "/home",
       children: [
         {
+          path: "home",
+          name: "Home",
+          component: () => import("@/components/main/index.vue"),
+        },
+        {
+          path: "forum",
+          name: "Forum",
+          component: () => import("@/views/tool/forumPage.vue"),
+        },
+        {
+          path: "studentCourse",
+          name: "StudentCourse",
+          component: () => import("@/views/student/course.vue"),
+        },
+        {
+          path: "studentInbox",
+          name: "StudentInbox",
+          component: () => import("@/views/student/inbox.vue"),
+        },
+        {
+          path: "teacherCourse",
+          name: "TeacherCourse",
+          component: () => import("@/views/teacher/course.vue"),
+        },
+        {
+          path: "teacherInbox",
+          name: "TeacherInbox",
+          component: () => import("@/views/teacher/inbox.vue"),
+        },
+        {
           path: "adminStudent",
           name: "AdminStudent",
           component: () => import("@/views/admin/studentManage.vue"),
@@ -33,36 +63,6 @@ const router = createRouter({
           path: "adminTool",
           name: "AdminTool",
           component: () => import("@/views/admin/toolManage.vue"),
-        },
-        {
-          path: "home",
-          name: "Home",
-          component: () => import("@/components/main/index.vue"),
-        },
-        {
-          path: "forum",
-          name: "Forum",
-          component: () => import("@/views/tool/forumPage.vue"),
-        },
-        {
-          path: "teacherCrouse",
-          name: "TeacherCrouse",
-          component: () => import("@/views/teacher/course.vue"),
-        },
-        {
-          path: "teacherInbox",
-          name: "TeacherInbox",
-          component: () => import("@/views/teacher/inbox.vue"),
-        },
-        {
-          path: "studentCrouse",
-          name: "StudentCrouse",
-          component: () => import("@/views/student/course.vue"),
-        },
-        {
-          path: "studentInbox",
-          name: "StudentInbox",
-          component: () => import("@/views/student/inbox.vue"),
         },
         {
           path: "setup",
@@ -81,12 +81,15 @@ const router = createRouter({
 
 router.beforeEach((to, from) => {
   const authStore = useAuthStore();
-  const isToLoginPage = to.name === "Login";
-
-  if (isToLoginPage && authStore.isAuthenticated && from.name !== "Login") {
+  const auth = authStore.isAuthenticated;
+  const LoginPage = {
+    from: from.name === "Login",
+    to: to.name === "Login",
+  };
+  if (auth && LoginPage.to && !LoginPage.from) {
     return { name: "Home" };
   }
-  if (!isToLoginPage && !authStore.isAuthenticated && from.name === "Login") {
+  if (!auth && !LoginPage.to && LoginPage.from) {
     return { name: "Login" };
   }
 });

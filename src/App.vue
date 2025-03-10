@@ -11,8 +11,8 @@ const themeStore = useThemeStore();
 </script>
 
 <style lang="scss">
-@use "./styles/light-theme.scss" as light;
-@use "./styles/dark-theme.scss" as dark;
+// @use "./styles/light-theme.scss" as light;
+// @use "./styles/dark-theme.scss" as dark;
 
 /* 全局样式 */
 html {

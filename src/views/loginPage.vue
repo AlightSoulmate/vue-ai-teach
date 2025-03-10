@@ -1,4 +1,5 @@
 <template>
+  <div>
   <nav class="top-nav">
     <TopNav />
   </nav>
@@ -9,8 +10,13 @@
         <div class="big-logo">
           <img :src="logoSrc" ></img>
         </div>
-        <h1 class="h1-title">{{ h1Title }}</h1>
-        <h2 class="h2-title">{{ h2Title }}</h2>
+        <div class="title">
+          <div class="h1-title">
+            <div class="front">{{ h1Title }}</div>
+            <div class="end">{{ h1TitleEnd }}</div>
+          </div>
+        <!-- <h2 class="h2-title">{{ h2Title }}</h2> -->
+        </div>
       </div>
     </div>
     <!-- 右侧登录区 -->
@@ -20,13 +26,15 @@
       </div>
     </div>
   </div>
+  </div>
 </template>
 <script lang="ts" setup>
 import { ref } from "vue";
 import TopNav from "@/components/topNav/login/index.vue";
 import EnterDialog from "@/components/use/enter.vue";
 
-const h1Title = ref("浙江外国语学院AI智能教学平台");
+const h1Title = ref("浙江外国语学院");
+const h1TitleEnd = ref("AI智能教学平台");
 const h2Title = ref("AI驱动的直观教学反馈与改进，以智能化评估帮助教师和学生完成创新");
 const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
 </script>
@@ -35,7 +43,9 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   margin: 0;
   padding: 0;
 }
-
+.top-nav {
+  position: relative;
+}
 .page-container {
   overflow: hidden;
   color: var(--text-color);
@@ -78,7 +88,6 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   align-items: center;
   justify-content: center;
   padding: 10rem 4rem 3rem 4rem;
-  animation: fadeIn 1s ease-out;
 }
 
 .content-wrapper {
@@ -105,13 +114,29 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
     transform: translateY(-5px);
   }
 }
-
-.h1-title {
-  font-size: 3.4rem;
-  font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 1.5rem;
-  letter-spacing: -1px;
+.title {
+  overflow: hidden;
+  height: 70px;
+}
+.h1-title{
+    display: flex;
+  .front {
+    font-size: 3.4rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+    letter-spacing: -1px;
+    animation: fadeInTitle 0.7s ease;
+  }
+  .end{
+    padding-left: 5px;
+    font-size: 3.4rem;
+    font-weight: 600;
+    color: #ff792d;
+    margin-bottom: 1.5rem;
+    letter-spacing: -1px;
+    animation: fadeInTitleEnd 1.1s ease;
+  } 
 }
 
 .h2-title {
@@ -127,12 +152,13 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   width: 100%;
   height: 380px;
   margin-bottom: 2.5rem;
+  // animation: fadeIn 1s ease-out;
   
   img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    transition: transform 0.3s ease;
+    transition: transform 0.5s ease;
     
     &:hover {
       transform: scale(1.02);
@@ -143,10 +169,27 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    // transform: translateY(20px);
   }
   to {
     opacity: 1;
+    // transform: translateY(0);
+  }
+}
+
+@keyframes fadeInTitle {
+  from {
+    transform: translateY(70px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes fadeInTitleEnd {
+  from {
+    transform: translateY(-120px);
+  }
+  to {
     transform: translateY(0);
   }
 }

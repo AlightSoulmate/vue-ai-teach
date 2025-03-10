@@ -87,19 +87,17 @@ const isCollapse = ref(false);
 const paths = ref<Record<any, string>>({
   tools: "/home",
   forum: "/forum",
-  adminTool:"/adminTool",
+  adminTool: "/adminTool",
   adminStudent: "/adminStudent",
   adminTeacher: "/adminTeacher",
-  teacherCrouse: "/teacherCrouse",
+  teacherCrouse: "/teacherCourse",
   teacherInbox: "/teacherInbox",
-  studentCrouse: "/studentCrouse",
+  studentCrouse: "/studentCourse",
   studentInbox: "/studentInbox",
   setup: "/setup",
 });
 
-const handleOpen = (key: string) => {
-  console.log(key);
-};
+const handleOpen = (key: string) => {};
 
 const toggleCollapse = () => {
   isCollapse.value = !isCollapse.value;

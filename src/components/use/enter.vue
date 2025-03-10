@@ -2,14 +2,14 @@
   <div class="form-container">
     <div
       class="role-convert"
-      @click="authStore.switchRole"
+      @click.prevent="authStore.switchRole"
       :title="authStore.currentRole"
     >
-      <span class="role-name">我是{{ authStore.currentRole }}</span>
+      <span class="role-name">我是{{ authStore.currentRoleCN }}</span>
     </div>
     <div v-if="authStore.isLogin">
       <p class="title" :title="authStore.currentRole">
-        {{ authStore.currentRole }}登录
+        {{ authStore.currentRoleCN }}登录
       </p>
       <form class="form" @submit.prevent="authStore.enterLogin">
         <div class="input-group">
@@ -68,7 +68,7 @@
       </p>
     </div>
     <div v-else>
-      <p class="title">{{ authStore.currentRole }}注册</p>
+      <p class="title">{{ authStore.currentRoleCN }}注册</p>
       <form class="form" @submit.prevent="authStore.enterRegister">
         <div class="input-group">
           <label for="username">账号</label>
@@ -146,7 +146,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 
 const authStore = useAuthStore();
 </script>
-<style scoped>
+<style lang="scss" scoped>
 .form-container {
   text-align: left;
   width: inherit;
@@ -169,26 +169,28 @@ const authStore = useAuthStore();
   display: grid;
   align-items: end;
   cursor: pointer;
+
+  .role-name {
+    vertical-align: bottom;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    color: #f3f4f6;
+    transition: role 0.5s ease-in-out;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
 }
-.role-name {
-  vertical-align: bottom;
-  text-align: center;
-  margin-bottom: 0.5rem;
-  font-size: 1.1rem;
-  color: #f3f4f6;
-  transition: role 0.5s ease-in-out;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-.role-convert[title="学生"] {
+
+.role-convert[title="student"] {
   background-color: #a78bfa;
 }
-.role-convert[title="教师"] {
+.role-convert[title="teacher"] {
   background-color: #256cdd;
 }
-.role-convert[title="管理员"] {
+.role-convert[title="admin"] {
   background-color: #c27d06;
 }
 
@@ -202,6 +204,7 @@ const authStore = useAuthStore();
   -ms-user-select: none;
   user-select: none;
   color: #f0f0f0;
+  letter-spacing: 1px;
 }
 
 .form {
@@ -212,12 +215,12 @@ const authStore = useAuthStore();
   margin-top: 1rem;
   font-size: 0.875rem;
   line-height: 1.25rem;
-}
 
-.input-group label {
-  display: block;
-  color: rgba(156, 163, 175, 1);
-  margin-bottom: 4px;
+  label {
+    display: block;
+    color: rgba(156, 163, 175, 1);
+    margin-bottom: 4px;
+  }
 }
 
 .input-group input {
@@ -230,15 +233,15 @@ const authStore = useAuthStore();
   color: rgba(243, 244, 246, 1);
 }
 
-.input-group input[title="学生"]:focus {
+.input-group input[title="student"]:focus {
   border-color: rgba(167, 139, 250);
   animation: student-border 0.25s ease-in-out;
 }
-.input-group input[title="教师"]:focus {
+.input-group input[title="teacher"]:focus {
   border-color: rgba(37, 108, 221);
   animation: teacher-border 0.25s ease-in-out;
 }
-.input-group input[title="管理员"]:focus {
+.input-group input[title="admin"]:focus {
   border-color: rgba(194, 125, 6);
   animation: admin-border 0.25s ease-in-out;
 }
@@ -299,53 +302,14 @@ const authStore = useAuthStore();
   font-weight: 600;
   cursor: pointer;
 }
-.sign[title="学生"] {
+.sign[title="student"] {
   background-color: #a78bfa;
 }
-.sign[title="教师"] {
+.sign[title="teacher"] {
   background-color: #256cdd;
 }
-.sign[title="管理员"] {
+.sign[title="admin"] {
   background-color: #f59e0b;
-}
-
-.social-message {
-  display: flex;
-  align-items: center;
-  padding-top: 1rem;
-}
-
-.line {
-  height: 1px;
-  flex: 1 1 0%;
-  background-color: rgba(55, 65, 81, 1);
-}
-
-.social-message .message {
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  color: rgba(156, 163, 175, 1);
-}
-
-.social-icons {
-  display: flex;
-  justify-content: center;
-}
-
-.social-icons .icon {
-  border-radius: 0.125rem;
-  padding: 0.75rem;
-  border: none;
-  background-color: transparent;
-  margin-left: 8px;
-}
-
-.social-icons .icon svg {
-  height: 1.25rem;
-  width: 1.25rem;
-  fill: #fff;
 }
 
 .signup {

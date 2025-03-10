@@ -13,6 +13,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "axios": "^1.7.9",
+    "axios-mock-adapter": "^2.1.0",
     "docx": "^9.1.1",
     "element-plus": "^2.9.3",
     "file-saver": "^2.0.5",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",
+    "@types/axios-mock-adapter": "^1.9.0",
     "@types/file-saver": "^2.0.7",
     "@types/mockjs": "^1.0.10",
     "@types/node": "^22.10.7",

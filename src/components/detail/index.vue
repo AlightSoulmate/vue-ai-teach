@@ -88,6 +88,20 @@ onMounted(() => {
   margin-bottom: 25px;
   padding: 10px 0;
   font-size: 14px;
+
+  :deep(.el-breadcrumb__inner),
+  :deep(.el-breadcrumb__inner.is-link) {
+    color: var(--text-color) !important;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    &:hover {
+      font-weight: bold;
+      color: #409eff !important;
+    }
+  }
+  :deep(.el-breadcrumb__separator) {
+    color: var(--text-color-secondary) !important;
+  }
 }
 
 .main-info {
@@ -220,9 +234,6 @@ onMounted(() => {
   }
   .logo-container {
     flex: 0.7;
-    // height: 100%;
-    // width: 320px;
-    // height: 220px;
     padding: 25px;
     background: var(--background-color);
     border-radius: 16px;
@@ -256,17 +267,5 @@ onMounted(() => {
   overflow: hidden;
   background: var(--background-color);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-:deep(.el-breadcrumb__inner),
-:deep(.el-breadcrumb__inner.is-link) {
-  color: var(--text-color) !important;
-  font-weight: 500;
-  transition: color 0.3s ease;
-  &:hover {
-    color: #409eff !important;
-  }
-}
-:deep(.el-breadcrumb__separator) {
-  color: var(--text-color-secondary) !important;
 }
 </style>

@@ -1,4 +1,4 @@
-import { fileURLToPath, resolve, URL } from "node:url";
+import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import vueDevTools from "vite-plugin-vue-devtools";
@@ -17,22 +17,9 @@ export default defineConfig({
       resolves: [ElementPlusResolve()],
     }),
     viteCompression(),
-    visualizer({ open: true }), // 打包后自动打开分析页面
+    visualizer({ open: true }),
   ],
   base: "./",
-  // build: {
-  //   rollupOptions: {
-  //     output: {
-  //       manualChunks(id) {
-  //         if (id.includes("node_modules")) {
-  //           if (id.includes("vue")) return "vendor-vue"; // Vue 相关的库单独打包
-  //           if (id.includes("lodash")) return "vendor-lodash"; // lodash 单独打包
-  //           return "vendor"; // 其他第三方库
-  //         }
-  //       },
-  //     },
-  //   },
-  // },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
@@ -52,6 +39,15 @@ export default defineConfig({
       //   changeOrigin: true,
       //   rewrite: (path) => path.replace(/^\/llm/, ""),
       // },
+    },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: `
+          @use "@/styles/_variables.scss" as *;
+        `,
+      },
     },
   },
 });

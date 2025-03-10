@@ -16,7 +16,7 @@
         </el-dropdown-item>
         <el-dropdown-item>
           <el-icon><UserFilled /></el-icon>
-          身份: {{ authStore.user.role }}
+          身份: {{ authStore.currentRoleCN }}
         </el-dropdown-item>
         <el-dropdown-item @click="handleModifyNickname">
           <el-icon><Key /></el-icon>修改昵称
@@ -186,7 +186,6 @@ onMounted(() => {
         role: "未登录",
         token: "未登录",
       };
-  console.log(authStore.user);
 });
 </script>
 

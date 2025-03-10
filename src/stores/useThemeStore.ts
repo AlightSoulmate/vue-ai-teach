@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, nextTick } from "vue";
+import { ref } from "vue";
 
 export const useThemeStore = defineStore("theme", () => {
   const isDarkTheme = ref<boolean>(false);

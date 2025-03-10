@@ -1,34 +1,45 @@
 <template>
-  <nav class="top-nav">
-    <TopNav />
-  </nav>
-  <el-container>
-    <el-aside :width="isCollapse ? '64px' : '200px'" class="menus">
-      <Menus @collapse="handleCollapse" />
-    </el-aside>
+  <div v-if="isLoading">
+    <Loading />
+  </div>
+  <div v-else>
+    <nav class="top-nav">
+      <TopNav />
+    </nav>
     <el-container>
-      <el-main>
-        <router-view> </router-view>
-      </el-main>
+      <el-aside :width="isCollapse ? '64px' : '200px'" class="menus">
+        <Menus @collapse="handleCollapse" />
+      </el-aside>
+      <el-container>
+        <el-main>
+          <router-view> </router-view>
+        </el-main>
+      </el-container>
     </el-container>
-  </el-container>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import TopNav from "@/components/topNav/main/index.vue";
 import Menus from "@/components/menus/index.vue";
+import Loading from "@/components/use/loading.vue";
 
+const isLoading = ref(true);
 const isCollapse = ref(false);
 
 const handleCollapse = (val: boolean) => {
   isCollapse.value = val;
 };
+
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 700);
+});
 </script>
 
 <style scoped lang="scss">
-@use "@/styles/_variables.scss" as *;
-
 * {
   margin: 0;
   padding: 0;

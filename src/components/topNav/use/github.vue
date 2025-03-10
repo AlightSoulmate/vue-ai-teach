@@ -4,7 +4,7 @@
       href="https://github.com/AlightSoulmate/vue-ai-teach"
       target="_blank"
       class="github-link"
-      title="源码"
+      title="front end"
     >
       <svg
         width="22"

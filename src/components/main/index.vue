@@ -29,7 +29,7 @@
               </template>
               <template #default>
                 <p class="tool-desc" @click="gotoDetail(tool)">
-                  {{ tool.description || "暂无描述" }}
+                  {{ tool.description }}
                 </p>
               </template>
               <template #info>
@@ -48,7 +48,7 @@
                   </div>
                   <div class="rating-count">
                     已有
-                    {{ tool.ratingCount || Math.floor(Math.random() * 100) }}
+                    {{ tool.ratingCount ?? Math.floor(Math.random() * 100) }}
                     人评分
                   </div>
                 </div>
@@ -64,15 +64,16 @@
     <aside class="side-nav">
       <el-anchor
         :offset="65"
+        :active="activeName"
         direction="vertical"
         type="default"
         @click="handleClick"
+        @select="handleSelect"
         class="anchor"
-        select-scroll-top="true"
       >
         <div class="anchor-title">分类导航</div>
         <el-anchor-link
-          v-for="category in toolsStore.categories"
+          v-for="(category, idx) in toolsStore.categories"
           :key="category"
           :href="`#${category}`"
           :title="category"
@@ -86,7 +87,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import Card from "@/components/main/Card.vue";
 import BackTop from "@/components/use/backTop.vue";
 import { useRouter } from "vue-router";
@@ -105,7 +106,6 @@ const titleH2 = ref(
 );
 const activeName = ref("对话模型");
 
-// 现有代码
 const gotoSite = (url: string) => {
   window.location.href = url;
 };
@@ -114,17 +114,35 @@ const gotoDetail = (tool: any) => {
   selectToolStore.selectTool(tool);
   route.push("/detail");
 };
+const handleSelect = (category: string) => {
+  activeName.value = category;
+  localStorage.setItem("activeName", JSON.stringify(category));
+  scrollToCategory(category);
+};
 
 onMounted(() => {
   toolsStore.fetchCategory();
-  activeName.value =
-    localStorage.getItem("activeName")?.split('"')[1] || "对话模型";
+  const storedActive = localStorage.getItem("activeName");
+  storedActive
+    ? (activeName.value = JSON.parse(storedActive))
+    : (activeName.value = "对话模型");
+  setTimeout(() => {
+    handleSelect(activeName.value);
+  }, 300);
 });
+const scrollToCategory = (category: string) => {
+  const targetLink = document.querySelector(
+    `.el-anchor a[href="#${category}"]`
+  );
+  if (targetLink) {
+    (targetLink as HTMLElement).click();
+  }
+};
 </script>
 
 <style scoped lang="scss">
-@use "@/styles/_variables.scss" as *;
-@use "@/styles/_mixins.scss" as *;
+// @use "@/styles/_variables.scss" as *;
+// @use "@/styles/_mixins.scss" as *;
 * {
   margin: 0;
   padding: 0;
@@ -148,7 +166,6 @@ onMounted(() => {
 
   .header {
     background-color: var(--background-color);
-    // border-bottom: 1px solid #ebeef5;
     width: 100%;
 
     #titleH1 {
@@ -198,7 +215,6 @@ onMounted(() => {
       width: 0%;
       height: 2px;
       color: var(--text-color);
-      // background-color: var(--text-color);
       background-color: #000;
       transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
       transition-duration: 400ms;
@@ -213,7 +229,6 @@ onMounted(() => {
     }
 
     .tool-card {
-      // height: 160px;
       cursor: pointer;
       max-width: 220px;
       justify-self: center;
@@ -255,7 +270,6 @@ onMounted(() => {
       line-height: 1.3;
       max-height: 3em;
       margin: 0 0 4px 0;
-      cursor: pointer;
       flex-grow: 1;
     }
     .tool-info {
@@ -269,7 +283,7 @@ onMounted(() => {
         gap: 4px;
 
         .rating-score {
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 600;
           color: #ff9800;
         }
@@ -280,33 +294,6 @@ onMounted(() => {
           transform-origin: left;
         }
       }
-
-      .rating-count {
-        font-size: 11px;
-        color: #999;
-      }
-    }
-    // 其他工具类
-    .gotoSite {
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      color: #409eff;
-      font-weight: 500;
-      padding: 8px 16px;
-      border-radius: 4px;
-      transition: all 0.3s ease;
-
-      &:hover {
-        background: rgba(64, 158, 255, 0.1);
-      }
-    }
-    .star {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      color: #ff9800;
-      font-weight: 500;
     }
   }
 }

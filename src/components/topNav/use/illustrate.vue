@@ -1,7 +1,7 @@
 <template>
   <el-dropdown class="user-dropdown">
     <div class="user-info">
-      <span class="help-content">帮助</span>
+      <span class="help-content">使用帮助</span>
       <el-icon class="el-icon--right">
         <arrow-down />
       </el-icon>
@@ -12,7 +12,7 @@
           <el-icon><HelpFilled /></el-icon>使用说明
         </el-dropdown-item>
         <el-dropdown-item @click="authStore.open(() => ContributionTitle)">
-          <el-icon><HelpFilled /></el-icon>贡献工具
+          <el-icon><MagicStick /></el-icon>贡献工具
         </el-dropdown-item>
         <el-dropdown-item @click="authStore.open(() => ContactUsTitle)">
           <el-icon><Connection /></el-icon>联系我们
@@ -22,7 +22,12 @@
   </el-dropdown>
 </template>
 <script lang="ts" setup>
-import { ArrowDown, HelpFilled, Connection } from "@element-plus/icons-vue";
+import {
+  ArrowDown,
+  HelpFilled,
+  Connection,
+  MagicStick,
+} from "@element-plus/icons-vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { ref } from "vue";
 
@@ -88,13 +93,16 @@ const handleContactUs = () => {
 }
 
 .user-info:hover {
-  background-color: var(--el-fill-color-light);
+  background-color: #cccccc4d;
 }
 .help-content {
   min-height: 35px;
   line-height: 35px;
   color: var(--text-color);
   font-size: 16px;
+}
+::v-deep(.el-icon:hover) {
+  color: var(--text-color) !important;
 }
 /* .help-content:hover {
   cursor: pointer;

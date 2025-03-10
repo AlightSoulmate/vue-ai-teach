@@ -6,6 +6,7 @@ import { saveAs } from "file-saver";
 import { Document, Packer, Paragraph, type IParagraphOptions } from "docx";
 import axios from "axios";
 import { ElMessage } from "element-plus";
+import { uploadRate, getDetail } from "@/services/ToolsService";
 
 export const useScoreStore = defineStore("score", () => {
   interface Eval {
@@ -18,7 +19,7 @@ export const useScoreStore = defineStore("score", () => {
   const userFile = ref<File | null>(null);
   const uploading = ref(false);
   const userFileName = ref("");
-  const ratingDimensions = ref([
+  const rateStandards = ref([
     {
       name: "内容质量",
       percent: 0.3,
@@ -80,7 +81,7 @@ export const useScoreStore = defineStore("score", () => {
       basis: "",
     },
   ]);
-  const ratingEvaluation = ref<Eval>({
+  const rate = ref<Eval>({
     username: "默认",
     tool: "默认",
     category: "默认",
@@ -91,7 +92,7 @@ export const useScoreStore = defineStore("score", () => {
     return JSON.parse('"' + str + '"');
   }
 
-  // 上传作业 - 选择文件
+  // 上传 - 选择文件
   const handleUserFileChange = (e: Event) => {
     const files = (e.target as HTMLInputElement).files;
     if (files && files.length > 0) {
@@ -99,7 +100,7 @@ export const useScoreStore = defineStore("score", () => {
       userFileName.value = files[0].name;
     }
   };
-  // 上传作业 - 点击上传btn
+  // 上传 - 点击上传btn
   const handleUpload = async () => {
     if (!userFile.value) {
       ElMessage.warning("请选择文件");
@@ -212,62 +213,42 @@ export const useScoreStore = defineStore("score", () => {
   const evaluationTransmission = async (toolId: number) => {
     const score = calculateWeightedAverage();
     console.log(score);
-    const rate = {
+    const rateValue = {
       rating: score,
-      comment: ratingEvaluation.value.comment,
+      comment: rate.value.comment,
     };
     const token = JSON.parse(localStorage.getItem("user") as string).token;
-    await axios
-      .post(`/api/tools/${toolId}/ratings`, {
-        Authorization: token,
-        rate,
-      })
-      // .post(`https://frp-man.com:49044/tools/${toolId}/ratings`, {
-      //   Authorization: token,
-      //   rate,
-      // })
-      .then((resp) => {
-        console.log("评价数据传输成功", resp.data.message);
-        ToolsDetailGet(toolId);
-      })
-      .catch((e) => {
-        console.log("评价数据传输失败", e);
-      });
+    try {
+      const resp = await uploadRate(token, rateValue, toolId);
+      console.log(resp.message);
+      ToolsDetailGet(toolId);
+    } catch (e: any) {
+      console.error("评价失败", e);
+    }
   };
   const toolsDetail = ref<any>({});
   const ToolsDetailGet = async (toolId: number) => {
-    // await axios
-    //   .get(`https://frp-man.com:49044/tools/${toolId}`)
-    //   .then((resp) => {
-    //     console.log(resp.data);
-    //     toolsDetail.value = resp.data;
-    //   })
-    //   .catch((e) => {
-    //     console.log("获取工具详情失败", e);
-    //   });
-    await axios
-      .get(`/api/tools/${toolId}`)
-      .then((resp) => {
-        console.log(resp.data);
-        toolsDetail.value = resp.data;
-      })
-      .catch((e) => {
-        console.log("获取工具详情失败", e);
-      });
+    try {
+      const resp = await getDetail(toolId);
+      console.log(resp);
+      toolsDetail.value = resp;
+    } catch (e: any) {
+      console.error("获取工具详情失败", e);
+    }
   };
   // 平均分计算
   const calculateWeightedAverage = (): number => {
     const weights = [0.3, 0.25, 0.25, 0.1, 0.1];
     let weightedSum = 0;
-    ratingDimensions.value.forEach((dimension, index) => {
-      weightedSum += dimension.score * weights[index];
+    rateStandards.value.forEach((standard, index) => {
+      weightedSum += standard.score * weights[index];
     });
     return parseFloat(weightedSum.toFixed(1));
   };
 
   return {
-    ratingDimensions,
-    ratingEvaluation,
+    rateStandards,
+    rate,
     userFile,
     uploading,
     toolsDetail,

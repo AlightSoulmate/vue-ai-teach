@@ -1,25 +1,19 @@
 // src/services/AuthService.ts
 import axios from "axios";
-import type { AxiosResponse } from "axios";
+import { ElMessage } from "element-plus";
+import type { AuthResponse, AuthLoginResponse } from "@/interfaces";
 
-interface User {
-  id: number;
-  nickname: any;
-  username: any;
-  role: string;
-  message: string;
-}
+/* Authentication & User Actions 
+  - Registration 
+  - Login
+  - User update info
+*/
 
-interface AuthResponse {
-  Authorization: string;
-  user: User;
-}
-
-// request intercept
+// Request Intercept
 axios.interceptors.request.use(
   (config) => {
     console.log("Request URL:", config.url);
-    console.log("Request data:", config.data || "no request body or error");
+    console.log("Request data:", config.data);
     return config;
   },
   (error) => {
@@ -27,15 +21,14 @@ axios.interceptors.request.use(
   }
 );
 
-// register
+// Register
 export const register = async (
   username: string,
   password: string,
   role: string
 ): Promise<AuthResponse> => {
   try {
-    if (role !== "管理员") {
-      role = role === "学生" ? "student" : "teacher";
+    if (role !== "admin") {
       // const response = await axios.post(
       //   "https://frp-man.com:49044/user/register",
       //   {
@@ -49,25 +42,28 @@ export const register = async (
         password,
         role,
       });
-      console.log(response.data);
       return response.data;
     } else {
+      ElMessage({
+        message: "管理员不允许注册！",
+        type: "warning",
+      });
       throw new Error("管理员不允许注册");
     }
   } catch (error: any) {
+    console.log(error);
     throw error.response ? error.response.data : { message: "请求失败" };
   }
 };
 
-// login
+// Login
 export const login = async (
   username: string,
   password: string,
   role: string
-): Promise<AuthResponse> => {
+): Promise<AuthLoginResponse> => {
   try {
-    if (role === "管理员") {
-      role = "admin";
+    if (role === "admin") {
       const response = await axios.post("/api/auth/login", {
         username,
         password,
@@ -84,7 +80,6 @@ export const login = async (
       console.log(response.data);
       return response.data;
     } else {
-      role = role === "学生" ? "student" : "teacher";
       const response = await axios.post("/api/user/login", {
         username,
         password,
@@ -98,15 +93,15 @@ export const login = async (
       //     role,
       //   }
       // );
-      console.log(response.data);
       return response.data;
     }
   } catch (error: any) {
+    console.log(error);
     throw error.response ? error.response.data : { message: "请求失败" };
   }
 };
 
-// User modification self information
+// User update info
 export const change = async (
   Authorization: string,
   nickname: string,
@@ -131,6 +126,7 @@ export const change = async (
     });
     return response.data;
   } catch (error: any) {
+    console.log(error);
     throw error.response ? error.response.data : { message: "请求失败" };
   }
 };

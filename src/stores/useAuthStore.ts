@@ -1,29 +1,30 @@
 // src/stores/useAuthStore.ts
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { register, login, change } from "@/services/AuthService";
 import { useRouter } from "vue-router";
 import { ElNotification, ElMessageBox } from "element-plus";
-interface User {
-  id: number | null;
-  nickname: string;
-  username: string;
-  role: string;
-  token: string;
-}
+import type { User } from "@/interfaces";
 
 export const useAuthStore = defineStore("auth", () => {
   const router = useRouter();
   const errorMessage = ref<string>("");
-  const isAuthenticated = ref<boolean>(false); // 记录登录状态
+  const isAuthenticated = ref<boolean>(false);
   const username = ref<string>("ycy");
   const password = ref<string>("123456");
-  const isLogin = ref(true);
-  const isFresh = ref(true); //临时变量，用于判断是否需要强制被批量导入的学生在首登时修改密码
-  const roles = ref<string[]>(["管理员", "教师", "学生"]);
-  const currentRole = ref<string>("学生");
+  const isLogin = ref<boolean>(true);
+  const isFresh = ref<number>(1); //临时变量，用于判断是否需要强制被批量导入的学生在首登时修改密码
+  const roles = ref<string[]>(["admin", "teacher", "student"]);
+  const currentRole = ref<string>("student");
+  const currentRoleCN = computed(() => {
+    return currentRole.value === "admin"
+      ? "管理员"
+      : currentRole.value === "teacher"
+      ? "老师"
+      : "学生";
+  });
   const user = ref<User>({
-    id: null,
+    id: 0,
     nickname: "",
     username: "",
     role: "",
@@ -48,10 +49,9 @@ export const useAuthStore = defineStore("auth", () => {
     confirmPassword: "",
   });
 
-  // 退出登录
   const logout = async () => {
     user.value = {
-      id: null,
+      id: 0,
       nickname: "",
       username: "",
       role: "",
@@ -61,6 +61,9 @@ export const useAuthStore = defineStore("auth", () => {
     localStorage.removeItem("user");
 
     await router.push("/login");
+    if (router.currentRoute.value.path === "/login") {
+      router.go(0);
+    }
   };
 
   // 检查登录状态
@@ -72,7 +75,7 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
-  // 找回密码
+  // 找回密码等
   const open = (Value: () => string) => {
     ElMessageBox.alert("Contact 18868717143@163.com", Value(), {
       confirmButtonText: "好的",
@@ -170,13 +173,14 @@ export const useAuthStore = defineStore("auth", () => {
 
   // 登录
   const enterLogin = async () => {
-    if (currentRole.value !== "管理员" && !validateLoginForm()) return;
+    if (currentRole.value !== "admin" && !validateLoginForm()) return;
     try {
       const data = await login(
         loginForm.value.username,
         loginForm.value.password,
         currentRole.value
       );
+      console.log(data);
       user.value = {
         id: data.user.id,
         nickname: data.user.nickname?.trim() || "未设置昵称",
@@ -185,13 +189,14 @@ export const useAuthStore = defineStore("auth", () => {
         token: data.Authorization,
       };
       isAuthenticated.value = true;
+      isFresh.value = data.user.is_fresh;
       errorMessage.value = "";
-      currentRole.value = data.user.role;
+      currentRole.value = user.value.role;
       localStorage.setItem("user", JSON.stringify(user.value));
 
       ElNotification({
-        title: `欢迎登入，${data.user.nickname?.trim() || "未设置昵称"}${
-          ["student", "teacher"].includes(user.value.role)
+        title: `欢迎登入，${user.value.nickname?.trim() || "未设置昵称"}${
+          user.value.role === "student" || user.value.role === "teacher"
             ? user.value.role === "student"
               ? "同学"
               : "老师"
@@ -203,7 +208,8 @@ export const useAuthStore = defineStore("auth", () => {
 
       await router.push("/");
     } catch (error: any) {
-      errorMessage.value = error.message || "登录失败";
+      console.log(error);
+      errorMessage.value = error.message ?? "登录失败";
     }
   };
 
@@ -216,6 +222,7 @@ export const useAuthStore = defineStore("auth", () => {
         registerForm.value.password,
         currentRole.value
       );
+      console.log(data);
       user.value = {
         id: data.user.id,
         nickname: data.user.nickname?.trim() || "未设置昵称",
@@ -235,7 +242,8 @@ export const useAuthStore = defineStore("auth", () => {
       });
       router.push("/");
     } catch (error: any) {
-      errorMessage.value = error.message || "注册失败";
+      console.log(error);
+      errorMessage.value = error.message ?? "注册失败";
     }
   };
 
@@ -273,6 +281,8 @@ export const useAuthStore = defineStore("auth", () => {
     loginForm,
     loginErrors,
     currentRole,
+    currentRoleCN,
+    isFresh,
     errorMessage,
     registerForm,
     registerErrors,

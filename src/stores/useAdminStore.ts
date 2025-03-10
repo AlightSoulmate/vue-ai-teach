@@ -2,14 +2,9 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { getUsers } from "@/services/AdminService";
+import type { User } from "@/interfaces";
 
 export const useAdminStore = defineStore("admin", () => {
-  interface User {
-    id: number;
-    nickname: string;
-    username: string;
-  }
-
   const students = ref<User[]>([]);
   const teachers = ref<User[]>([]);
   const tools = ref<[]>([]);

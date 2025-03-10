@@ -15,7 +15,7 @@
       <div class="nav-right">
         <Theme />
         <Illustrate />
-        <Github />
+        <!-- <Github /> -->
         <div class="auth-buttons">
           <el-button
             type="primary"

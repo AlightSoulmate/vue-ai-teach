@@ -7,7 +7,7 @@
       <div class="content">
         <div class="rating-container">
           <el-popover
-            v-for="(dimension, index) in scoreStore.ratingDimensions"
+            v-for="(standard, index) in scoreStore.rateStandards"
             :key="index"
             placement="right"
             :width="400"
@@ -15,20 +15,20 @@
           >
             <template #reference>
               <div class="rating-item">
-                <span class="rating-title">{{ dimension.name }}：</span>
+                <span class="rating-title">{{ standard.name }}：</span>
                 <el-rate
-                  v-model="dimension.score"
+                  v-model="standard.score"
                   :max="5"
                   allow-half
                   :colors="['#C6D1DE', '#409EFF', '#67C23A']"
                 />
-                <span class="score-label">{{ dimension.score }} 分</span>
+                <span class="score-label">{{ standard.score }} 分</span>
               </div>
             </template>
-            <template #default class="above-criteria-list">
+            <template #default class="criteria-container">
               <div class="criteria-header">评分标准</div>
               <ul class="criteria-list">
-                <li v-for="(criteria, idx) in dimension.criteria" :key="idx">
+                <li v-for="(criteria, idx) in standard.criteria" :key="idx">
                   {{ criteria }}
                 </li>
               </ul>
@@ -36,15 +36,19 @@
           </el-popover>
         </div>
         <div class="comment">
-          <span class="comment-title">留下您的宝贵评价：(一天内只能提交1次)</span>
+          <!-- <span class="comment-title"
+            >留下您的宝贵评价：(一天内只能提交1次)</span
+          > -->
           <el-input
             type="textarea"
-            placeholder="在此处输入您的评价，帮助其他用户了解这个工具..."
+            placeholder="留下您的宝贵评价，帮助其他用户了解此工具（每个工具每日仅限一次评价）..."
             class="comment-input"
             :autosize="{ minRows: 3, maxRows: 6 }"
-            v-model="scoreStore.ratingEvaluation.comment"
+            maxlength="500"
+            v-model="comment"
             :disabled="!canSubmit"
           />
+          <p v-if="inputLess" class="input-less">输入的字符数少于10个!</p>
         </div>
         <div class="submit-wrapper">
           <el-button
@@ -66,45 +70,82 @@
       <div class="score-title title">
         <el-icon><ChatDotRound /></el-icon>用户评价
       </div>
-      <div class="tool-details">
-        <div
-          class="score-content"
-          v-for="score in scoreStore.toolsDetail.rates"
-          :key="score.id"
-        >
-          <div class="score-content-item">
-            <div class="score-header">
-              <div class="score-content-item-title">
-                <el-avatar :size="28" class="user-avatar">{{
-                  score.user.charAt(0)
-                }}</el-avatar>
-                {{ score.user }}
+      <el-scrollbar
+        class="tool-details"
+        always
+        @scroll="scroll"
+        ref="scrollbarRef"
+        :height="`${scrollHeight}px`"
+      >
+        <div ref="innerRef">
+          <div
+            class="score-content"
+            v-for="score in scoreStore.toolsDetail.rates"
+            :key="score.id"
+          >
+            <div class="score-content-item">
+              <div class="score-header">
+                <div class="score-content-item-title">
+                  <el-avatar :size="26" class="user-avatar">{{
+                    score.user.charAt(0)
+                  }}</el-avatar>
+                  {{ score.user }}
+                </div>
+                <div class="score-content-item-score">
+                  <span>评分：</span>{{ score.rating }} ⭐
+                </div>
               </div>
-              <div class="score-content-item-score">
-                <span>评分：</span>{{ score.rating }} ⭐
+              <div class="score-content-item-content">
+                {{ score.comment }}
               </div>
-            </div>
-            <div class="score-content-item-content">
-              {{ score.comment }}
             </div>
           </div>
         </div>
-      </div>
+      </el-scrollbar>
+      <el-slider
+        v-model="value"
+        :max="max"
+        :format-tooltip="formatTooltip"
+        @input="inputSlider"
+      />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, nextTick, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { Checked, ChatDotRound } from "@element-plus/icons-vue";
 import { useScoreStore } from "@/stores/useScoreStore";
 import { useDebounceStore } from "@/stores/useDebounceStore";
+import type { ScrollbarInstance } from "element-plus";
+type Arrayable<T> = T | T[];
 
+const max = ref(0);
+const value = ref(0);
+const comment = ref<string>();
+const inputLess = ref(false);
+const scrollHeight = ref<number>(450);
+const innerRef = ref<HTMLDivElement>();
+const scrollbarRef = ref<ScrollbarInstance>();
 const scoreStore = useScoreStore();
 const debounceStore = useDebounceStore();
 const selectedToolId = ref<any>({});
 const lastSubmitDate = ref("");
+
+const commentProcess = (Value: () => string) => {
+  comment.value = Value();
+  let len = Value().length;
+  if (len > 10) scoreStore.rate.comment = comment.value;
+  else inputLess.value = true;
+};
+
+watch(
+  () => scoreStore.rate.comment?.length,
+  (newLength) => {
+    inputLess.value = (newLength ?? 0) < 10;
+  }
+);
 
 // 计算是否可以提交
 const canSubmit = computed(() => {
@@ -172,11 +213,29 @@ onMounted(() => {
       selectedToolId.value.id
     );
   }
+  setTimeout(() => {
+    nextTick(() => {
+      if (innerRef.value) {
+        console.log("clientHeight ", innerRef.value.clientHeight);
+        max.value = innerRef.value.clientHeight - scrollHeight.value;
+      } else {
+        console.warn("innerRef 为空，无法获取 clientHeight");
+      }
+    });
+  }, 1000);
 });
+
+const inputSlider = (value: Arrayable<number>) => {
+  scrollbarRef.value!.setScrollTop(value as number);
+};
+const scroll = ({ scrollTop }: { scrollTop: number }) => {
+  value.value = scrollTop;
+};
+const formatTooltip = (value: number) => `${value} px`;
 </script>
 
 <style scoped lang="scss">
-@use "@/styles/_variables.scss" as *;
+// @use "@/styles/_variables.scss" as *;
 * {
   margin: 0;
   padding: 0;
@@ -196,13 +255,10 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-}
 
-.main-upload-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  .content {
+    width: 100%;
+  }
 }
 
 .title {
@@ -220,14 +276,8 @@ onMounted(() => {
   .el-icon {
     font-size: $xxlarge-font-size;
     color: var(--text-color);
-    // color: var(--score-title-icon-color);
   }
 }
-
-.content {
-  width: 100%;
-}
-
 .rating-container {
   width: 100%;
   padding: 5px 0 5px 20px;
@@ -240,58 +290,54 @@ onMounted(() => {
   &:hover {
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
   }
-}
 
-.rating-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 6px 0;
-  padding: 6px 0;
-  border-bottom: 1px dashed #eaeaea;
+  .rating-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 6px 0;
+    padding: 6px 0;
+    border-bottom: 1px dashed #eaeaea;
 
-  &:last-child {
-    border-bottom: none;
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .rating-title {
+      min-width: 80px;
+      font-weight: 500;
+      font-size: $medium-font-size;
+      color: var(--text-color);
+    }
+
+    .score-label {
+      font-size: $medium-font-size;
+      color: #409eff;
+      font-weight: 500;
+    }
   }
 }
-
-.rating-title {
-  min-width: 80px;
-  font-weight: 500;
-  font-size: $medium-font-size;
+.criteria-container {
   color: var(--text-color);
+  background-color: var(--background-color);
 }
-
-.score-label {
-  font-size: $medium-font-size;
-  color: #409eff;
-  font-weight: 500;
-}
-
 .criteria-header {
   font-weight: bold;
   margin-bottom: 10px;
   color: #409eff;
   border-bottom: 1px solid #eaeaea;
-  padding-bottom: 5px;
-  background-color: var(--background-color);
 }
-
 .criteria-list {
-  max-width: 100%;
-  padding: 0 0 0 20px;
-  background-color: var(--background-color);
+  width: 100%;
+  padding-left: 20px;
+  font-size: $small-font-size;
 
   li {
     margin-bottom: 8px;
     text-align: left;
     line-height: 1.4;
-    font-size: $small-font-size;
-    color: var(--text-color);
-    background-color: var(--background-color);
   }
 }
-
 .comment {
   margin: 20px 0;
   width: 100%;
@@ -315,6 +361,13 @@ onMounted(() => {
         box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
       }
     }
+  }
+
+  .input-less {
+    font-size: 12px;
+    padding: 4px 0 0 2px;
+    margin-bottom: -6px;
+    color: rgb(255, 140, 0);
   }
 }
 
@@ -343,77 +396,79 @@ onMounted(() => {
   }
 }
 
-// 工具评分展示
-.tool-details {
-  width: 100%;
-  padding: 20px;
-  background-color: var(--background-color);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.score-title {
-  font-size: 20px;
-}
-
-.score-content {
-  margin-bottom: 20px;
-  background-color: #fff;
-  padding: 16px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s ease;
-
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.score-header {
+.main-upload-container {
+  flex: 1;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
+  flex-direction: column;
+  align-items: flex-start;
 
-.score-content-item-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #2c3e50;
+  .score-title {
+    font-size: 20px;
+  }
 
-  .user-avatar {
-    background-color: #409eff;
-    color: white;
+  .tool-details {
+    width: 100%;
+    padding: 10px 20px;
+    background-color: var(--background-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+    .score-content {
+      margin-bottom: 10px;
+      background-color: var(--background-color);
+      padding: 6px 6px;
+      border-radius: 10px;
+      border: 1px #ccc solid;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+      transition: all 0.3s ease;
+
+      &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .score-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .score-content-item-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-color);
+
+      .user-avatar {
+        background-color: #409eff;
+        color: white;
+      }
+    }
+    .score-content-item-score {
+      font-size: 14px;
+      color: #ff9800;
+      font-weight: bold;
+
+      span {
+        color: #909399;
+        font-weight: normal;
+      }
+    }
+  }
+
+  .score-content-item-content {
+    font-size: 14px;
+    color: var(--text-color);
+    padding: 0 30px;
   }
 }
 
-.score-content-item-content {
-  font-size: 15px;
-  color: var(--text-color);
-  margin: 10px 0;
-  line-height: 1.6;
-  padding: 5px 0;
-  border-top: 1px dashed #eaeaea;
-  border-bottom: 1px dashed #eaeaea;
-}
-
-.score-content-item-score {
-  font-size: 14px;
-  color: #ff9800;
-  font-weight: bold;
-
-  span {
-    color: #909399;
-    font-weight: normal;
-  }
-}
 .el-popper {
   background-color: var(--background-color) !important;
 }

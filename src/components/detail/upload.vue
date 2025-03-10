@@ -7,7 +7,7 @@
 
     <div class="content">
       <div class="description">
-        在这里，你可以提交关于该AI工具的详细评价报告，请确保您的报告包含完整的使用体验和建议。
+        在这里，你可以提交关于该AI工具的详细评价报告，请确保您的报告包含完整的使用体验，建议根据评分模块的类目分别进行评价。
       </div>
 
       <div class="upload-section">
@@ -73,20 +73,20 @@ const scoreStore = useScoreStore();
 }
 
 .content {
-  padding: 20px;
+  padding: 10px;
 }
 
 .description {
   color: var(--text-color-secondary);
   font-size: 14px;
   line-height: 1.6;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
 }
 
 .upload-section {
   background-color: var(--el-fill-color-blank);
   border-radius: 8px;
-  padding: 20px;
+  padding: 10px 20px;
 }
 
 .input-wrapper {
