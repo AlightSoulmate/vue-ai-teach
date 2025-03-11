@@ -1,7 +1,7 @@
 // src/stores/useAdminStore.ts
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { getUsers } from "@/services/AdminService";
+import { getUsers, updateUser } from "@/services";
 import type { User } from "@/interfaces";
 
 export const useAdminStore = defineStore("admin", () => {
@@ -37,6 +37,32 @@ export const useAdminStore = defineStore("admin", () => {
       ? (totalStudents.value = Users.length)
       : (totalTeachers.value = Users.length);
   };
+
+  // Update users' info
+  const UpdateUserInfo = async (
+    id: number,
+    role: string,
+    password: string,
+    nickname: string,
+    username: string
+  ) => {
+    const token = (localStorage.getItem("user") as any).token;
+    try {
+      const pwd = password || "";
+      const response = await updateUser(
+        id,
+        role,
+        token,
+        pwd,
+        nickname,
+        username
+      );
+      console.log(response);
+    } catch (e: any) {
+      console.error(e);
+    }
+  };
+
   return {
     students,
     teachers,
@@ -44,5 +70,6 @@ export const useAdminStore = defineStore("admin", () => {
     fetchStudents,
     fetchTeachers,
     countSize,
+    UpdateUserInfo,
   };
 });

@@ -15,3 +15,34 @@ export const getUsers = async (Authorization: string) => {
     throw error.response ? error.response.data : { message: "请求失败" };
   }
 };
+
+// Update users info ( nickname | username |  password )
+export const updateUser = async (
+  id: number,
+  role: string,
+  Authorization: string,
+  password: string,
+  nickname: string,
+  username: string
+) => {
+  try {
+    const response = await axios.put(
+      "/api/auth",
+      {
+        Authorization,
+        password,
+        nickname,
+        username,
+      },
+      {
+        params: {
+          id,
+          role,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error.response ? error.response.data : { message: "请求失败" };
+  }
+};

@@ -4,19 +4,17 @@
     <TopNav />
   </nav>
   <div class="page-container">
+      <div class="title">
+            <div class="front">{{ h1Title }}</div>
+            <div class="end">{{ h1TitleEnd }}</div>
+        </div>
     <!-- 左侧内容区 -->
     <div class="left-section">
       <div class="content-wrapper">
         <div class="big-logo">
           <img :src="logoSrc" ></img>
         </div>
-        <div class="title">
-          <div class="h1-title">
-            <div class="front">{{ h1Title }}</div>
-            <div class="end">{{ h1TitleEnd }}</div>
-          </div>
-        <!-- <h2 class="h2-title">{{ h2Title }}</h2> -->
-        </div>
+
       </div>
     </div>
     <!-- 右侧登录区 -->
@@ -50,7 +48,7 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   overflow: hidden;
   color: var(--text-color);
   width: 100%;
-  height: 100vh;
+  height: 92vh;
   background-color: var(--background-color);
   background-image: linear-gradient(
       0deg,
@@ -88,6 +86,7 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   align-items: center;
   justify-content: center;
   padding: 10rem 4rem 3rem 4rem;
+  margin-top: 80px;
 }
 
 .content-wrapper {
@@ -102,6 +101,7 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   justify-content: center;
   padding: 0 4rem 3.5rem 0;
   margin-right: 100px;
+  margin-top: 130px;
 }
 
 .login-container {
@@ -114,37 +114,39 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
     transform: translateY(-5px);
   }
 }
-.title {
-  overflow: hidden;
-  height: 70px;
-}
-.h1-title{
+
+.title{
+    position: absolute;
+    margin: 0 auto;
+    overflow: hidden;
+    width: 100%;
+    text-align: center;
     display: flex;
+    margin-top: 40px;
+
   .front {
+    flex: 1;
+    text-align: right;
+    align-items: right;
     font-size: 3.4rem;
     font-weight: 600;
     color: var(--text-color);
     margin-bottom: 1.5rem;
     letter-spacing: -1px;
     animation: fadeInTitle 0.7s ease;
+    white-space: normal;
   }
   .end{
+    flex: 1;
+    text-align: left;
     padding-left: 5px;
     font-size: 3.4rem;
     font-weight: 600;
     color: #ff792d;
     margin-bottom: 1.5rem;
-    letter-spacing: -1px;
     animation: fadeInTitleEnd 1.1s ease;
+    white-space: normal;
   } 
-}
-
-.h2-title {
-  font-size: 1.4rem;
-  color: var(--text-color);
-  line-height: 1.6;
-  margin-bottom: 2rem;
-  opacity: 0.85;
 }
 
 .big-logo {
@@ -235,6 +237,30 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
 
   .h2-title {
     text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .title {
+    flex-direction: column;
+    
+    .front {
+      text-align: center;
+    }
+    .end {
+      text-align: center;
+      padding-left: 0;
+    }
+  }
+  .left-section {
+    // display: none; // 不占位
+    visibility: hidden; // 占位
+  }
+  .right-section {
+    margin-top: -80px;
+    transition: all 0.5s ease;
+    align-items: center;
+    margin-left: -50px;
   }
 }
 </style>

@@ -1,7 +1,7 @@
 // src/stores/useAuthStore.ts
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { register, login, change } from "@/services/AuthService";
+import { register, login, change } from "@/services";
 import { useRouter } from "vue-router";
 import { ElNotification, ElMessageBox } from "element-plus";
 import type { User } from "@/interfaces";

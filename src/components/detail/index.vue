@@ -1,3 +1,28 @@
+<script lang="ts" setup>
+import { ref, onMounted } from "vue";
+import { ArrowRight, Link, ChatDotRound } from "@element-plus/icons-vue";
+import { useSelectedToolStore } from "@/stores/useSelectedToolStore";
+import Score from "./score.vue";
+import Upload from "./upload.vue";
+
+const cats = ref("全部工具");
+const tool = ref<any>({});
+const selectToolStore = useSelectedToolStore();
+
+const gotoSite = (url: () => string) => {
+  window.open(url(), "_blank", "noopener,noreferrer");
+};
+
+onMounted(() => {
+  const selectedTool = localStorage.getItem("selectedTool");
+  if (selectedTool) {
+    selectToolStore.selectedTool = JSON.parse(selectedTool);
+    tool.value = selectToolStore.selectedTool;
+  }
+  console.log(tool.value);
+});
+</script>
+
 <template>
   <div class="container">
     <el-breadcrumb :separator-icon="ArrowRight" class="breadcrumb">
@@ -46,30 +71,6 @@
     </div>
   </div>
 </template>
-
-<script lang="ts" setup>
-import { ref, onMounted } from "vue";
-import { ArrowRight, Link, ChatDotRound } from "@element-plus/icons-vue";
-import { useSelectedToolStore } from "@/stores/useSelectedToolStore";
-import Score from "./score.vue";
-import Upload from "./upload.vue";
-
-const cats = ref("全部工具");
-const tool = ref<any>({});
-const selectToolStore = useSelectedToolStore();
-
-const gotoSite = (url: () => string) => {
-  window.open(url(), "_blank", "noopener,noreferrer");
-};
-onMounted(() => {
-  const selectedTool = localStorage.getItem("selectedTool");
-  if (selectedTool) {
-    selectToolStore.selectedTool = JSON.parse(selectedTool);
-    tool.value = selectToolStore.selectedTool;
-  }
-  console.log(tool.value);
-});
-</script>
 
 <style scoped lang="scss">
 * {

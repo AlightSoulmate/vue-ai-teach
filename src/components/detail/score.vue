@@ -36,30 +36,31 @@
           </el-popover>
         </div>
         <div class="comment">
-          <!-- <span class="comment-title"
-            >留下您的宝贵评价：(一天内只能提交1次)</span
-          > -->
           <el-input
             type="textarea"
             placeholder="留下您的宝贵评价，帮助其他用户了解此工具（每个工具每日仅限一次评价）..."
             class="comment-input"
             :autosize="{ minRows: 3, maxRows: 6 }"
             maxlength="500"
-            v-model="comment"
+            v-model="scoreStore.rate.comment"
             :disabled="!canSubmit"
           />
           <p v-if="inputLess" class="input-less">输入的字符数少于10个!</p>
         </div>
         <div class="submit-wrapper">
-          <el-button
-            type="primary"
-            @click="submitRating"
-            class="submit-btn"
-            :disabled="!canSubmit"
-            :loading="debounceStore.isSubmitting"
-          >
-            {{ submitButtonText }}
-          </el-button>
+          <div style="display: flex">
+            <el-icon @click="startSpeechRecognition"><Microphone /></el-icon>
+            <el-button
+              type="primary"
+              @click="submitRating"
+              class="submit-btn"
+              :disabled="!canSubmit"
+              :loading="debounceStore.isSubmitting"
+              ref="submitRef"
+            >
+              {{ submitButtonText }}
+            </el-button>
+          </div>
           <div v-if="lastSubmitDate" class="submit-info">
             上次提交日期: {{ lastSubmitDate }}
           </div>
@@ -89,7 +90,7 @@
                   <el-avatar :size="26" class="user-avatar">{{
                     score.user.charAt(0)
                   }}</el-avatar>
-                  {{ score.user }}
+                  <span class="user-nickname">@{{ score.user }}</span>
                 </div>
                 <div class="score-content-item-score">
                   <span>评分：</span>{{ score.rating }} ⭐
@@ -113,9 +114,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, nextTick, watch } from "vue";
+import { ref, computed, onMounted, nextTick, watch, watchEffect } from "vue";
 import { ElMessage } from "element-plus";
-import { Checked, ChatDotRound } from "@element-plus/icons-vue";
+import { Checked, ChatDotRound, Microphone } from "@element-plus/icons-vue";
 import { useScoreStore } from "@/stores/useScoreStore";
 import { useDebounceStore } from "@/stores/useDebounceStore";
 import type { ScrollbarInstance } from "element-plus";
@@ -125,9 +126,11 @@ const max = ref(0);
 const value = ref(0);
 const comment = ref<string>();
 const inputLess = ref(false);
-const scrollHeight = ref<number>(450);
+const scrollHeight = ref<number>(390);
+// const fixScrollHeightForHorizon = ref<number>(0);
 const innerRef = ref<HTMLDivElement>();
 const scrollbarRef = ref<ScrollbarInstance>();
+const submitRef = ref();
 const scoreStore = useScoreStore();
 const debounceStore = useDebounceStore();
 const selectedToolId = ref<any>({});
@@ -139,13 +142,6 @@ const commentProcess = (Value: () => string) => {
   if (len > 10) scoreStore.rate.comment = comment.value;
   else inputLess.value = true;
 };
-
-watch(
-  () => scoreStore.rate.comment?.length,
-  (newLength) => {
-    inputLess.value = (newLength ?? 0) < 10;
-  }
-);
 
 // 计算是否可以提交
 const canSubmit = computed(() => {
@@ -171,26 +167,16 @@ const submitButtonText = computed(() => {
 
 // 处理提交评分
 const handleSubmitRating = async () => {
-  if (!canSubmit.value) {
-    ElMessage({
-      message: "您今天已经提交过评分，请明天再来！",
-      type: "warning",
-    });
-    return;
-  }
-
   await debounceStore.withSubmitLock(async () => {
     selectedToolId.value = JSON.parse(
       localStorage.getItem("selectedTool") as any
     );
     await scoreStore.evaluationTransmission(selectedToolId.value.id);
-
     // 记录提交时间
     debounceStore.dailySubmitManager.recordSubmit(selectedToolId.value.id);
     lastSubmitDate.value = debounceStore.dailySubmitManager.getLastSubmitDate(
       selectedToolId.value.id
     );
-
     ElMessage({
       message: "评分提交成功，感谢您的参与！",
       type: "success",
@@ -206,7 +192,6 @@ onMounted(() => {
     localStorage.getItem("selectedTool") as any
   );
   scoreStore.ToolsDetailGet(selectedToolId.value.id);
-
   // 获取上次提交日期
   if (selectedToolId.value?.id) {
     lastSubmitDate.value = debounceStore.dailySubmitManager.getLastSubmitDate(
@@ -216,14 +201,19 @@ onMounted(() => {
   setTimeout(() => {
     nextTick(() => {
       if (innerRef.value) {
-        console.log("clientHeight ", innerRef.value.clientHeight);
         max.value = innerRef.value.clientHeight - scrollHeight.value;
       } else {
-        console.warn("innerRef 为空，无法获取 clientHeight");
+        console.warn("innerRef.clientHeight is 0 !");
       }
     });
   }, 1000);
 });
+watch(
+  () => scoreStore.rate.comment?.length,
+  (newLength) => {
+    inputLess.value = (newLength ?? 0) < 10;
+  }
+);
 
 const inputSlider = (value: Arrayable<number>) => {
   scrollbarRef.value!.setScrollTop(value as number);
@@ -232,10 +222,42 @@ const scroll = ({ scrollTop }: { scrollTop: number }) => {
   value.value = scrollTop;
 };
 const formatTooltip = (value: number) => `${value} px`;
+
+// 语音识别
+const startSpeechRecognition = () => {
+  if (!canSubmit.value) {
+    ElMessage({
+      message: "您今天已经提交过评分，请换个工具尝试或明天再来！",
+      type: "warning",
+    });
+    return;
+  }
+
+  if (!("webkitSpeechRecognition" in window)) {
+    alert("您的浏览器不支持 Web Speech API，请使用 Chrome！");
+    return;
+  }
+
+  const recognition = new (window as any).webkitSpeechRecognition(); // 兼容 Chrome
+  recognition.lang = "zh-CN"; // 设定语言
+  recognition.continuous = false; // 语音识别结束后自动停止
+  recognition.interimResults = false; // 仅返回最终结果
+
+  recognition.onstart = () => console.log("语音识别开始...");
+  recognition.onresult = (event: any) => {
+    const result = event.results[0][0].transcript;
+    console.log("识别结果:", result);
+    scoreStore.rate.comment = result ?? "未访问到声音";
+  };
+  recognition.onerror = (event: any) =>
+    console.error("语音识别错误:", event.error);
+  recognition.onend = () => console.log("语音识别结束");
+
+  recognition.start();
+};
 </script>
 
 <style scoped lang="scss">
-// @use "@/styles/_variables.scss" as *;
 * {
   margin: 0;
   padding: 0;
@@ -255,6 +277,7 @@ const formatTooltip = (value: number) => `${value} px`;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  min-width: 290px;
 
   .content {
     width: 100%;
@@ -280,7 +303,7 @@ const formatTooltip = (value: number) => `${value} px`;
 }
 .rating-container {
   width: 100%;
-  padding: 5px 0 5px 20px;
+  padding: 5px 0 5px 5px;
   background: var(--background-color);
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -296,7 +319,7 @@ const formatTooltip = (value: number) => `${value} px`;
     align-items: center;
     gap: 12px;
     margin: 6px 0;
-    padding: 6px 0;
+    padding: 6px 8px;
     border-bottom: 1px dashed #eaeaea;
 
     &:last-child {
@@ -342,17 +365,10 @@ const formatTooltip = (value: number) => `${value} px`;
   margin: 20px 0;
   width: 100%;
 
-  .comment-title {
-    display: block;
-    margin-bottom: 12px;
-    color: var(--text-color);
-    font-weight: 500;
-  }
-
   .comment-input {
     width: 100%;
 
-    :deep(.el-textarea__inner) {
+    ::v-deep(.el-textarea__inner) {
       border-radius: 8px;
       padding: 12px;
       transition: all 0.3s ease;
@@ -376,6 +392,13 @@ const formatTooltip = (value: number) => `${value} px`;
   flex-direction: column;
   align-items: flex-start;
   margin-top: 15px;
+
+  .el-icon {
+    font-size: 22px;
+    color: #409eff;
+    margin: 5px;
+    cursor: pointer;
+  }
 
   .submit-btn {
     padding: 10px 24px;
@@ -414,11 +437,12 @@ const formatTooltip = (value: number) => `${value} px`;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
     .score-content {
+      white-space: wrap;
       margin-bottom: 10px;
       background-color: var(--background-color);
-      padding: 6px 6px;
+      padding: 8px 6px;
       border-radius: 10px;
-      border: 1px #ccc solid;
+      // border: 1px #ccc solid;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
       transition: all 0.3s ease;
 
@@ -428,6 +452,16 @@ const formatTooltip = (value: number) => `${value} px`;
 
       &:last-child {
         margin-bottom: 0;
+      }
+
+      &:last-child::after {
+        content: "没有更多评论了~";
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        padding-top: 10px;
+        font-size: 12px;
+        color: #666;
       }
     }
   }
@@ -441,19 +475,26 @@ const formatTooltip = (value: number) => `${value} px`;
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 14px;
       font-weight: 600;
       color: var(--text-color);
 
       .user-avatar {
         background-color: #409eff;
         color: white;
+        transform: scale(1.1);
+        font-size: 12px;
+      }
+
+      .user-nickname {
+        font-size: 12px;
+        margin-top: -15px;
       }
     }
     .score-content-item-score {
       font-size: 14px;
       color: #ff9800;
       font-weight: bold;
+      margin-top: -15px;
 
       span {
         color: #909399;
@@ -463,9 +504,17 @@ const formatTooltip = (value: number) => `${value} px`;
   }
 
   .score-content-item-content {
+    display: flex;
+    flex-wrap: wrap;
     font-size: 14px;
     color: var(--text-color);
     padding: 0 30px;
+    margin-top: -10px;
+    margin-left: 5px;
+    white-space: wrap;
+    // white-space: pre-wrap; //保留空白符
+    // word-break: break-word; //允许拆分单词换行
+    width: 100%;
   }
 }
 

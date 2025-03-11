@@ -25,10 +25,10 @@ import TopNav from "@/components/topNav/main/index.vue";
 import Menus from "@/components/menus/index.vue";
 import Loading from "@/components/use/loading.vue";
 
-const isLoading = ref(true);
-const isCollapse = ref(false);
+const isLoading = ref<boolean>(true);
+const isCollapse = ref<boolean>(false);
 
-const handleCollapse = (val: boolean) => {
+const handleCollapse = (val: boolean): void => {
   isCollapse.value = val;
 };
 

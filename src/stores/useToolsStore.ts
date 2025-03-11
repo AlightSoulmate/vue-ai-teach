@@ -1,7 +1,7 @@
 // @/stores/useToolsStore.ts
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import { getCategories, getTools } from "@/services/ToolsService";
+import { getCategories, getTools } from "@/services";
 import { tools } from "../../backup/tools";
 
 export const useToolsStore = defineStore("tools", () => {

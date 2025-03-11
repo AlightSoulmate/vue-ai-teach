@@ -35,12 +35,12 @@
         header-align="center"
         align="center"
       >
-        <template #default>
+        <template #default="{ row }">
           <el-button
             link
             type="primary"
             size="small"
-            @click="handleNicknameUpdate"
+            @click="handleNicknameUpdate(row)"
             title="nickname"
           >
             Modify Nickname
@@ -49,7 +49,7 @@
             link
             type="primary"
             size="small"
-            @click="handleUsernameUpdate"
+            @click="handleUsernameUpdate(row)"
             title="username"
           >
             Modify Username
@@ -58,7 +58,7 @@
             link
             type="primary"
             size="small"
-            @click="handleDeleteUpdate"
+            @click="handleDeleteUpdate(row)"
             title="password"
           >
             Modify Password
@@ -82,23 +82,86 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, watch } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { useAdminStore } from "@/stores/useAdminStore";
 
+const object = ref("student");
 const adminStore = useAdminStore();
 const currentPage = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
 
-const handlePageChange = (page) => {
+const handlePageChange = (page: number) => {
   currentPage.value = page;
 };
-const handleNicknameUpdate = () => {
-  console.log("handleNicknameUpdate");
+const handleNicknameUpdate = (row: any) => {
+  ElMessageBox.prompt("请输入新昵称", "修改昵称", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    inputPattern: /^.{2,10}$/,
+    inputErrorMessage: "昵称长度必须在2-10位之间",
+  })
+    .then(({ value }) => {
+      if (value) {
+        const user = {
+          id: row.id,
+          nickname: value,
+          username: row.username,
+        };
+        let password = "";
+        adminStore.UpdateUserInfo(
+          user.id,
+          object.value,
+          password,
+          user.nickname,
+          user.username
+        );
+      }
+    })
+    .catch(() => {
+      ElMessage({
+        type: "info",
+        message: "取消修改",
+      });
+    });
 };
-const handleUsernameUpdate = () => {
-  console.log("handleUsernameUpdate");
+const handleUsernameUpdate = (row: any) => {
+  console.log(row);
+  ElMessageBox.prompt(
+    `对原用户名 ${row.username} 进行修改，请即输入新用户名（不建议随意修改用户名）`,
+    "修改用户名",
+    {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      inputPattern: /^.{2,18}$/,
+      inputErrorMessage: "用户名长度必须在2-18位之间",
+    }
+  )
+    .then(({ value }) => {
+      if (value) {
+        const user = {
+          id: row.id,
+          nickname: row.nickname,
+          username: value,
+        };
+        let password = "";
+        adminStore.UpdateUserInfo(
+          user.id,
+          object.value,
+          password,
+          user.nickname,
+          user.username
+        );
+      }
+    })
+    .catch(() => {
+      ElMessage({
+        type: "info",
+        message: "取消修改",
+      });
+    });
 };
-const handleDeleteUpdate = () => {
+const handleDeleteUpdate = (row: any) => {
   console.log("handleDeleteUpdate");
 };
 watch(currentPage, (newVal) => {
@@ -107,58 +170,6 @@ watch(currentPage, (newVal) => {
 onMounted(() => {
   adminStore.fetchStudents();
 });
-const tableStudentData = [
-  {
-    id: 20,
-    nickname: "Luca",
-    username: "cxt9",
-  },
-  {
-    id: 20,
-    nickname: "Luca",
-    username: "cxt9",
-  },
-  {
-    id: 20,
-    nickname: "Luca",
-    username: "cxt9",
-  },
-  {
-    id: 20,
-    nickname: "Luca",
-    username: "cxt9",
-  },
-  {
-    id: 20,
-    nickname: "Luca",
-    username: "cxt9",
-  },
-  {
-    id: 20,
-    nickname: "Luca",
-    username: "cxt9",
-  },
-  {
-    id: 20,
-    nickname: "Luca",
-    username: "cxt9",
-  },
-  {
-    id: 20,
-    nickname: "Luca",
-    username: "cxt9",
-  },
-  {
-    id: 20,
-    nickname: "Luca",
-    username: "cxt9",
-  },
-  {
-    id: 20,
-    nickname: "Luca",
-    username: "cxt9",
-  },
-];
 </script>
 <style lang="scss" scoped>
 * {

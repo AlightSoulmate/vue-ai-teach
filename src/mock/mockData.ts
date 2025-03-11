@@ -127,7 +127,8 @@ Mock.mock(new RegExp(`/api/tools/\\d+`), "get", (options: any) => {
       {
         user: Mock.Random.cname(), //昵称
         rating: 5, //评分
-        comment: "comment-one", //评价
+        comment:
+          "GitHub, Inc. 成立于 2008 年，最初是一家独立的公司，专注于提供基于 Git 的代码托管和协作开发平台。2018 年 微软以 75 亿美元的价格收购了 GitHub，将其纳入微软生态，但 GitHub 仍然保持独立运营，并继续支持开源社区和开发者。", //评价
       },
       {
         user: Mock.Random.cname(),
@@ -142,7 +143,8 @@ Mock.mock(new RegExp(`/api/tools/\\d+`), "get", (options: any) => {
       {
         user: Mock.Random.cname(),
         rating: 4.5,
-        comment: "comment-four",
+        comment:
+          "在 CORS（跨域资源共享，Cross-Origin Resource Sharing） 机制中，HTTP 请求被分为 简单请求（Simple Request）和 预检请求（Preflight Request）。它们用于处理浏览器向不同源（跨域）发送请求时的安全性校验。",
       },
       {
         user: Mock.Random.cname(),
@@ -157,17 +159,32 @@ Mock.mock(new RegExp(`/api/tools/\\d+`), "get", (options: any) => {
       {
         user: Mock.Random.cname(),
         rating: 1.5,
-        comment: "comment-four",
+        comment: "comment-seven",
       },
       {
         user: Mock.Random.cname(),
         rating: 5,
-        comment: "comment-five",
+        comment: "comment-eight",
       },
       {
         user: Mock.Random.cname(),
         rating: 4,
-        comment: "comment-six",
+        comment: "comment-nine",
+      },
+      {
+        user: Mock.Random.cname(),
+        rating: 1.5,
+        comment: "comment-ten",
+      },
+      {
+        user: Mock.Random.cname(),
+        rating: 5,
+        comment: "comment-eleven",
+      },
+      {
+        user: Mock.Random.cname(),
+        rating: 4,
+        comment: "comment-twelve",
       },
     ],
   };

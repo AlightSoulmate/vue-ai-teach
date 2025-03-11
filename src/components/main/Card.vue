@@ -66,7 +66,6 @@
     display: flex;
     flex-direction: column;
     // border: 1px solid var(--card-content-border-color);
-    // border-radius: 12px;
 
     .card-header {
       display: flex;
@@ -102,7 +101,7 @@
       // color: #999;
     }
   }
-  :deep(.card-content:hover) {
+  ::v-deep(.card-content:hover) {
     transition: all 0.25s ease-out;
     color: rgba(255, 255, 255, 0.9);
   }
@@ -117,7 +116,6 @@
     top: 0;
     right: 0;
     background-color: #00838d;
-    // background: #57acb3;
     border-radius: 0 4px 0 32px;
   }
 

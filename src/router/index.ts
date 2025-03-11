@@ -50,19 +50,19 @@ const router = createRouter({
           component: () => import("@/views/teacher/inbox.vue"),
         },
         {
-          path: "adminStudent",
-          name: "AdminStudent",
-          component: () => import("@/views/admin/studentManage.vue"),
+          path: "stuList",
+          name: "StuList",
+          component: () => import("@/views/admin/stuList.vue"),
         },
         {
-          path: "adminTeacher",
-          name: "AdminTeacher",
-          component: () => import("@/views/admin/teacherManage.vue"),
+          path: "teaList",
+          name: "TeaList",
+          component: () => import("@/views/admin/teaList.vue"),
         },
         {
-          path: "adminTool",
-          name: "AdminTool",
-          component: () => import("@/views/admin/toolManage.vue"),
+          path: "toolList",
+          name: "ToolList",
+          component: () => import("@/views/admin/toolList.vue"),
         },
         {
           path: "setup",

@@ -18,7 +18,6 @@
     <el-menu
       :default-active="activeMenu"
       class="el-menu-vertical-demo"
-      @open="handleOpen"
       :collapse="isCollapse"
       router
     >
@@ -35,9 +34,9 @@
           <el-icon><Location /></el-icon>
           <span>管理中心</span>
         </template>
-        <el-menu-item :index="paths.adminTool">工具管理</el-menu-item>
-        <el-menu-item :index="paths.adminStudent">学生管理</el-menu-item>
-        <el-menu-item :index="paths.adminTeacher">教师管理</el-menu-item>
+        <el-menu-item :index="paths.toolList">工具管理</el-menu-item>
+        <el-menu-item :index="paths.stuList">学生管理</el-menu-item>
+        <el-menu-item :index="paths.teaList">教师管理</el-menu-item>
       </el-sub-menu>
       <el-menu-item :index="paths.teacherCrouse" v-if="role.isTeacher">
         <el-icon><IconMenu /></el-icon>
@@ -77,19 +76,20 @@ import { computed } from "vue";
 
 const authStore = useAuthStore();
 const activeMenu = ref("/home");
+const isCollapse = ref<boolean>(false);
 
 const role = computed(() => ({
   isStudent: authStore.user.role === "student",
   isTeacher: authStore.user.role === "teacher",
   isAdmin: authStore.user.role === "admin",
 }));
-const isCollapse = ref(false);
+
 const paths = ref<Record<any, string>>({
   tools: "/home",
   forum: "/forum",
-  adminTool: "/adminTool",
-  adminStudent: "/adminStudent",
-  adminTeacher: "/adminTeacher",
+  toolList: "/toolList",
+  stuList: "/stuList",
+  teaList: "/teaList",
   teacherCrouse: "/teacherCourse",
   teacherInbox: "/teacherInbox",
   studentCrouse: "/studentCourse",
@@ -97,9 +97,7 @@ const paths = ref<Record<any, string>>({
   setup: "/setup",
 });
 
-const handleOpen = (key: string) => {};
-
-const toggleCollapse = () => {
+const toggleCollapse = (): void => {
   isCollapse.value = !isCollapse.value;
   emit("collapse", isCollapse.value);
 };
