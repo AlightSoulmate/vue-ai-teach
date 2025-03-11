@@ -14,6 +14,11 @@ const router = createRouter({
       component: () => import("@/views/loginPage.vue"),
     },
     {
+      path: "/form",
+      name: "Form",
+      component: () => import("@/views/formPage.vue"),
+    },
+    {
       path: "/",
       name: "Index",
       component: () => import("@/views/mainPage.vue"),
@@ -89,9 +94,9 @@ router.beforeEach((to, from) => {
   if (auth && LoginPage.to && !LoginPage.from) {
     return { name: "Home" };
   }
-  if (!auth && !LoginPage.to && LoginPage.from) {
-    return { name: "Login" };
-  }
+  // if (!auth && !LoginPage.to && LoginPage.from) {
+  //   return { name: "Login" };
+  // }
 });
 
 export default router;

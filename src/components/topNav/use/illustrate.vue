@@ -77,6 +77,7 @@ const handleContactUs = () => {
   border: none !important;
   box-shadow: none !important;
 }
+
 .user-dropdown {
   cursor: pointer;
 }
@@ -100,11 +101,9 @@ const handleContactUs = () => {
   line-height: 35px;
   color: var(--text-color);
   font-size: 16px;
+  white-space: nowrap;
 }
 ::v-deep(.el-icon:hover) {
   color: var(--text-color) !important;
 }
-/* .help-content:hover {
-  cursor: pointer;
-} */
 </style>

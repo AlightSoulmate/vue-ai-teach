@@ -1,40 +1,54 @@
 <template>
   <div>
-  <nav class="top-nav">
-    <TopNav />
-  </nav>
-  <div class="page-container">
+    <nav class="top-nav">
+      <TopNav />
+    </nav>
+    <div class="page-container">
       <div class="title">
-            <div class="front">{{ h1Title }}</div>
-            <div class="end">{{ h1TitleEnd }}</div>
-        </div>
-    <!-- 左侧内容区 -->
-    <div class="left-section">
+        <div class="front">{{ h1Title }}</div>
+        <div class="end">{{ h1TitleEnd }}</div>
+      </div>
+      <div class="slip"><Slip class="slip-inner" /></div>
+      <div class="enter" @click="handleLogin">
+        <Enter class="enter-inner" />
+      </div>
+      <div class="carousel"><Carousel class="carousel-inner" /></div>
+      <!-- <div class="left-section">
       <div class="content-wrapper">
         <div class="big-logo">
           <img :src="logoSrc" ></img>
         </div>
-
       </div>
     </div>
-    <!-- 右侧登录区 -->
     <div class="right-section">
       <div class="login-container">
         <EnterDialog />
       </div>
+    </div> -->
     </div>
-  </div>
   </div>
 </template>
 <script lang="ts" setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import TopNav from "@/components/topNav/login/index.vue";
+import Enter from "@/components/use/newButton.vue";
 import EnterDialog from "@/components/use/enter.vue";
+// @ts-ignore
+import Slip from "@/components/use/textSlip.vue";
+import Carousel from "@/components/use/carousel.vue";
 
+const router = useRouter();
 const h1Title = ref("浙江外国语学院");
 const h1TitleEnd = ref("AI智能教学平台");
-const h2Title = ref("AI驱动的直观教学反馈与改进，以智能化评估帮助教师和学生完成创新");
+const h2Title = ref(
+  "AI驱动的直观教学反馈与改进，以智能化评估帮助教师和学生完成创新"
+);
 const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
+
+const handleLogin = () => {
+  router.push("/form");
+};
 </script>
 <style scoped lang="scss">
 * {
@@ -50,30 +64,30 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   width: 100%;
   height: 92vh;
   background-color: var(--background-color);
-  background-image: linear-gradient(
-      0deg,
-      transparent 24%,
-      var(--color) 25%,
-      var(--color) 26%,
-      transparent 27%,
-      transparent 74%,
-      var(--color) 75%,
-      var(--color) 76%,
-      transparent 77%,
-      transparent
-    ),
-    linear-gradient(
-      90deg,
-      transparent 24%,
-      var(--color) 25%,
-      var(--color) 26%,
-      transparent 27%,
-      transparent 74%,
-      var(--color) 75%,
-      var(--color) 76%,
-      transparent 77%,
-      transparent
-    );
+  // background-image: linear-gradient(
+  //     0deg,
+  //     transparent 24%,
+  //     var(--color) 25%,
+  //     var(--color) 26%,
+  //     transparent 27%,
+  //     transparent 74%,
+  //     var(--color) 75%,
+  //     var(--color) 76%,
+  //     transparent 77%,
+  //     transparent
+  //   ),
+  //   linear-gradient(
+  //     90deg,
+  //     transparent 24%,
+  //     var(--color) 25%,
+  //     var(--color) 26%,
+  //     transparent 27%,
+  //     transparent 74%,
+  //     var(--color) 75%,
+  //     var(--color) 76%,
+  //     transparent 77%,
+  //     transparent
+  //   );
   background-size: 55px 55px;
   display: flex;
   padding-top: 0;
@@ -86,7 +100,7 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   align-items: center;
   justify-content: center;
   padding: 10rem 4rem 3rem 4rem;
-  margin-top: 80px;
+  margin-top: 250px;
 }
 
 .content-wrapper {
@@ -101,7 +115,7 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   justify-content: center;
   padding: 0 4rem 3.5rem 0;
   margin-right: 100px;
-  margin-top: 130px;
+  margin-top: 250px;
 }
 
 .login-container {
@@ -115,14 +129,15 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   }
 }
 
-.title{
-    position: absolute;
-    margin: 0 auto;
-    overflow: hidden;
-    width: 100%;
-    text-align: center;
-    display: flex;
-    margin-top: 40px;
+.title {
+  position: absolute;
+  margin: 0 auto;
+  overflow: hidden;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  margin-top: 60px;
+  transition: all 0.5s ease;
 
   .front {
     flex: 1;
@@ -136,7 +151,7 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
     animation: fadeInTitle 0.7s ease;
     white-space: normal;
   }
-  .end{
+  .end {
     flex: 1;
     text-align: left;
     padding-left: 5px;
@@ -146,7 +161,43 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
     margin-bottom: 1.5rem;
     animation: fadeInTitleEnd 1.1s ease;
     white-space: normal;
-  } 
+    margin-left: 5px;
+  }
+}
+
+.slip {
+  background-color: var(--background-color);
+  position: absolute;
+  margin: 0 auto;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  margin-top: 150px;
+  transition: all 0.5s ease;
+}
+
+.slip-inner {
+  margin: 0 auto;
+  transition: all 0.5s ease;
+}
+.enter {
+  position: absolute;
+  margin: 0 auto;
+  overflow: hidden;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  margin-top: 260px;
+  transition: all 0.5s ease;
+}
+.enter-inner {
+  margin: 0 auto;
+  transform: scale(0.8);
+  transition: all 0.5s ease;
+}
+.carousel {
+  margin-top: 400px;
+  transition: all 0.5s ease;
 }
 
 .big-logo {
@@ -154,14 +205,13 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   width: 100%;
   height: 380px;
   margin-bottom: 2.5rem;
-  // animation: fadeIn 1s ease-out;
-  
+
   img {
     width: 100%;
     height: 100%;
     object-fit: contain;
     transition: transform 0.5s ease;
-    
+
     &:hover {
       transform: scale(1.02);
     }
@@ -171,11 +221,11 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
 @keyframes fadeIn {
   from {
     opacity: 0;
-    // transform: translateY(20px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
-    // transform: translateY(0);
+    transform: translateY(0);
   }
 }
 
@@ -200,7 +250,7 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
   .left-section {
     padding: 2rem;
   }
-  
+
   .h1-title {
     font-size: 3rem;
   }
@@ -243,7 +293,7 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
 @media (max-width: 768px) {
   .title {
     flex-direction: column;
-    
+
     .front {
       text-align: center;
     }
@@ -253,11 +303,11 @@ const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
     }
   }
   .left-section {
-    // display: none; // 不占位
-    visibility: hidden; // 占位
+    display: none; // 不占位
+    // visibility: hidden; // 占位
   }
   .right-section {
-    margin-top: -80px;
+    margin-top: 260px;
     transition: all 0.5s ease;
     align-items: center;
     margin-left: -50px;

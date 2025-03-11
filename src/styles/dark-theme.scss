@@ -1,9 +1,9 @@
 /* src/styles/dark-theme.scss */
-
-:root {
+// :root
+html[data-theme='dark'] {
     --background-color: #{$dark-background};
     --text-color: #{$dark-text};
-    --enter-background: #{$dark-enter-background};
+    --card-background: #{$dark-card-background};
     --border-color: #{$dark-border-color};
     --hover-color: #{$dark-hover-color};
     --active-background-color: #{$dark-active-background-color};

@@ -5,7 +5,7 @@
       <div class="nav-left">
         <Icon />
         <img
-          :src="themeStore.isDarkTheme ? logo : logoDark"
+          :src="themeStore.isDarkTheme ? logoDark : logo"
           alt="logo"
           class="logo"
         />
@@ -15,9 +15,24 @@
       <div class="nav-right">
         <Theme />
         <Illustrate />
-        <!-- <Github /> -->
+        <Github />
         <div class="auth-buttons">
           <el-button
+            type="primary"
+            text
+            @click="handleLogin"
+            :class="{ active: authStore.isLogin }"
+          >
+            登录
+          </el-button>
+          <el-button
+            type="primary"
+            @click="handleLogin"
+            :class="{ active: !authStore.isLogin }"
+          >
+            注册
+          </el-button>
+          <!-- <el-button
             type="primary"
             text
             @click="authStore.switchToLogin"
@@ -31,7 +46,7 @@
             :class="{ active: !authStore.isLogin }"
           >
             注册
-          </el-button>
+          </el-button> -->
         </div>
       </div>
     </div>
@@ -46,12 +61,19 @@ import Theme from "../use/theme.vue";
 import Github from "../use/github.vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useThemeStore } from "@/stores/useThemeStore";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 const authStore = useAuthStore();
 const themeStore = useThemeStore();
 const logo = ref("https://a1.x914.com/alight/i/AITeach/white-zisu-logo.png");
 const logoDark = ref(
   "https://a1.x914.com/alight/i/AITeach/black-zisu-logo.png"
 );
+
+const handleLogin = () => {
+  router.push("/form");
+};
 </script>
 
 <style scoped>

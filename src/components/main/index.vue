@@ -141,8 +141,6 @@ const scrollToCategory = (category: string) => {
 </script>
 
 <style scoped lang="scss">
-// @use "@/styles/_variables.scss" as *;
-// @use "@/styles/_mixins.scss" as *;
 * {
   margin: 0;
   padding: 0;
@@ -215,7 +213,7 @@ const scrollToCategory = (category: string) => {
       width: 0%;
       height: 2px;
       color: var(--text-color);
-      background-color: #000;
+      background-color: var(--text-color);
       transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
       transition-duration: 400ms;
       transition-property: width, left;

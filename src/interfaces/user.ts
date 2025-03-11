@@ -9,3 +9,11 @@ export interface User {
   role: string;
   token: string;
 }
+
+export interface queryUser {
+  id: number;
+  nickname: string;
+  username: string;
+  role: string;
+  message: string;
+}

@@ -1,7 +1,7 @@
 <template>
   <div class="grid-content" @click="goBackHome">
     <img
-      :src="themeStore.isDarkTheme ? logoSrc : logoSrcDark"
+      :src="themeStore.isDarkTheme ? logoSrcDark : logoSrc"
       alt="logo"
       class="logo name"
     />

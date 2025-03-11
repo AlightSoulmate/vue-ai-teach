@@ -1,9 +1,9 @@
 /* src/styles/light-theme.scss */
-
-:root {
+// :root
+html[data-theme='light'] {
     --background-color: #{$light-background};
     --text-color: #{$light-text};
-    --enter-background: #{$light-enter-background};
+    --card-background: #{$light-card-background};
     --border-color: #{$light-border-color};
     --hover-color: #{$light-hover-color};
     --active-background-color: #{$light-active-background-color};

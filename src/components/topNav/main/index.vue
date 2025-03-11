@@ -5,7 +5,7 @@
       <div class="nav-left">
         <Icon />
         <img
-          :src="themeStore.isDarkTheme ? logo : logoDark"
+          :src="themeStore.isDarkTheme ? logoDark: logo"
           alt="logo"
           class="logo"
         />

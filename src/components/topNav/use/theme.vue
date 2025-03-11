@@ -18,13 +18,17 @@
           ></path>
         </svg>
       </span>
-      <input type="checkbox" class="input" @click="toggleTheme" />
+      <input
+        type="checkbox"
+        class="input"
+        :checked="themeStore.isDarkTheme"
+        @click="toggleTheme"
+      />
       <span class="slider"></span>
     </label>
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted } from "vue";
 import { useThemeStore } from "@/stores/useThemeStore";
 
 const themeStore = useThemeStore();
@@ -32,9 +36,6 @@ const themeStore = useThemeStore();
 const toggleTheme = () => {
   themeStore.toggleTheme();
 };
-onMounted(() => {
-  themeStore.initTheme();
-});
 </script>
 <style scoped>
 .grid-content {

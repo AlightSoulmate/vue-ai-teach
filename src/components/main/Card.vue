@@ -30,7 +30,7 @@
   width: 100%;
   height: 100%;
   border-radius: 3px;
-  background-color: var(--background-color);
+  background-color: var(--card-background);
   display: flex;
   flex-direction: column;
   box-shadow: 1px 3px 12px rgba(0, 0, 0, 0.05);

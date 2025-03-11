@@ -1,9 +1,9 @@
-/* src/styles/_variables.scss */
+// @/styles/_variables.scss
 
 // 主题变量 白色主题
 $light-background: #ffffff;
+$light-card-background:#f0f0f0;
 $light-text: #033133;
-$light-enter-background: #f0f0f0;
 $light-border-color: #e4e7ed;
 $light-hover-color: #f5f7fa;
 $light-active-background-color: rgba(167, 139, 250, 0.1);
@@ -15,7 +15,8 @@ $light-score-title-icon-color: #1c1c1d;
 $light-card-content-border-color: #eceef2;
 
 // 主题变量 黑色主题
-$dark-background: #1e1e1e;
+$dark-background: #161616;
+$dark-card-background:#212121;
 $dark-text: #ffffff;
 $dark-enter-background: #2c2c2c;
 $dark-border-color: #363636;
