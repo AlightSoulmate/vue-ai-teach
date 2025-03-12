@@ -61,9 +61,9 @@ export const useAuthStore = defineStore("auth", () => {
     localStorage.removeItem("user");
 
     await router.push("/login");
-    if (router.currentRoute.value.path === "/login") {
-      router.go(0);
-    }
+    // if (router.currentRoute.value.path === "/login") {
+    //   router.go(0);
+    // }
   };
 
   // 检查登录状态

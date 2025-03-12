@@ -12,14 +12,14 @@
           <el-icon><User /></el-icon>ID: {{ authStore.user.id }}
         </el-dropdown-item>
         <el-dropdown-item>
-          <el-icon><User /></el-icon>账号：{{ authStore.user.username }}
+          <el-icon><Avatar /></el-icon>账号：{{ authStore.user.username }}
         </el-dropdown-item>
         <el-dropdown-item>
           <el-icon><UserFilled /></el-icon>
           身份: {{ authStore.currentRoleCN }}
         </el-dropdown-item>
         <el-dropdown-item @click="handleModifyNickname">
-          <el-icon><Key /></el-icon>修改昵称
+          <el-icon><EditPen /></el-icon>修改昵称
         </el-dropdown-item>
         <el-dropdown-item @click="passwordDialogVisible = true">
           <el-icon><Key /></el-icon>修改密码
@@ -88,8 +88,10 @@ import { ElMessageBox, ElMessage } from "element-plus";
 import { onMounted, ref, reactive } from "vue";
 import {
   User,
+  Avatar,
   UserFilled,
   Key,
+  EditPen,
   SwitchButton as Logout,
 } from "@element-plus/icons-vue";
 import { useAuthStore } from "@/stores/useAuthStore";

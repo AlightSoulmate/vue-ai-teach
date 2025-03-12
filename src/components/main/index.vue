@@ -73,7 +73,7 @@
       >
         <div class="anchor-title">分类导航</div>
         <el-anchor-link
-          v-for="(category, idx) in toolsStore.categories"
+          v-for="category in toolsStore.categories"
           :key="category"
           :href="`#${category}`"
           :title="category"
@@ -250,7 +250,6 @@ const scrollToCategory = (category: string) => {
       .tool-name {
         font-size: 13px;
         font-weight: 600;
-        color: var(--text-color);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -258,7 +257,6 @@ const scrollToCategory = (category: string) => {
     }
     .tool-desc {
       font-size: 12px;
-      color: var(--text-color);
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;

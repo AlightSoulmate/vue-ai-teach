@@ -55,6 +55,7 @@
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    color: #ffffff;
   }
   &:hover::before {
     transform: scale(21);
@@ -65,7 +66,6 @@
     padding: 10px 16px;
     display: flex;
     flex-direction: column;
-    // border: 1px solid var(--card-content-border-color);
 
     .card-header {
       display: flex;
@@ -88,7 +88,6 @@
       p {
         font-size: 16px;
         font-weight: 600;
-        color: var(--text-color);
         margin: 0;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -98,7 +97,6 @@
 
     .card-info {
       font-size: 11px;
-      // color: #999;
     }
   }
   ::v-deep(.card-content:hover) {

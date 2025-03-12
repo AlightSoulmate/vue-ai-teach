@@ -1,7 +1,6 @@
 <template>
   <div class="nav">
     <div class="glass-effect">
-      <!-- 左侧 -->
       <div class="nav-left">
         <Icon />
         <img
@@ -10,8 +9,6 @@
           class="logo"
         />
       </div>
-
-      <!-- 右侧 -->
       <div class="nav-right">
         <Theme />
         <Illustrate />
@@ -78,12 +75,12 @@ const handleLogin = () => {
 
 <style scoped>
 .nav {
-  height: 64px;
+  height: 60px;
   padding: 0 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 3px solid #2d2d2d;
+  border-bottom: 1px solid var(--navbar-bottom-border-color);
   position: relative;
 }
 .glass-effect {
@@ -95,12 +92,12 @@ const handleLogin = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 15px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0 10px;
+  /* background: rgba(255, 255, 255, 0.1); */
+  /* backdrop-filter: blur(10px); */
+  /* -webkit-backdrop-filter: blur(10px); */
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+  /* border-bottom: 1px solid rgba(255, 255, 255, 0.2); */
   z-index: 1000;
   transition: all 0.3s ease-in-out;
 }

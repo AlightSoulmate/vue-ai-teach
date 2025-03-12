@@ -9,8 +9,8 @@
         <div class="end">{{ h1TitleEnd }}</div>
       </div>
       <div class="slip"><Slip class="slip-inner" /></div>
-      <div class="enter" @click="handleLogin">
-        <Enter class="enter-inner" />
+      <div class="enter">
+        <Enter class="enter-inner" @click="handleLogin" />
       </div>
       <div class="carousel"><Carousel class="carousel-inner" /></div>
       <!-- <div class="left-section">

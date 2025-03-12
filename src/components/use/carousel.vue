@@ -1,161 +1,173 @@
+<!-- 
+  CSS手写无边界走马灯 @Luca Yu
+-->
+
 <style scoped>
-  .card {
-    width: 100%;
-    height: 100%;
-    padding: 15px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    color: white;
-    text-align: center;
-  }
+.card {
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  color: white;
+  text-align: center;
+}
 
-  .card p {
-    font-size: 14px;
-    color: white;
-  }
+.card p {
+  font-size: 14px;
+  color: white;
+}
 
-  .slider {
-    width: 100%;
-    height: var(--height);
-    overflow: hidden;
-    mask-image: linear-gradient(to right, transparent, #000 10% 90%, transparent);
-  }
-  .slider .list {
-    display: flex;
-    width: 100%;
-    min-width: calc(var(--width) * var(--quantity));
-    position: relative;
-  }
-  .slider .list .item {
-    width: var(--width);
-    height: var(--height);
-    position: absolute;
+.card img {
+  transform: scale(0.6);
+  margin-top: -40px;
+}
+
+.slider-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.slider {
+  width: 100%;
+  height: var(--height);
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 10% 90%, transparent);
+}
+.slider .list {
+  display: flex;
+  width: 100%;
+  min-width: calc(var(--width) * var(--quantity));
+  position: relative;
+}
+.slider .list .item {
+  width: var(--width);
+  height: var(--height);
+  position: absolute;
+  left: 100%;
+  animation: autoRun 30s linear infinite;
+  transition: transform 0.3s;
+  animation-delay: calc(
+    (30s / var(--quantity)) * (var(--position) - 1) - 30s
+  ) !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.slider .list .item img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  transition: transform 0.3s;
+}
+@keyframes autoRun {
+  from {
     left: 100%;
-    animation: autoRun 10s linear infinite;
-    transition: filter 0.5s;
-    animation-delay: calc(
-      (10s / var(--quantity)) * (var(--position) - 1) - 10s
-    ) !important;
   }
-  .slider .list .item img {
-    width: 100%;
+  to {
+    left: calc(var(--width) * -1);
   }
-  @keyframes autoRun {
-    from {
-      left: 100%;
-    }
-    to {
-      left: calc(var(--width) * -1);
-    }
+}
+.slider:hover .item {
+  animation-play-state: paused !important;
+}
+.slider .item:hover img {
+  transform: scale(1.2);
+}
+.slider[reverse="true"] .list .item {
+  animation: reversePlay 30s linear infinite;
+  animation-delay: calc(
+    (30s / var(--quantity)) * (var(--position) - 1) - 30s
+  ) !important;
+}
+@keyframes reversePlay {
+  from {
+    left: calc(var(--width) * -1);
   }
-  .slider:hover .item {
-    animation-play-state: paused !important;
-    filter: grayscale(1);
+  to {
+    left: 100%;
   }
-  .slider .item:hover {
-    filter: grayscale(0);
-  }
-  .slider[reverse="true"] .item {
-    animation: reversePlay 10s linear infinite;
-  }
-  @keyframes reversePlay {
-    from {
-      left: calc(var(--width) * -1);
-    }
-    to {
-      left: 100%;
-    }
-  }
+}
 </style>
+<script lang="ts" setup>
+import { useToolsStore } from "@/stores/useToolsStore";
+import { onMounted, computed } from "vue";
 
+const toolsStore = useToolsStore();
+
+// 获取所有工具
+const allTools = computed(() => {
+  const tools = Object.values(toolsStore.toolsByCategory || {}).flat();
+  return tools;
+});
+
+// 工具数组
+const firstRowTools = computed(() => {
+  if (!allTools.value.length) return [];
+  return [...allTools.value].sort(() => 0.5 - Math.random()).slice(0, 20);
+});
+
+const secondRowTools = computed(() => {
+  if (!allTools.value.length) return [];
+  return [...allTools.value].sort(() => 0.5 - Math.random()).slice(0, 20);
+});
+
+const thirdRowTools = computed(() => {
+  if (!allTools.value.length) return [];
+  return [...allTools.value].sort(() => 0.5 - Math.random()).slice(0, 20);
+});
+
+onMounted(() => {
+  toolsStore.fetchCategory();
+});
+</script>
 <template>
-  <div
-    class="slider"
-    style="--width: 200px;
-      --height: 200px;
-      --quantity: 9;"
-  >
-    <div class="list">
-      <div class="item" style="--position: 1">
+  <div class="slider-container">
+    <!-- 第一行 -->
+    <div class="slider" style="--width: 100px; --height: 80px; --quantity: 20">
+      <div class="list">
         <div
-          class="card"
-          style="background: linear-gradient(to right, #ff7e5f, #feb47b)"
+          class="item"
+          v-for="(tool, index) in firstRowTools"
+          :key="`row1-${tool.id}`"
+          :style="`--position:${index + 1}`"
         >
-          <p>HELLO THERE</p>
-          <p>Am Ashwin.A</p>
+          <img :src="tool.logo_url" :alt="tool.name" :title="tool.name" />
         </div>
       </div>
-      <div class="item" style="--position: 2">
+    </div>
+
+    <!-- 第二行 -->
+    <div
+      class="slider"
+      reverse="true"
+      style="--width: 100px; --height: 80px; --quantity: 20"
+    >
+      <div class="list">
         <div
-          class="card"
-          style="background: linear-gradient(to right, #6a11cb, #2575fc)"
+          class="item"
+          v-for="(tool, index) in secondRowTools"
+          :key="`row2-${tool.id}`"
+          :style="`--position:${index + 1}`"
         >
-          <p>Do follow on Insta</p>
-          <p>ashwin_ambar_</p>
+          <img :src="tool.logo_url" :alt="tool.name" :title="tool.name" />
         </div>
       </div>
-      <div class="item" style="--position: 3">
+    </div>
+
+    <!-- 第三行 -->
+    <div class="slider" style="--width: 100px; --height: 80px; --quantity: 20">
+      <div class="list">
         <div
-          class="card"
-          style="background: linear-gradient(to right, #00c6ff, #0072ff)"
+          class="item"
+          v-for="(tool, index) in thirdRowTools"
+          :key="`row3-${tool.id}`"
+          :style="`--position:${index + 1}`"
         >
-          <p>Replace cards with images</p>
-          <p>for a image slider</p>
-        </div>
-      </div>
-      <div class="item" style="--position: 4">
-        <div
-          class="card"
-          style="background: linear-gradient(to right, #ff512f, #dd2476)"
-        >
-          <p>Html css only</p>
-          <p>Hover to stop the slides</p>
-        </div>
-      </div>
-      <div class="item" style="--position: 5">
-        <div
-          class="card"
-          style="background: linear-gradient(to right, #ffb6c1, #ff69b4)"
-        >
-          <p>Card 5</p>
-          <p>Content for card 5</p>
-        </div>
-      </div>
-      <div class="item" style="--position: 6">
-        <div
-          class="card"
-          style="background: linear-gradient(to right, #ff9a8b, #ffc3a0)"
-        >
-          <p>Card 6</p>
-          <p>Content for card 6</p>
-        </div>
-      </div>
-      <div class="item" style="--position: 7">
-        <div
-          class="card"
-          style="background: linear-gradient(to right, #a1c4fd, #c2e9fb)"
-        >
-          <p>Card 7</p>
-          <p>Modify it and use</p>
-        </div>
-      </div>
-      <div class="item" style="--position: 8">
-        <div
-          class="card"
-          style="background: linear-gradient(to right, #fbc2eb, #a18cd1)"
-        >
-          <p>Card 8</p>
-          <p>Content for card 8</p>
-        </div>
-      </div>
-      <div class="item" style="--position: 9">
-        <div
-          class="card"
-          style="background: linear-gradient(to right, #84fab0, #8fd3f4)"
-        >
-          <p>card 9</p>
-          <p>Content for card 9</p>
+          <img :src="tool.logo_url" :alt="tool.name" :title="tool.name" />
         </div>
       </div>
     </div>
