@@ -17,31 +17,6 @@
   transition: background 0.3s;
 }
 
-/* .button::before {
-  position: absolute;
-  content: attr(data-tooltip);
-  width: var(--tooltip-width);
-  height: var(--tooltip-height);
-  background-color: var(--tooltip-color);
-  font-size: 0.9rem;
-  color: #111;
-  border-radius: 0.25em;
-  line-height: var(--tooltip-height);
-  bottom: calc(var(--height) + var(--gap-between-tooltip-to-button) + 10px);
-  left: calc(50% - var(--tooltip-width) / 2);
-} */
-
-.button::after {
-  position: absolute;
-  content: "";
-  width: 0;
-  height: 0;
-  border: 10px solid transparent;
-  border-top-color: var(--tooltip-color);
-  left: calc(50% - 10px);
-  bottom: calc(100% + var(--gap-between-tooltip-to-button) - 10px);
-}
-
 .button::after,
 .button::before {
   opacity: 0;
@@ -83,11 +58,6 @@
   justify-content: center;
 }
 
-.icon svg {
-  width: 24px;
-  height: 24px;
-}
-
 .button:hover {
   background: #6c18ff;
 }
@@ -116,32 +86,14 @@
 </style>
 <script setup>
 import { defineModel } from "vue";
+import { Plus } from "@element-plus/icons-vue";
 const text = defineModel();
 </script>
 <template>
   <div class="button" data-tooltip="Size: 20Mb">
     <div class="button-wrapper">
       <div class="text" :title="text">{{ text }}</div>
-      <span class="icon">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-          role="img"
-          width="2em"
-          height="2em"
-          preserveAspectRatio="xMidYMid meet"
-          viewBox="0 0 24 24"
-        >
-          <path
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17"
-          ></path>
-        </svg>
-      </span>
+      <el-icon class="icon" style="transform: scale(1.2)"><Plus /></el-icon>
     </div>
   </div>
 </template>

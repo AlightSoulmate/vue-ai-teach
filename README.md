@@ -1,3 +1,17 @@
+# AITeach
+
+基于 Vue 3 + TypeScript + Vite 构建的高效智能教学平台界面。
+
+## 功能特性
+
+- 📦 支持命令行多环境部署（开发、测试、生产）
+- 🔒 完善的用户权限管理
+- 💡 提供丰富的 AI 工具集
+- ✨ AI 驱动的论文、作业评估能力
+- 🎨 现代化的 UI 设计
+
+## 更新日志
+
 ### 2025.3.7
 
 - 安全优化：支持管理员撤回操作，防止误操作导致损失
@@ -10,67 +24,94 @@
 - 登录逻辑优化：昵称重复返回后端报错（509）
 - 其他优化：引入加载动画
 
-### 使用提示
+## 快速开始
 
-- 若出现无法登录的情况，请刷新重试
-- 若出现无法注册的情况，考虑该账号是否已经注册，并尝试登录
-- 请不要将密码设置得过于简单，建议使用个人常用密码
-- 遇到无法解决的问题，联系18868717143@163.com, 或检查网络连接、清除浏览器缓存、重启、更换浏览器
+### 环境要求
 
-## AITeach
+- Node.js >= v18.19.1
+- npm >= 10.2.4 (或其他兼容的包管理器)
 
-#### 本地部署启动项目
+### 安装和运行
 
-##### 1.克隆项目
+1. 克隆项目
 
 ```bash
-git@github.com:AlightSoulmate/vue-ai-teach.git
+git clone git@github.com:AlightSoulmate/vue-ai-teach.git
 ```
 
-##### 2.进入项目根目录
+2. 进入项目目录
 
 ```bash
-cd ./vue-ai-teach
+cd vue-ai-teach
 ```
 
-##### 3.安装依赖
-> 推荐在 node v18.19.1 环境下部署，使用 npm 包版本推荐 10.2.4 或其他包管理器，请确保版本适配，以避免由于版本不兼容导致依赖安装失败
-```sh
+3. 安装依赖
+
+```bash
 npm install
 ```
 
-##### 4.热重载启动，在浏览器中打开网址（端口号）
+4. 启动开发服务器
 
-```sh
+```bash
+# 开发环境
 npm run dev
-```
 
-##### 5.如果还需要部署到生产环境，输入以下指令打包
+# 测试环境
+npm run staging
 
-```sh
+# 生产环境
 npm run build
 ```
 
-### 隐私政策
+### 环境说明
 
-- 我们重视用户的隐私与数据安全。用户的个人信息仅用于提供和优化服务，不会未经授权共享或出售给任何第三方
-- 我们采取严格的安全措施保护用户的数据，并遵守适用的隐私法规，用户密码等敏感信息通过流行算法进行加密存储。
-- 使用网站服务即表示用户同意我们的隐私政策
+- 开发环境 (development)
 
-### TODO
+  - 启动命令：`npm run dev`
+  - 特点：使用 mock 开发调试
 
-- 组件拖拽式操作支持
+- 测试环境 (staging)
 
-#### 其他
+  - 启动命令：`npm run staging`
+  - 特点：连接后端服务器或本地测试，模拟生产环境
 
-##### Recommended IDE Setup
+- 生产环境 (production)
+  - 启动命令：`npm run build`
+  - 特点：生成./dist 用于实际部署到生产环境
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## 常见问题
 
-##### Type Support for `.vue` Imports in TS
+- **登录问题**
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+  - 如遇登录失败，请先刷新页面重试
+  - 确认账号是否已注册，可尝试直接登录
 
-##### Customize configuration
+- **注册问题**
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+  - 请使用安全性较高的密码
+  - 避免使用已被注册的用户名
+
+- **其他问题**
+  - 检查网络连接
+  - 清除浏览器缓存
+  - 尝试更换浏览器
+  - 联系我们：18868717143@163.com，请注明身份和问题
+
+## 隐私政策
+
+- 我们严格保护用户隐私和数据安全
+- 用户信息仅用于服务优化，不会未经授权共享
+- 采用流行加密算法保护敏感信息
+- 使用服务即表示同意隐私政策
+
+## 开发计划
+
+- [ ] 组件拖拽式操作支持
+- [ ] 更多 AI 教学工具集成
+- [ ] 性能优化和代码重构
+
+## 开发推荐
+
+- **TypeScript 支持**
+- **IDE**: [VSCode](https://code.visualstudio.com/)

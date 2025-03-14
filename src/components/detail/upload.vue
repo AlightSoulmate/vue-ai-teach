@@ -1,3 +1,16 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import { Upload, UploadFilled } from "@element-plus/icons-vue";
+import { useScoreStore } from "@/stores/useScoreStore";
+
+const scoreStore = useScoreStore();
+const description = ref<string>(
+  "在这里，你可以提交关于该AI工具的详细评价报告，请确保您的报告包含完整的使用体验，建议根据评分模块的类目分别进行评价。"
+);
+const uploadFileSupport = ref<string[]>([".docx", ".doc", ".pdf"]);
+const FilenameDefault = ref<string>("点击或拖拽文件到此处上传");
+</script>
+
 <template>
   <div class="upload-container">
     <div class="header">
@@ -7,7 +20,7 @@
 
     <div class="content">
       <div class="description">
-        在这里，你可以提交关于该AI工具的详细评价报告，请确保您的报告包含完整的使用体验，建议根据评分模块的类目分别进行评价。
+        {{ description }}
       </div>
 
       <div class="upload-section">
@@ -23,9 +36,11 @@
               @change="(e) => scoreStore.handleUserFileChange(e)"
             />
             <span class="file-name">
-              {{ scoreStore.userFileName || "点击或拖拽文件到此处上传" }}
+              {{ scoreStore.userFileName || FilenameDefault }}
             </span>
-            <span class="file-hint">支持 .docx/.doc/.pdf 格式</span>
+            <span class="file-hint">
+              支持 {{ uploadFileSupport.join(", ") }} 格式
+            </span>
           </div>
         </div>
 
@@ -42,13 +57,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { useScoreStore } from "@/stores/useScoreStore";
-import { Upload, UploadFilled } from "@element-plus/icons-vue";
-
-const scoreStore = useScoreStore();
-</script>
 
 <style scoped lang="scss">
 .upload-container {

@@ -1,12 +1,10 @@
 // mock/mockData.ts
 import Mock from "mockjs";
-// import axios from "axios";
-// import MockAdapter from "axios-mock-adapter";
 
-// const mock = new MockAdapter(axios, { delayResponse: 300 });
 // 1.1 用户注册
 Mock.mock("/api/user/register", "post", (req) => {
   const { username, role } = JSON.parse(req.body);
+  console.log("mock用户注册", req.body);
   return {
     Authorization: "jwt token",
     user: {
@@ -22,6 +20,7 @@ Mock.mock("/api/user/register", "post", (req) => {
 // 1.2 用户登录
 Mock.mock("/api/user/login", "post", (req) => {
   const { username, role } = JSON.parse(req.body);
+  console.log("mock用户登录", req.body);
   return {
     Authorization: "jwt token",
     user: {
@@ -38,6 +37,7 @@ Mock.mock("/api/user/login", "post", (req) => {
 // 1.3 管理员登录
 Mock.mock("/api/auth/login", "post", (req) => {
   const { username, role } = JSON.parse(req.body);
+  console.log("mock管理员登录", req.body);
   return {
     Authorization: "jwt token",
     user: {
@@ -49,23 +49,9 @@ Mock.mock("/api/auth/login", "post", (req) => {
   };
 });
 
-// 1.4 用户修改信息
-// Mock.mock("/api/user", "put", (req) => {
-//   const { nickname, username } = JSON.parse(req.body);
-//   return {
-//     Authorization: "jwt token",
-//     user: {
-//       id: Math.floor(Math.random() * 1000),
-//       nickname,
-//       username,
-//       role: "xxx",
-//       message: "用户信息修改成功",
-//     },
-//   };
-// });
-
 // 2.2 获取工具类别列表
 Mock.mock("/api/tools/categories", "get", () => {
+  console.log("mock获取工具类别列表");
   return {
     categories: [
       "对话模型",
@@ -85,7 +71,7 @@ Mock.mock("/api/tools/categories", "get", () => {
 
 //2.7 上传评分
 Mock.mock(new RegExp(`/api/tools/\\d+/ratings`), "post", (options: any) => {
-  console.log("上传评分", options);
+  console.log("mock上传评分", options);
   const match = options.url.match(/\/api\/tools\/(\d+)\/ratings/);
   if (!match) {
     return {
@@ -108,9 +94,10 @@ Mock.mock(new RegExp(`/api/tools/\\d+/ratings`), "post", (options: any) => {
     message: "评分提交成功",
   };
 });
+
 //2.3 获取工具详情
 Mock.mock(new RegExp(`/api/tools/\\d+`), "get", (options: any) => {
-  console.log("获取工具详情", options);
+  console.log("mock获取工具详情", options);
   const toolId = options.url.match(/\/api\/tools\/(\d+)/)[1];
   return {
     id: Number(toolId),
@@ -190,15 +177,9 @@ Mock.mock(new RegExp(`/api/tools/\\d+`), "get", (options: any) => {
   };
 });
 
-// 3.1 用户为工具打分
-// Mock.mock("/api/tools/{toolId}/ratings", "post", () => {
-//   return {
-//     message: "评分成功",
-//   };
-// });
-
 // 1.5 管理员获取用户列表
 Mock.mock("/api/auth", "post", (Authorization) => {
+  console.log("mock管理员获取用户列表", Authorization);
   if (Authorization) {
     return {
       students: [

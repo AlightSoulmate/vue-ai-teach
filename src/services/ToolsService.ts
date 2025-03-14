@@ -1,15 +1,12 @@
 // src/services/ToolsService.ts
-import axios from "axios";
+import service from "./config";
 
 /*  */
 
 // Get categories
 export const getCategories = async (): Promise<{ categories: string[] }> => {
   try {
-    const response = await axios.get("/api/tools/categories");
-    // const response = await axios.get(
-    //   "https://frp-man.com:49044/tools/categories"
-    // );
+    const response = await service.get("/tools/categories");
     return response.data;
   } catch (e: any) {
     throw e.response ? e.response.data : { message: "请求失败" };
@@ -19,7 +16,9 @@ export const getCategories = async (): Promise<{ categories: string[] }> => {
 // Get tools by category
 export const getTools = async (category: string): Promise<{ tools: [] }> => {
   try {
-    const response = await axios.get(`/api/tools?category=${category}`);
+    const response = await service.get(`/tools`, {
+      params: { category },
+    });
     return response.data;
   } catch (e: any) {
     throw e.response ? e.response.data : { message: "请求失败" };
@@ -33,14 +32,10 @@ export const uploadRate = async (
   toolId: number
 ): Promise<{ message: string }> => {
   try {
-    const response = await axios.post(`/api/tools/${toolId}/ratings`, {
+    const response = await service.post(`/tools/${toolId}/ratings`, {
       Authorization,
       rate,
     });
-    // const response = await axios.post(`https://frp-man.com:49044/tools/${toolId}/ratings`, {
-    //   Authorization: token,
-    //   rate,
-    // })
     return response.data;
   } catch (e: any) {
     throw e.response ? e.response.data : { message: "请求失败" };
@@ -50,9 +45,7 @@ export const uploadRate = async (
 // Get A tool
 export const getDetail = async (toolId: number): Promise<{}> => {
   try {
-    const response = await axios.get(`/api/tools/${toolId}`);
-    // const response = await axios
-    //   .get(`https://frp-man.com:49044/tools/${toolId}`)
+    const response = await service.get(`/tools/${toolId}`);
     return response.data;
   } catch (e: any) {
     throw e.response ? e.response.data : { message: "请求失败" };

@@ -1,25 +1,13 @@
 // src/services/AuthService.ts
-import axios from "axios";
 import { ElMessage } from "element-plus";
 import type { AuthResponse, AuthLoginResponse } from "@/interfaces";
+import service from "./config";
 
 /* Authentication & User Actions 
   - Registration 
   - Login
   - User update info
 */
-
-// Request Intercept
-axios.interceptors.request.use(
-  (config) => {
-    console.log("Request URL:", config.url);
-    console.log("Request data:", config.data);
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 // Register
 export const register = async (
@@ -29,15 +17,7 @@ export const register = async (
 ): Promise<AuthResponse> => {
   try {
     if (role !== "admin") {
-      // const response = await axios.post(
-      //   "https://frp-man.com:49044/user/register",
-      //   {
-      //     username,
-      //     password,
-      //     role,
-      //   }
-      // );
-      const response = await axios.post("/api/user/register", {
+      const response = await service.post("/user/register", {
         username,
         password,
         role,
@@ -64,35 +44,19 @@ export const login = async (
 ): Promise<AuthLoginResponse> => {
   try {
     if (role === "admin") {
-      const response = await axios.post("/api/auth/login", {
+      const response = await service.post("/auth/login", {
         username,
         password,
         role,
       });
-      // const response = await axios.post(
-      //   "https://frp-man.com:49044/auth/login",
-      //   {
-      //     username,
-      //     password,
-      //     role,
-      //   }
-      // );
       console.log(response.data);
       return response.data;
     } else {
-      const response = await axios.post("/api/user/login", {
+      const response = await service.post("/user/login", {
         username,
         password,
         role,
       });
-      // const response = await axios.post(
-      //   "https://frp-man.com:49044/user/login",
-      //   {
-      //     username,
-      //     password,
-      //     role,
-      //   }
-      // );
       return response.data;
     }
   } catch (error: any) {
@@ -110,14 +74,7 @@ export const change = async (
   username: string
 ): Promise<AuthResponse> => {
   try {
-    // const response = await axios.put("https://frp-man.com:49044/user", {
-    //   Authorization,
-    //   old_password,
-    //   password,
-    //   nickname,
-    //   username,
-    // });
-    const response = await axios.put("/api/user", {
+    const response = await service.put("/user", {
       Authorization,
       old_password,
       password,

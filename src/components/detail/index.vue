@@ -1,25 +1,41 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import { ArrowRight, Link, ChatDotRound } from "@element-plus/icons-vue";
+import { ArrowRight } from "@element-plus/icons-vue";
 import { useSelectedToolStore } from "@/stores/useSelectedToolStore";
+import type { Tool } from "@/interfaces";
 import Score from "./score.vue";
 import Upload from "./upload.vue";
 
 const cats = ref("全部工具");
-const tool = ref<any>({});
+const tool = ref<Tool>({
+  id: "",
+  name: "",
+  category: "",
+  description: "",
+  score: 0,
+  url: "",
+  logo_url: "",
+});
+
 const selectToolStore = useSelectedToolStore();
 
-const gotoSite = (url: () => string) => {
-  window.open(url(), "_blank", "noopener,noreferrer");
+const gotoSite = (url: string) => {
+  window.open(url, "_blank", "noopener,noreferrer");
 };
 
 onMounted(() => {
-  const selectedTool = localStorage.getItem("selectedTool");
-  if (selectedTool) {
-    selectToolStore.selectedTool = JSON.parse(selectedTool);
-    tool.value = selectToolStore.selectedTool;
-  }
-  console.log(tool.value);
+  setTimeout(() => {
+    try {
+      const selectedTool = localStorage.getItem("selectedTool");
+      if (selectedTool) {
+        const parsedTool = JSON.parse(selectedTool);
+        selectToolStore.selectedTool = parsedTool;
+        tool.value = parsedTool;
+      }
+    } catch (error) {
+      console.error("解析工具数据失败:", error);
+    }
+  }, 100);
 });
 </script>
 
@@ -52,7 +68,7 @@ onMounted(() => {
         </div>
 
         <div class="action-section">
-          <button class="url-button" @click="gotoSite(() => tool.url)">
+          <button class="url-button" @click="gotoSite(tool.url)">
             访问官网
           </button>
         </div>
@@ -73,6 +89,28 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
+$border-radius: 16px;
+$box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+$hover-box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+$transition-duration: 0.3s;
+$primary-color: #409eff;
+$gradient-start: #ff7a18;
+$gradient-end: #af002d;
+
+@mixin hover-effect {
+  transition: all $transition-duration ease;
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: $hover-box-shadow;
+  }
+}
+
+@mixin card-style {
+  background: var(--background-color);
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -93,11 +131,11 @@ onMounted(() => {
   :deep(.el-breadcrumb__inner),
   :deep(.el-breadcrumb__inner.is-link) {
     color: var(--text-color) !important;
+    transition: color $transition-duration ease;
     font-weight: 500;
-    transition: color 0.3s ease;
     &:hover {
       font-weight: bold;
-      color: #409eff !important;
+      color: $primary-color !important;
     }
   }
   :deep(.el-breadcrumb__separator) {
@@ -108,16 +146,13 @@ onMounted(() => {
 .main-info {
   display: flex;
   gap: 40px;
-  align-items: flex-start;
   margin-bottom: 40px;
   align-items: stretch;
 
   .info {
     flex: 1;
-    background: var(--background-color);
+    @include card-style;
     padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
     .header-section {
       display: flex;
@@ -131,9 +166,9 @@ onMounted(() => {
         color: var(--text-color);
       }
     }
+
     .score {
-      display: flex;
-      align-items: center;
+      @include flex-center-left;
       font-size: 28px;
       font-weight: bold;
       color: #ff9800;
@@ -155,14 +190,8 @@ onMounted(() => {
     }
 
     .tag-section {
-      display: flex;
-      align-items: center;
+      @include flex-center-left;
       margin-bottom: 20px;
-
-      .tag-label {
-        font-size: 16px;
-        color: var(--text-color-secondary);
-      }
 
       .tag-list {
         display: flex;
@@ -172,83 +201,56 @@ onMounted(() => {
           padding: 6px 14px;
           border-radius: 14px;
           font-size: 14px;
-          background: rgba(64, 158, 255, 0.1);
-          color: #409eff;
-          transition: all 0.3s ease;
+          background: rgba($primary-color, 0.1);
+          color: $primary-color;
+          transition: all $transition-duration ease;
 
           &:hover {
-            background: rgba(64, 158, 255, 0.2);
+            background: rgba($primary-color, 0.2);
             transform: translateY(-1px);
           }
         }
       }
     }
+
     .action-section {
-      display: flex;
-      align-items: center;
+      @include flex-center-left;
       gap: 20px;
 
       .url-button {
-        display: flex;
-        align-items: center;
+        @include flex-center-left;
         gap: 8px;
         padding: 10px 20px;
         border: none;
         border-radius: 8px;
-        background: linear-gradient(135deg, #ff7a18, #af002d);
+        background: linear-gradient(135deg, $gradient-start, $gradient-end);
         color: white;
         font-size: 16px;
         font-weight: 500;
         cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(255, 122, 24, 0.3);
+        transition: all $transition-duration ease;
+        box-shadow: 0 4px 12px rgba($gradient-start, 0.3);
 
         &:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(255, 122, 24, 0.4);
+          box-shadow: 0 6px 16px rgba($gradient-start, 0.4);
         }
+
         .el-icon {
           font-size: 18px;
         }
       }
-      .feedback {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        border: 2px solid var(--border-color);
-        color: var(--text-color-secondary);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        &:hover {
-          border-color: #409eff;
-          color: #409eff;
-          transform: rotate(15deg);
-        }
-        .el-icon {
-          font-size: 20px;
-        }
-      }
     }
   }
+
   .logo-container {
     flex: 0.7;
     padding: 25px;
-    background: var(--background-color);
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    display: flex;
-    align-items: center;
+    @include card-style;
+    @include flex-center-left;
     justify-content: center;
     overflow: hidden;
-    transition: all 0.3s ease;
-
-    &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    }
+    @include hover-effect;
 
     img {
       max-width: 100%;
@@ -262,11 +264,11 @@ onMounted(() => {
     }
   }
 }
+
 .score-section {
   margin-top: 40px;
-  border-radius: 16px;
+  border-radius: $border-radius;
   overflow: hidden;
-  background: var(--background-color);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  @include card-style;
 }
 </style>

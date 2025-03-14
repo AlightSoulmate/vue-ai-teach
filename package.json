@@ -4,8 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "dev": "vite --mode development",
+    "build": "vite build --mode production",
+    "staging": "vite --mode staging",
+    "build:staging": "vite build --mode staging",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build"

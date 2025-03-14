@@ -34,11 +34,6 @@ export default defineConfig({
       //   changeOrigin: true,
       //   rewrite: (path) => path.replace(/^\/api/, ""),
       // },
-      // "/llm": {
-      //   target: "http://js1.blockelite.cn:27078",
-      //   changeOrigin: true,
-      //   rewrite: (path) => path.replace(/^\/llm/, ""),
-      // },
     },
   },
   css: {
@@ -46,6 +41,7 @@ export default defineConfig({
       scss: {
         additionalData: `
           @use "@/styles/_variables.scss" as *;
+          @use "@/styles/_mixins.scss" as *;
         `,
       },
     },

@@ -9,3 +9,9 @@
   justify-content: center;
   align-items: center;
 }
+
+@mixin flex-center-left {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}

@@ -1,3 +1,190 @@
+<script lang="ts" setup>
+import { ref, computed, onMounted, nextTick, watch } from "vue";
+import { ElMessage } from "element-plus";
+import { Checked, ChatDotRound, Microphone } from "@element-plus/icons-vue";
+import { useScoreStore } from "@/stores/useScoreStore";
+import { useDebounceStore } from "@/stores/useDebounceStore";
+import type { ScrollbarInstance } from "element-plus";
+import type { SpeechRecognitionEvent } from "@/interfaces";
+
+interface SelectedTool {
+  id: string | number;
+  [key: string]: any;
+}
+
+const max = ref(0);
+const value = ref(0);
+const inputLess = ref(false);
+const scrollHeight = ref<number>(390);
+const innerRef = ref<HTMLDivElement>();
+const scrollbarRef = ref<ScrollbarInstance>();
+const submitRef = ref();
+const scoreStore = useScoreStore();
+const debounceStore = useDebounceStore();
+const selectedToolId = ref<SelectedTool>({ id: "" });
+const lastSubmitDate = ref("");
+
+const MIN_COMMENT_LENGTH = 10;
+const DEBOUNCE_DELAY = 500;
+const MAX_COMMENT_LENGTH = 500;
+const RATE_COLORS = ["#C6D1DE", "#409EFF", "#67C23A"];
+const RATE_MAX = 5;
+
+const getToolFromStorage = (): SelectedTool => {
+  try {
+    return JSON.parse(localStorage.getItem("selectedTool") || '{"id": ""}');
+  } catch (error) {
+    console.error("解析工具数据失败:", error);
+    return { id: "" };
+  }
+};
+
+const showMessage = (
+  message: string,
+  type: "success" | "error" | "warning" | "info" = "success"
+) => {
+  ElMessage({
+    message,
+    type,
+    duration: 3000,
+    showClose: true,
+  });
+};
+
+const toNumber = (value: string | number): number => {
+  return typeof value === "string" ? parseInt(value, 10) : value;
+};
+
+const canSubmit = computed(() => {
+  const toolId = selectedToolId.value?.id;
+  return (
+    toolId &&
+    !debounceStore.dailySubmitManager.checkDailySubmit(toolId) &&
+    !debounceStore.isSubmitting
+  );
+});
+
+const submitButtonText = computed(() => {
+  if (debounceStore.isSubmitting) return "提交中...";
+
+  const toolId = selectedToolId.value?.id;
+  if (toolId && debounceStore.dailySubmitManager.checkDailySubmit(toolId)) {
+    return "今日已提交";
+  }
+  return "提交评分";
+});
+
+const handleSubmitRating = async () => {
+  try {
+    await debounceStore.withSubmitLock(async () => {
+      const tool = getToolFromStorage();
+      selectedToolId.value = tool;
+
+      if (!tool.id) {
+        throw new Error("未找到工具ID");
+      }
+
+      const toolId = toNumber(tool.id);
+      await scoreStore.evaluationTransmission(toolId);
+      debounceStore.dailySubmitManager.recordSubmit(toolId);
+      lastSubmitDate.value =
+        debounceStore.dailySubmitManager.getLastSubmitDate(toolId);
+
+      showMessage("评分提交成功，感谢您的参与！", "success");
+    });
+  } catch (error) {
+    console.error("提交评分失败:", error);
+    showMessage("提交失败，请稍后重试", "error");
+  }
+};
+
+const inputSlider = (value: number) => {
+  scrollbarRef.value?.setScrollTop(value);
+};
+
+const scroll = ({ scrollTop }: { scrollTop: number }) => {
+  value.value = scrollTop;
+};
+
+const formatTooltip = (value: number) => `${value} px`;
+
+const startSpeechRecognition = () => {
+  if (!canSubmit.value) {
+    showMessage("您今天已经提交过评分，请换个工具尝试或明天再来！", "warning");
+    return;
+  }
+
+  if (!("webkitSpeechRecognition" in window)) {
+    showMessage("您的浏览器不支持 Web Speech API，请使用 Chrome！", "warning");
+    return;
+  }
+
+  const recognition = new (window as any).webkitSpeechRecognition();
+  recognition.lang = "zh-CN";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    console.log("语音识别开始...");
+    showMessage("请开始说话...", "info");
+  };
+
+  recognition.onresult = (event: SpeechRecognitionEvent) => {
+    const result = event.results[0][0].transcript;
+    console.log("识别结果:", result);
+    if (result.length > MAX_COMMENT_LENGTH) {
+      scoreStore.rate.comment = result.slice(0, MAX_COMMENT_LENGTH);
+      showMessage("评论已超过最大长度限制，已自动截断", "warning");
+    } else {
+      scoreStore.rate.comment = result;
+    }
+  };
+
+  recognition.onerror = (event: any) => {
+    console.error("语音识别错误:", event.error);
+    showMessage("语音识别失败，请重试", "error");
+  };
+
+  recognition.onend = () => {
+    console.log("语音识别结束");
+    showMessage("语音识别已完成", "success");
+  };
+
+  recognition.start();
+};
+
+onMounted(async () => {
+  try {
+    const tool = getToolFromStorage();
+    selectedToolId.value = tool;
+
+    if (tool.id) {
+      const toolId = toNumber(tool.id);
+      await scoreStore.ToolsDetailGet(toolId);
+      lastSubmitDate.value =
+        debounceStore.dailySubmitManager.getLastSubmitDate(toolId);
+    }
+
+    await nextTick();
+    if (innerRef.value) {
+      max.value = innerRef.value.clientHeight - scrollHeight.value;
+    }
+  } catch (error) {
+    console.error("初始化失败:", error);
+    showMessage("初始化失败，请刷新页面重试", "error");
+  }
+});
+
+watch(
+  () => scoreStore.rate.comment?.length,
+  (newLength) => {
+    inputLess.value = (newLength ?? 0) < MIN_COMMENT_LENGTH;
+  }
+);
+
+const submitRating = debounceStore.debounce(handleSubmitRating, DEBOUNCE_DELAY);
+</script>
+
 <template>
   <div class="main-container">
     <div class="main-score-container">
@@ -9,8 +196,8 @@
           <el-popover
             v-for="(standard, index) in scoreStore.rateStandards"
             :key="index"
-            placement="right"
             :width="400"
+            placement="right"
             trigger="hover"
           >
             <template #reference>
@@ -18,20 +205,22 @@
                 <span class="rating-title">{{ standard.name }}：</span>
                 <el-rate
                   v-model="standard.score"
-                  :max="5"
+                  :max="RATE_MAX"
                   allow-half
-                  :colors="['#C6D1DE', '#409EFF', '#67C23A']"
+                  :colors="RATE_COLORS"
                 />
                 <span class="score-label">{{ standard.score }} 分</span>
               </div>
             </template>
-            <template #default class="criteria-container">
-              <div class="criteria-header">评分标准</div>
-              <ul class="criteria-list">
-                <li v-for="(criteria, idx) in standard.criteria" :key="idx">
-                  {{ criteria }}
-                </li>
-              </ul>
+            <template #default>
+              <div class="criteria-container">
+                <div class="criteria-header">评分标准</div>
+                <ul class="criteria-list">
+                  <li v-for="(criteria, idx) in standard.criteria" :key="idx">
+                    {{ criteria }}
+                  </li>
+                </ul>
+              </div>
             </template>
           </el-popover>
         </div>
@@ -45,11 +234,15 @@
             v-model="scoreStore.rate.comment"
             :disabled="!canSubmit"
           />
-          <p v-if="inputLess" class="input-less">输入的字符数少于10个!</p>
+          <p v-if="inputLess" class="input-less">
+            输入的字符数少于{{ MIN_COMMENT_LENGTH }}个!
+          </p>
         </div>
         <div class="submit-wrapper">
-          <div style="display: flex">
-            <el-icon @click="startSpeechRecognition"><Microphone /></el-icon>
+          <div class="submit-buttons">
+            <el-icon @click="startSpeechRecognition" class="mic-icon"
+              ><Microphone
+            /></el-icon>
             <el-button
               type="primary"
               @click="submitRating"
@@ -87,9 +280,9 @@
             <div class="score-content-item">
               <div class="score-header">
                 <div class="score-content-item-title">
-                  <el-avatar :size="26" class="user-avatar">{{
-                    score.user.charAt(0)
-                  }}</el-avatar>
+                  <el-avatar :size="26" class="user-avatar">
+                    {{ score.user.charAt(0) }}
+                  </el-avatar>
                   <span class="user-nickname">@{{ score.user }}</span>
                 </div>
                 <div class="score-content-item-score">
@@ -113,151 +306,33 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import { ref, computed, onMounted, nextTick, watch, watchEffect } from "vue";
-import { ElMessage } from "element-plus";
-import { Checked, ChatDotRound, Microphone } from "@element-plus/icons-vue";
-import { useScoreStore } from "@/stores/useScoreStore";
-import { useDebounceStore } from "@/stores/useDebounceStore";
-import type { ScrollbarInstance } from "element-plus";
-type Arrayable<T> = T | T[];
-
-const max = ref(0);
-const value = ref(0);
-const comment = ref<string>();
-const inputLess = ref(false);
-const scrollHeight = ref<number>(390);
-// const fixScrollHeightForHorizon = ref<number>(0);
-const innerRef = ref<HTMLDivElement>();
-const scrollbarRef = ref<ScrollbarInstance>();
-const submitRef = ref();
-const scoreStore = useScoreStore();
-const debounceStore = useDebounceStore();
-const selectedToolId = ref<any>({});
-const lastSubmitDate = ref("");
-
-const commentProcess = (Value: () => string) => {
-  comment.value = Value();
-  let len = Value().length;
-  if (len > 10) scoreStore.rate.comment = comment.value;
-  else inputLess.value = true;
-};
-
-// 计算是否可以提交
-const canSubmit = computed(() => {
-  if (!selectedToolId.value?.id) return false;
-  return (
-    !debounceStore.dailySubmitManager.checkDailySubmit(
-      selectedToolId.value.id
-    ) && !debounceStore.isSubmitting
-  );
-});
-
-// 提交按钮文本
-const submitButtonText = computed(() => {
-  if (debounceStore.isSubmitting) return "提交中...";
-  if (
-    selectedToolId.value?.id &&
-    debounceStore.dailySubmitManager.checkDailySubmit(selectedToolId.value.id)
-  ) {
-    return "今日已提交";
-  }
-  return "提交评分";
-});
-
-// 处理提交评分
-const handleSubmitRating = async () => {
-  await debounceStore.withSubmitLock(async () => {
-    selectedToolId.value = JSON.parse(
-      localStorage.getItem("selectedTool") as any
-    );
-    await scoreStore.evaluationTransmission(selectedToolId.value.id);
-    // 记录提交时间
-    debounceStore.dailySubmitManager.recordSubmit(selectedToolId.value.id);
-    lastSubmitDate.value = debounceStore.dailySubmitManager.getLastSubmitDate(
-      selectedToolId.value.id
-    );
-    ElMessage({
-      message: "评分提交成功，感谢您的参与！",
-      type: "success",
-    });
-  });
-};
-
-// 使用防抖包装提交函数
-const submitRating = debounceStore.debounce(handleSubmitRating, 500);
-
-onMounted(() => {
-  selectedToolId.value = JSON.parse(
-    localStorage.getItem("selectedTool") as any
-  );
-  scoreStore.ToolsDetailGet(selectedToolId.value.id);
-  // 获取上次提交日期
-  if (selectedToolId.value?.id) {
-    lastSubmitDate.value = debounceStore.dailySubmitManager.getLastSubmitDate(
-      selectedToolId.value.id
-    );
-  }
-  setTimeout(() => {
-    nextTick(() => {
-      if (innerRef.value) {
-        max.value = innerRef.value.clientHeight - scrollHeight.value;
-      } else {
-        console.warn("innerRef.clientHeight is 0 !");
-      }
-    });
-  }, 1000);
-});
-watch(
-  () => scoreStore.rate.comment?.length,
-  (newLength) => {
-    inputLess.value = (newLength ?? 0) < 10;
-  }
-);
-
-const inputSlider = (value: Arrayable<number>) => {
-  scrollbarRef.value!.setScrollTop(value as number);
-};
-const scroll = ({ scrollTop }: { scrollTop: number }) => {
-  value.value = scrollTop;
-};
-const formatTooltip = (value: number) => `${value} px`;
-
-// 语音识别
-const startSpeechRecognition = () => {
-  if (!canSubmit.value) {
-    ElMessage({
-      message: "您今天已经提交过评分，请换个工具尝试或明天再来！",
-      type: "warning",
-    });
-    return;
-  }
-
-  if (!("webkitSpeechRecognition" in window)) {
-    alert("您的浏览器不支持 Web Speech API，请使用 Chrome！");
-    return;
-  }
-
-  const recognition = new (window as any).webkitSpeechRecognition(); // 兼容 Chrome
-  recognition.lang = "zh-CN"; // 设定语言
-  recognition.continuous = false; // 语音识别结束后自动停止
-  recognition.interimResults = false; // 仅返回最终结果
-
-  recognition.onstart = () => console.log("语音识别开始...");
-  recognition.onresult = (event: any) => {
-    const result = event.results[0][0].transcript;
-    console.log("识别结果:", result);
-    scoreStore.rate.comment = result ?? "未访问到声音";
-  };
-  recognition.onerror = (event: any) =>
-    console.error("语音识别错误:", event.error);
-  recognition.onend = () => console.log("语音识别结束");
-
-  recognition.start();
-};
-</script>
-
 <style scoped lang="scss">
+$border-radius: 12px;
+$box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+$hover-box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+$transition-duration: 0.3s;
+$primary-color: #409eff;
+$warning-color: #ff9800;
+$text-secondary: #909399;
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+}
+
+@mixin hover-effect {
+  transition: all $transition-duration ease;
+  &:hover {
+    box-shadow: $hover-box-shadow;
+  }
+}
+
+@mixin card-style {
+  background: var(--background-color);
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -265,10 +340,9 @@ const startSpeechRecognition = () => {
 }
 
 .main-container {
-  margin: 20px 30px 10px 30px;
+  margin: 20px 30px 10px;
   padding: 15px 20px;
   display: flex;
-  flex-direction: row;
   gap: 30px;
 }
 
@@ -285,8 +359,7 @@ const startSpeechRecognition = () => {
 }
 
 .title {
-  display: flex;
-  align-items: center;
+  @include flex-center;
   gap: 8px;
   font-style: italic;
   font-weight: bold;
@@ -301,22 +374,16 @@ const startSpeechRecognition = () => {
     color: var(--text-color);
   }
 }
+
 .rating-container {
   width: 100%;
   padding: 5px 0 5px 5px;
-  background: var(--background-color);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  @include card-style;
   margin-bottom: 20px;
-  transition: all 0.3s ease;
-
-  &:hover {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  }
+  @include hover-effect;
 
   .rating-item {
-    display: flex;
-    align-items: center;
+    @include flex-center;
     gap: 12px;
     margin: 6px 0;
     padding: 6px 8px;
@@ -335,21 +402,24 @@ const startSpeechRecognition = () => {
 
     .score-label {
       font-size: $medium-font-size;
-      color: #409eff;
+      color: $primary-color;
       font-weight: 500;
     }
   }
 }
+
 .criteria-container {
   color: var(--text-color);
   background-color: var(--background-color);
 }
+
 .criteria-header {
   font-weight: bold;
   margin-bottom: 10px;
-  color: #409eff;
+  color: $primary-color;
   border-bottom: 1px solid #eaeaea;
 }
+
 .criteria-list {
   width: 100%;
   padding-left: 20px;
@@ -361,6 +431,7 @@ const startSpeechRecognition = () => {
     line-height: 1.4;
   }
 }
+
 .comment {
   margin: 20px 0;
   width: 100%;
@@ -371,10 +442,10 @@ const startSpeechRecognition = () => {
     ::v-deep(.el-textarea__inner) {
       border-radius: 8px;
       padding: 12px;
-      transition: all 0.3s ease;
+      transition: all $transition-duration ease;
 
       &:focus {
-        box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
       }
     }
   }
@@ -383,7 +454,7 @@ const startSpeechRecognition = () => {
     font-size: 12px;
     padding: 4px 0 0 2px;
     margin-bottom: -6px;
-    color: rgb(255, 140, 0);
+    color: $warning-color;
   }
 }
 
@@ -395,7 +466,7 @@ const startSpeechRecognition = () => {
 
   .el-icon {
     font-size: 22px;
-    color: #409eff;
+    color: $primary-color;
     margin: 5px;
     cursor: pointer;
   }
@@ -404,18 +475,18 @@ const startSpeechRecognition = () => {
     padding: 10px 24px;
     font-size: 15px;
     border-radius: 8px;
-    transition: all 0.3s ease;
+    transition: all $transition-duration ease;
 
     &:not(:disabled):hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+      box-shadow: 0 4px 12px rgba($primary-color, 0.3);
     }
   }
 
   .submit-info {
     margin-top: 10px;
     font-size: 13px;
-    color: #909399;
+    color: $text-secondary;
   }
 }
 
@@ -432,9 +503,7 @@ const startSpeechRecognition = () => {
   .tool-details {
     width: 100%;
     padding: 10px 20px;
-    background-color: var(--background-color);
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    @include card-style;
 
     .score-content {
       white-space: wrap;
@@ -442,26 +511,21 @@ const startSpeechRecognition = () => {
       background-color: var(--background-color);
       padding: 8px 6px;
       border-radius: 10px;
-      // border: 1px #ccc solid;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-      transition: all 0.3s ease;
-
-      &:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      }
+      @include hover-effect;
 
       &:last-child {
         margin-bottom: 0;
-      }
 
-      &:last-child::after {
-        content: "没有更多评论了~";
-        margin: 0 auto;
-        display: flex;
-        align-items: center;
-        padding-top: 10px;
-        font-size: 12px;
-        color: #666;
+        &::after {
+          content: "没有更多评论了~";
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          padding-top: 10px;
+          font-size: 12px;
+          color: #666;
+        }
       }
     }
   }
@@ -472,14 +536,13 @@ const startSpeechRecognition = () => {
     align-items: center;
 
     .score-content-item-title {
-      display: flex;
-      align-items: center;
+      @include flex-center;
       gap: 8px;
       font-weight: 600;
       color: var(--text-color);
 
       .user-avatar {
-        background-color: #409eff;
+        background-color: $primary-color;
         color: white;
         transform: scale(1.1);
         font-size: 12px;
@@ -490,14 +553,15 @@ const startSpeechRecognition = () => {
         margin-top: -15px;
       }
     }
+
     .score-content-item-score {
       font-size: 14px;
-      color: #ff9800;
+      color: $warning-color;
       font-weight: bold;
       margin-top: -15px;
 
       span {
-        color: #909399;
+        color: $text-secondary;
         font-weight: normal;
       }
     }
@@ -512,8 +576,6 @@ const startSpeechRecognition = () => {
     margin-top: -10px;
     margin-left: 5px;
     white-space: wrap;
-    // white-space: pre-wrap; //保留空白符
-    // word-break: break-word; //允许拆分单词换行
     width: 100%;
   }
 }
@@ -521,6 +583,7 @@ const startSpeechRecognition = () => {
 .el-popper {
   background-color: var(--background-color) !important;
 }
+
 :deep(.el-popover.el-popper) {
   max-width: none;
   width: 300px !important;

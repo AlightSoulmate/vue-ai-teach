@@ -11,17 +11,17 @@ const router = createRouter({
     {
       path: "/login",
       name: "Login",
-      component: () => import("@/views/loginPage.vue"),
+      component: () => import("@/pages/loginPage.vue"),
     },
     {
       path: "/form",
       name: "Form",
-      component: () => import("@/views/formPage.vue"),
+      component: () => import("@/pages/formPage.vue"),
     },
     {
       path: "/",
       name: "Index",
-      component: () => import("@/views/mainPage.vue"),
+      component: () => import("@/pages/mainPage.vue"),
       redirect: "/home",
       children: [
         {
@@ -32,54 +32,54 @@ const router = createRouter({
         {
           path: "forum",
           name: "Forum",
-          component: () => import("@/views/tool/forumPage.vue"),
+          component: () => import("@/pages/tool/forumPage.vue"),
         },
         {
           path: "studentCourse",
           name: "StudentCourse",
-          component: () => import("@/views/student/course.vue"),
+          component: () => import("@/pages/student/course.vue"),
         },
         {
           path: "studentInbox",
           name: "StudentInbox",
-          component: () => import("@/views/student/inbox.vue"),
+          component: () => import("@/pages/student/inbox.vue"),
         },
         {
           path: "teacherCourse",
           name: "TeacherCourse",
-          component: () => import("@/views/teacher/course.vue"),
+          component: () => import("@/pages/teacher/course.vue"),
         },
         {
           path: "teacherInbox",
           name: "TeacherInbox",
-          component: () => import("@/views/teacher/inbox.vue"),
+          component: () => import("@/pages/teacher/inbox.vue"),
         },
         {
           path: "stuList",
           name: "StuList",
-          component: () => import("@/views/admin/stuList.vue"),
+          component: () => import("@/pages/admin/stuList.vue"),
         },
         {
           path: "teaList",
           name: "TeaList",
-          component: () => import("@/views/admin/teaList.vue"),
+          component: () => import("@/pages/admin/teaList.vue"),
         },
         {
           path: "toolList",
           name: "ToolList",
-          component: () => import("@/views/admin/toolList.vue"),
+          component: () => import("@/pages/admin/toolList.vue"),
         },
         {
           path: "setup",
           name: "Setup",
-          component: () => import("@/views/setupPage.vue"),
+          component: () => import("@/pages/setupPage.vue"),
         },
       ],
     },
     {
       path: "/detail",
       name: "Detail",
-      component: () => import("@/views/tool/detailPage.vue"),
+      component: () => import("@/pages/tool/detailPage.vue"),
     },
   ],
 });
