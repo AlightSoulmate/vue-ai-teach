@@ -1,3 +1,13 @@
+<script lang="ts" setup>
+import { ref } from "vue";
+import { Search } from "@element-plus/icons-vue";
+
+const searchText = ref("");
+const fakeSearch = () => {
+  console.log("click search");
+};
+</script>
+
 <template>
   <div class="search-container">
     <el-input
@@ -9,16 +19,6 @@
     />
   </div>
 </template>
-
-<script lang="ts" setup>
-import { ref } from "vue";
-import { Search } from "@element-plus/icons-vue";
-
-const searchText = ref("");
-const fakeSearch = () => {
-  console.log('click search');
-};
-</script>
 
 <style scoped>
 .search-container {

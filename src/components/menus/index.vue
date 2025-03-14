@@ -1,3 +1,47 @@
+<script lang="ts" setup>
+import { ref } from "vue";
+import {
+  Menu as IconMenu,
+  Location,
+  Setting,
+  Memo,
+  Expand,
+  Fold,
+} from "@element-plus/icons-vue";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { computed } from "vue";
+
+const authStore = useAuthStore();
+const activeMenu = ref("/home");
+const isCollapse = ref<boolean>(false);
+
+const role = computed(() => ({
+  isStudent: authStore.user.role === "student",
+  isTeacher: authStore.user.role === "teacher",
+  isAdmin: authStore.user.role === "admin",
+}));
+
+const paths = ref<Record<any, string>>({
+  tools: "/home",
+  forum: "/forum",
+  toolList: "/toolList",
+  stuList: "/stuList",
+  teaList: "/teaList",
+  teacherCrouse: "/teacherCourse",
+  teacherInbox: "/teacherInbox",
+  studentCrouse: "/studentCourse",
+  studentInbox: "/studentInbox",
+  setup: "/setup",
+});
+
+const toggleCollapse = (): void => {
+  isCollapse.value = !isCollapse.value;
+  emit("collapse", isCollapse.value);
+};
+
+const emit = defineEmits(["collapse"]);
+</script>
+
 <template>
   <div class="menu-container">
     <div class="collapse-trigger">
@@ -61,50 +105,8 @@
     </el-menu>
   </div>
 </template>
-<script lang="ts" setup>
-import { ref } from "vue";
-import {
-  Menu as IconMenu,
-  Location,
-  Setting,
-  Memo,
-  Expand,
-  Fold,
-} from "@element-plus/icons-vue";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { computed } from "vue";
 
-const authStore = useAuthStore();
-const activeMenu = ref("/home");
-const isCollapse = ref<boolean>(false);
-
-const role = computed(() => ({
-  isStudent: authStore.user.role === "student",
-  isTeacher: authStore.user.role === "teacher",
-  isAdmin: authStore.user.role === "admin",
-}));
-
-const paths = ref<Record<any, string>>({
-  tools: "/home",
-  forum: "/forum",
-  toolList: "/toolList",
-  stuList: "/stuList",
-  teaList: "/teaList",
-  teacherCrouse: "/teacherCourse",
-  teacherInbox: "/teacherInbox",
-  studentCrouse: "/studentCourse",
-  studentInbox: "/studentInbox",
-  setup: "/setup",
-});
-
-const toggleCollapse = (): void => {
-  isCollapse.value = !isCollapse.value;
-  emit("collapse", isCollapse.value);
-};
-
-const emit = defineEmits(["collapse"]);
-</script>
-<style scoped>
+<style scoped lang="scss">
 .menu-container {
   display: flex;
   flex-direction: column;

@@ -1,3 +1,26 @@
+<script lang="ts" setup>
+import { ref } from "vue";
+import Icon from "../use/icon.vue";
+import Illustrate from "../use/illustrate.vue";
+import Theme from "../use/theme.vue";
+import Github from "../use/github.vue";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { useThemeStore } from "@/stores/useThemeStore";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+const authStore = useAuthStore();
+const themeStore = useThemeStore();
+const logo = ref("https://a1.x914.com/alight/i/AITeach/white-zisu-logo.png");
+const logoDark = ref(
+  "https://a1.x914.com/alight/i/AITeach/black-zisu-logo.png"
+);
+
+const handleLogin = () => {
+  router.push("/form");
+};
+</script>
+
 <template>
   <div class="nav">
     <div class="glass-effect">
@@ -49,29 +72,6 @@
     </div>
   </div>
 </template>
-
-<script lang="ts" setup>
-import { ref } from "vue";
-import Icon from "../use/icon.vue";
-import Illustrate from "../use/illustrate.vue";
-import Theme from "../use/theme.vue";
-import Github from "../use/github.vue";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { useThemeStore } from "@/stores/useThemeStore";
-import { useRouter } from "vue-router";
-
-const router = useRouter();
-const authStore = useAuthStore();
-const themeStore = useThemeStore();
-const logo = ref("https://a1.x914.com/alight/i/AITeach/white-zisu-logo.png");
-const logoDark = ref(
-  "https://a1.x914.com/alight/i/AITeach/black-zisu-logo.png"
-);
-
-const handleLogin = () => {
-  router.push("/form");
-};
-</script>
 
 <style scoped>
 .nav {

@@ -1,26 +1,3 @@
-<template>
-  <el-dropdown class="user-dropdown">
-    <div class="user-info">
-      <span class="help-content">使用帮助</span>
-      <el-icon class="el-icon--right">
-        <arrow-down />
-      </el-icon>
-    </div>
-    <template #dropdown>
-      <el-dropdown-menu>
-        <el-dropdown-item @click="handleInstructions">
-          <el-icon><HelpFilled /></el-icon>使用说明
-        </el-dropdown-item>
-        <el-dropdown-item @click="authStore.open(() => ContributionTitle)">
-          <el-icon><MagicStick /></el-icon>贡献工具
-        </el-dropdown-item>
-        <el-dropdown-item @click="authStore.open(() => ContactUsTitle)">
-          <el-icon><Connection /></el-icon>联系我们
-        </el-dropdown-item>
-      </el-dropdown-menu>
-    </template>
-  </el-dropdown>
-</template>
 <script lang="ts" setup>
 import {
   ArrowDown,
@@ -45,6 +22,31 @@ const handleContactUs = () => {
   console.log("handleContactUs");
 };
 </script>
+
+<template>
+  <el-dropdown class="user-dropdown">
+    <div class="user-info">
+      <span class="help-content">使用帮助</span>
+      <el-icon class="el-icon--right">
+        <arrow-down />
+      </el-icon>
+    </div>
+    <template #dropdown>
+      <el-dropdown-menu>
+        <el-dropdown-item @click="handleInstructions">
+          <el-icon><HelpFilled /></el-icon>使用说明
+        </el-dropdown-item>
+        <el-dropdown-item @click="authStore.open(() => ContributionTitle)">
+          <el-icon><MagicStick /></el-icon>贡献工具
+        </el-dropdown-item>
+        <el-dropdown-item @click="authStore.open(() => ContactUsTitle)">
+          <el-icon><Connection /></el-icon>联系我们
+        </el-dropdown-item>
+      </el-dropdown-menu>
+    </template>
+  </el-dropdown>
+</template>
+
 <style scoped>
 .user-dropdown {
   cursor: pointer;

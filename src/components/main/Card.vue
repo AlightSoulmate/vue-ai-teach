@@ -1,3 +1,5 @@
+<script lang="ts" setup></script>
+
 <template>
   <div class="card">
     <div class="card-content">
@@ -22,8 +24,6 @@
     </div>
   </div>
 </template>
-
-<script lang="ts" setup></script>
 
 <style lang="scss" scoped>
 .card {

@@ -1,88 +1,3 @@
-<template>
-  <el-dropdown class="user-dropdown">
-    <div class="user-info">
-      <el-avatar :size="32" :src="userAvatar">
-        {{ authStore.user.nickname?.charAt(0) }}
-      </el-avatar>
-      <span class="username">{{ authStore.user.nickname }}</span>
-    </div>
-    <template #dropdown>
-      <el-dropdown-menu>
-        <el-dropdown-item>
-          <el-icon><User /></el-icon>ID: {{ authStore.user.id }}
-        </el-dropdown-item>
-        <el-dropdown-item>
-          <el-icon><Avatar /></el-icon>账号：{{ authStore.user.username }}
-        </el-dropdown-item>
-        <el-dropdown-item>
-          <el-icon><UserFilled /></el-icon>
-          身份: {{ authStore.currentRoleCN }}
-        </el-dropdown-item>
-        <el-dropdown-item @click="handleModifyNickname">
-          <el-icon><EditPen /></el-icon>修改昵称
-        </el-dropdown-item>
-        <el-dropdown-item @click="passwordDialogVisible = true">
-          <el-icon><Key /></el-icon>修改密码
-        </el-dropdown-item>
-        <el-dropdown-item @click="handleLogout" divided>
-          <el-icon><Logout /></el-icon>退出登录
-        </el-dropdown-item>
-      </el-dropdown-menu>
-    </template>
-  </el-dropdown>
-
-  <!-- 修改密码对话框 -->
-  <el-dialog
-    v-model="passwordDialogVisible"
-    title="修改密码"
-    width="400px"
-    center
-    destroy-on-close
-    append-to-body
-    :modal-append-to-body="true"
-    class="password-dialog"
-  >
-    <el-form
-      :model="passwordForm"
-      :rules="passwordRules"
-      ref="passwordFormRef"
-      label-width="100px"
-      status-icon
-    >
-      <el-form-item label="旧密码" prop="oldPassword">
-        <el-input
-          v-model="passwordForm.oldPassword"
-          type="password"
-          show-password
-          placeholder="请输入旧密码"
-        />
-      </el-form-item>
-      <el-form-item label="新密码" prop="newPassword">
-        <el-input
-          v-model="passwordForm.newPassword"
-          type="password"
-          show-password
-          placeholder="请输入新密码"
-        />
-      </el-form-item>
-      <el-form-item label="确认密码" prop="confirmPassword">
-        <el-input
-          v-model="passwordForm.confirmPassword"
-          type="password"
-          show-password
-          placeholder="请确认新密码"
-        />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="passwordDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitPasswordChange">确认</el-button>
-      </span>
-    </template>
-  </el-dialog>
-</template>
-
 <script lang="ts" setup>
 import { ElMessageBox, ElMessage } from "element-plus";
 import { onMounted, ref, reactive } from "vue";
@@ -97,6 +12,7 @@ import {
 import { useAuthStore } from "@/stores/useAuthStore";
 import type { FormInstance, FormRules } from "element-plus";
 import { change } from "@/services/AuthService";
+
 const authStore = useAuthStore();
 const userAvatar = "";
 const passwordDialogVisible = ref(false);
@@ -190,6 +106,91 @@ onMounted(() => {
       };
 });
 </script>
+
+<template>
+  <el-dropdown class="user-dropdown">
+    <div class="user-info">
+      <el-avatar :size="32" :src="userAvatar">
+        {{ authStore.user.nickname?.charAt(0) }}
+      </el-avatar>
+      <span class="username">{{ authStore.user.nickname }}</span>
+    </div>
+    <template #dropdown>
+      <el-dropdown-menu>
+        <el-dropdown-item>
+          <el-icon><User /></el-icon>ID: {{ authStore.user.id }}
+        </el-dropdown-item>
+        <el-dropdown-item>
+          <el-icon><Avatar /></el-icon>账号：{{ authStore.user.username }}
+        </el-dropdown-item>
+        <el-dropdown-item>
+          <el-icon><UserFilled /></el-icon>
+          身份: {{ authStore.currentRoleCN }}
+        </el-dropdown-item>
+        <el-dropdown-item @click="handleModifyNickname">
+          <el-icon><EditPen /></el-icon>修改昵称
+        </el-dropdown-item>
+        <el-dropdown-item @click="passwordDialogVisible = true">
+          <el-icon><Key /></el-icon>修改密码
+        </el-dropdown-item>
+        <el-dropdown-item @click="handleLogout" divided>
+          <el-icon><Logout /></el-icon>退出登录
+        </el-dropdown-item>
+      </el-dropdown-menu>
+    </template>
+  </el-dropdown>
+
+  <!-- 修改密码对话框 -->
+  <el-dialog
+    v-model="passwordDialogVisible"
+    title="修改密码"
+    width="400px"
+    center
+    destroy-on-close
+    append-to-body
+    :modal-append-to-body="true"
+    class="password-dialog"
+  >
+    <el-form
+      :model="passwordForm"
+      :rules="passwordRules"
+      ref="passwordFormRef"
+      label-width="100px"
+      status-icon
+    >
+      <el-form-item label="旧密码" prop="oldPassword">
+        <el-input
+          v-model="passwordForm.oldPassword"
+          type="password"
+          show-password
+          placeholder="请输入旧密码"
+        />
+      </el-form-item>
+      <el-form-item label="新密码" prop="newPassword">
+        <el-input
+          v-model="passwordForm.newPassword"
+          type="password"
+          show-password
+          placeholder="请输入新密码"
+        />
+      </el-form-item>
+      <el-form-item label="确认密码" prop="confirmPassword">
+        <el-input
+          v-model="passwordForm.confirmPassword"
+          type="password"
+          show-password
+          placeholder="请确认新密码"
+        />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="passwordDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitPasswordChange">确认</el-button>
+      </span>
+    </template>
+  </el-dialog>
+</template>
 
 <style scoped>
 .user-dropdown {

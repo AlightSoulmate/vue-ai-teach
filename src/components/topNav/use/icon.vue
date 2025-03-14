@@ -1,12 +1,3 @@
-<template>
-  <div class="grid-content" @click="goBackHome">
-    <img
-      :src="themeStore.isDarkTheme ? logoSrcDark : logoSrc"
-      alt="logo"
-      class="logo name"
-    />
-  </div>
-</template>
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -25,6 +16,17 @@ const goBackHome = () => {
   router.push(path);
 };
 </script>
+
+<template>
+  <div class="grid-content" @click="goBackHome">
+    <img
+      :src="themeStore.isDarkTheme ? logoSrcDark : logoSrc"
+      alt="logo"
+      class="logo name"
+    />
+  </div>
+</template>
+
 <style scoped>
 .grid-content {
   min-height: 55px;

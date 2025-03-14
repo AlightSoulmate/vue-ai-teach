@@ -1,3 +1,58 @@
+<script lang="ts" setup>
+import { ref, onMounted, onUnmounted, watch } from "vue";
+import { useRouter } from "vue-router";
+import { useToolsStore } from "@/stores/useToolsStore";
+import { useSelectedToolStore } from "@/stores/useSelectedToolStore";
+import Card from "@/components/main/Card.vue";
+import BackTop from "@/components/use/backTop.vue";
+
+const route = useRouter();
+const toolsStore = useToolsStore();
+const selectToolStore = useSelectedToolStore();
+const activeName = ref("对话模型");
+const titleH1 = ref("AI / LLM 模型工具集");
+const titleH2 = ref(
+  "100+中文 AI / LLM工具本站链接直达、体验工具后可以留下您对它的评价并写下评分的依据，谢谢！"
+);
+
+const handleClick = (e: MouseEvent) => {
+  e.preventDefault();
+};
+
+const gotoSite = (url: string) => {
+  window.location.href = url;
+};
+
+const gotoDetail = (tool: any) => {
+  selectToolStore.selectTool(tool);
+  route.push("/detail");
+};
+const handleSelect = (category: string) => {
+  activeName.value = category;
+  localStorage.setItem("activeName", JSON.stringify(category));
+  scrollToCategory(category);
+};
+
+onMounted(() => {
+  toolsStore.fetchCategory();
+  const storedActive = localStorage.getItem("activeName");
+  storedActive
+    ? (activeName.value = JSON.parse(storedActive))
+    : (activeName.value = "对话模型");
+  setTimeout(() => {
+    handleSelect(activeName.value);
+  }, 300);
+});
+const scrollToCategory = (category: string) => {
+  const targetLink = document.querySelector(
+    `.el-anchor a[href="#${category}"]`
+  );
+  if (targetLink) {
+    (targetLink as HTMLElement).click();
+  }
+};
+</script>
+
 <template>
   <el-container>
     <div class="main-container">
@@ -85,60 +140,6 @@
     </div>
   </el-container>
 </template>
-
-<script lang="ts" setup>
-import { ref, onMounted, onUnmounted, watch } from "vue";
-import Card from "@/components/main/Card.vue";
-import BackTop from "@/components/use/backTop.vue";
-import { useRouter } from "vue-router";
-import { useToolsStore } from "@/stores/useToolsStore";
-import { useSelectedToolStore } from "@/stores/useSelectedToolStore";
-
-const handleClick = (e: MouseEvent) => {
-  e.preventDefault();
-};
-const route = useRouter();
-const toolsStore = useToolsStore();
-const selectToolStore = useSelectedToolStore();
-const titleH1 = ref("AI / LLM 模型工具集");
-const titleH2 = ref(
-  "100+中文 AI / LLM工具本站链接直达、体验工具后可以留下您对它的评价并写下评分的依据，谢谢！"
-);
-const activeName = ref("对话模型");
-
-const gotoSite = (url: string) => {
-  window.location.href = url;
-};
-
-const gotoDetail = (tool: any) => {
-  selectToolStore.selectTool(tool);
-  route.push("/detail");
-};
-const handleSelect = (category: string) => {
-  activeName.value = category;
-  localStorage.setItem("activeName", JSON.stringify(category));
-  scrollToCategory(category);
-};
-
-onMounted(() => {
-  toolsStore.fetchCategory();
-  const storedActive = localStorage.getItem("activeName");
-  storedActive
-    ? (activeName.value = JSON.parse(storedActive))
-    : (activeName.value = "对话模型");
-  setTimeout(() => {
-    handleSelect(activeName.value);
-  }, 300);
-});
-const scrollToCategory = (category: string) => {
-  const targetLink = document.querySelector(
-    `.el-anchor a[href="#${category}"]`
-  );
-  if (targetLink) {
-    (targetLink as HTMLElement).click();
-  }
-};
-</script>
 
 <style scoped lang="scss">
 * {

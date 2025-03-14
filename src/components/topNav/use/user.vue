@@ -1,11 +1,5 @@
-<template>
-  <div class="auth-buttons">
-        <el-button type="primary" @click="handleLogin" text>登录</el-button>
-        <el-button type="primary" @click="handleRegister">注册</el-button>
-      </div>
-</template>
 <script lang="ts" setup>
-import { ElMessage } from 'element-plus';
+import { ElMessage } from "element-plus";
 const handleLogin = () => {
   ElMessage({
     message: "从下面的登录框登入",
@@ -20,6 +14,14 @@ const handleRegister = () => {
   });
 };
 </script>
+
+<template>
+  <div class="auth-buttons">
+    <el-button type="primary" @click="handleLogin" text>登录</el-button>
+    <el-button type="primary" @click="handleRegister">注册</el-button>
+  </div>
+</template>
+
 <style scoped>
 .auth-buttons {
   display: flex;

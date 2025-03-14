@@ -1,3 +1,5 @@
+<script lang="ts" setup></script>
+
 <template>
   <div class="github-content">
     <a
@@ -20,12 +22,8 @@
     </a>
   </div>
 </template>
-<script lang="ts" setup></script>
+
 <style scoped>
-/* .github-content {
-  min-height: 40px;
-  line-height: 50px;
-} */
 .github-link {
   display: flex;
   min-height: 55px;

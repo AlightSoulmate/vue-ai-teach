@@ -16,7 +16,7 @@ export const GetUsers = async (Authorization: string) => {
   }
 };
 
-// Update users' info ( nickname | username |  password )
+// Update users' info
 export const UpdateUser = async (
   id: number,
   role: string,

@@ -1,3 +1,13 @@
+<script lang="ts" setup>
+import { useThemeStore } from "@/stores/useThemeStore";
+
+const themeStore = useThemeStore();
+
+const toggleTheme = () => {
+  themeStore.toggleTheme();
+};
+</script>
+
 <template>
   <div class="grid-content">
     <label class="switch">
@@ -28,15 +38,7 @@
     </label>
   </div>
 </template>
-<script lang="ts" setup>
-import { useThemeStore } from "@/stores/useThemeStore";
 
-const themeStore = useThemeStore();
-
-const toggleTheme = () => {
-  themeStore.toggleTheme();
-};
-</script>
 <style scoped>
 .grid-content {
   min-height: 55px;

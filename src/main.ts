@@ -9,10 +9,10 @@ import "element-plus/dist/index.css";
 import "@/styles/light-theme.scss";
 import "@/styles/dark-theme.scss";
 
-if (import.meta.env.MODE === "development") {
-  import("@/mock/mockData")
-    .then(() => console.log("Mock √"))
-    .catch((e) => console.error("Mock X", e));
+if (import.meta.env.DEV) {
+  import("@/mock")
+    .then(() => console.log("Mock OK"))
+    .catch((e) => console.error("Mock Failed", e));
 }
 
 const app = createApp(App);

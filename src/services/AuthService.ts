@@ -3,7 +3,8 @@ import { ElMessage } from "element-plus";
 import type { AuthResponse, AuthLoginResponse } from "@/interfaces";
 import service from "./config";
 
-/* Authentication & User Actions 
+/* 
+  Authentication & User Actions 
   - Registration 
   - Login
   - User update info

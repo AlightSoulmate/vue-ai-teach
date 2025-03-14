@@ -1,28 +1,3 @@
-<template>
-  <div class="nav">
-    <div class="glass-effect">
-      <!-- 左侧 -->
-      <div class="nav-left">
-        <Icon />
-        <img
-          :src="themeStore.isDarkTheme ? logoDark: logo"
-          alt="logo"
-          class="logo"
-        />
-        <Search />
-      </div>
-
-      <!-- 右侧 -->
-      <div class="nav-right">
-        <Theme />
-        <Illustrate />
-        <Github />
-        <Mine />
-      </div>
-    </div>
-  </div>
-</template>
-
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useThemeStore } from "@/stores/useThemeStore";
@@ -39,6 +14,28 @@ const logoDark = ref(
   "https://a1.x914.com/alight/i/AITeach/black-zisu-logo.png"
 );
 </script>
+
+<template>
+  <div class="nav">
+    <div class="glass-effect">
+      <div class="nav-left">
+        <Icon />
+        <img
+          :src="themeStore.isDarkTheme ? logoDark : logo"
+          alt="logo"
+          class="logo"
+        />
+        <Search />
+      </div>
+      <div class="nav-right">
+        <Theme />
+        <Illustrate />
+        <Github />
+        <Mine />
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .nav {
