@@ -1,6 +1,6 @@
 # AITeach
 
-基于 Vue 3 + TypeScript + Vite 构建的高效智能教学平台界面。
+基于 Vue 3 + TypeScript + Vite 构建的高校智能教学平台界面。
 
 ## 功能特性
 
