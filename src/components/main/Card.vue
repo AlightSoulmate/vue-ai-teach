@@ -1,7 +1,37 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { ref, onMounted, onUnmounted } from "vue";
+
+const isVisible = ref(false);
+const cardRef = ref<HTMLElement | null>(null);
+
+const observer = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        isVisible.value = true;
+        observer.unobserve(entry.target);
+      }
+    });
+  },
+  {
+    threshold: 0.05,
+    rootMargin: "100px",
+  }
+);
+
+onMounted(() => {
+  if (cardRef.value) {
+    observer.observe(cardRef.value);
+  }
+});
+
+onUnmounted(() => {
+  observer.disconnect();
+});
+</script>
 
 <template>
-  <div class="card">
+  <div class="card" ref="cardRef" :class="{ 'is-visible': isVisible }">
     <div class="card-content">
       <div class="card-header">
         <slot name="header">
@@ -34,9 +64,19 @@
   display: flex;
   flex-direction: column;
   box-shadow: 1px 3px 12px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
   overflow: hidden;
   position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+  visibility: hidden;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+    transition-delay: min(calc(var(--index, 0) * 50ms), 200ms);
+    visibility: visible;
+  }
 
   &::before {
     content: "";
@@ -52,11 +92,12 @@
     transform-origin: 50% 50%;
     transition: transform 0.25s ease-out;
   }
+
   &:hover {
-    transform: translateY(-1px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     color: #ffffff;
   }
+
   &:hover::before {
     transform: scale(21);
   }
@@ -66,6 +107,8 @@
     padding: 10px 16px;
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 1;
 
     .card-header {
       display: flex;
@@ -99,10 +142,11 @@
       font-size: 11px;
     }
   }
+
   ::v-deep(.card-content:hover) {
-    transition: all 0.25s ease-out;
     color: rgba(255, 255, 255, 0.9);
   }
+
   .go-corner {
     display: flex;
     align-items: center;
@@ -115,6 +159,7 @@
     right: 0;
     background-color: #00838d;
     border-radius: 0 4px 0 32px;
+    z-index: 2;
   }
 
   .go-arrow {

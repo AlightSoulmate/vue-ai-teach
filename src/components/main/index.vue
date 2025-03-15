@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useToolsStore } from "@/stores/useToolsStore";
 import { useSelectedToolStore } from "@/stores/useSelectedToolStore";
@@ -14,6 +14,8 @@ const titleH1 = ref("AI / LLM 模型工具集");
 const titleH2 = ref(
   "100+中文 AI / LLM工具本站链接直达、体验工具后可以留下您对它的评价并写下评分的依据，谢谢！"
 );
+const loading = ref(true);
+const initialLoading = ref(true);
 
 const handleClick = (e: MouseEvent) => {
   e.preventDefault();
@@ -27,22 +29,30 @@ const gotoDetail = (tool: any) => {
   selectToolStore.selectTool(tool);
   route.push("/detail");
 };
+
 const handleSelect = (category: string) => {
   activeName.value = category;
   localStorage.setItem("activeName", JSON.stringify(category));
   scrollToCategory(category);
 };
 
-onMounted(() => {
-  toolsStore.fetchCategory();
+onMounted(async () => {
+  initialLoading.value = true;
+  loading.value = true;
+
+  await toolsStore.fetchCategory();
   const storedActive = localStorage.getItem("activeName");
-  storedActive
-    ? (activeName.value = JSON.parse(storedActive))
-    : (activeName.value = "对话模型");
-  setTimeout(() => {
-    handleSelect(activeName.value);
-  }, 300);
+  activeName.value = storedActive ? JSON.parse(storedActive) : "对话模型";
+  handleSelect(activeName.value);
+
+  // 首屏加载完成
+  initialLoading.value = false;
+
+  // 等待所有类别加载完成
+  await new Promise((resolve) => setTimeout(resolve, 100)); // 给UI一个更新的机会
+  loading.value = false;
 });
+
 const scrollToCategory = (category: string) => {
   const targetLink = document.querySelector(
     `.el-anchor a[href="#${category}"]`
@@ -51,10 +61,17 @@ const scrollToCategory = (category: string) => {
     (targetLink as HTMLElement).click();
   }
 };
+
+// 添加计算属性来获取已加载的类别
+const loadedCategories = computed(() => {
+  return toolsStore.categories.filter((category) =>
+    toolsStore.loadedCategories.has(category)
+  );
+});
 </script>
 
 <template>
-  <el-container>
+  <el-container v-loading="initialLoading">
     <div class="main-container">
       <div class="header">
         <div class="title">
@@ -62,55 +79,86 @@ const scrollToCategory = (category: string) => {
         </div>
       </div>
       <el-main class="main">
-        <div
-          v-for="category in toolsStore.categories"
-          :label="category"
-          :name="category"
-          :key="category"
-        >
-          <div class="card-title" :id="category">{{ category }}</div>
-          <div class="cat-main">
-            <Card
-              v-for="(tool, index) in toolsStore.toolsByCategory[category]"
-              :key="index"
-              class="tool-card"
-              @click="gotoDetail(tool)"
-            >
-              <template #header>
-                <div class="tool-logo">
-                  <img :src="tool.logo_url" :title="tool.name" />
-                  <div class="tool-name">{{ tool.name }}</div>
-                </div>
-              </template>
-              <template #default>
-                <p class="tool-desc" @click="gotoDetail(tool)">
-                  {{ tool.description }}
-                </p>
-              </template>
-              <template #info>
-                <div class="tool-info">
-                  <div class="rating">
-                    <span class="rating-score">{{ tool.score }}</span>
-                    <div class="rating-stars">
-                      <el-rate
-                        v-model="tool.score"
-                        disabled
-                        text-color="#ff9800"
-                        score-template="{value}"
-                        :show-score="false"
-                      />
+        <template v-if="!initialLoading">
+          <div
+            v-for="category in loadedCategories"
+            :label="category"
+            :name="category"
+            :key="category"
+          >
+            <div class="card-title" :id="category">{{ category }}</div>
+            <div class="cat-main">
+              <Card
+                v-for="(tool, index) in toolsStore.toolsByCategory[category]"
+                :key="tool.id"
+                class="tool-card"
+                :style="{ '--index': index % 8 }"
+                @click="gotoDetail(tool)"
+              >
+                <template #header>
+                  <div class="tool-logo">
+                    <img :src="tool.logo_url" :title="tool.name" />
+                    <div class="tool-name">{{ tool.name }}</div>
+                  </div>
+                </template>
+                <template #default>
+                  <p class="tool-desc" @click="gotoDetail(tool)">
+                    {{ tool.description }}
+                  </p>
+                </template>
+                <template #info>
+                  <div class="tool-info">
+                    <div class="rating">
+                      <span class="rating-score">{{ tool.score }}</span>
+                      <div class="rating-stars">
+                        <el-rate
+                          v-model="tool.score"
+                          disabled
+                          text-color="#ff9800"
+                          score-template="{value}"
+                          :show-score="false"
+                        />
+                      </div>
+                    </div>
+                    <div class="rating-count">
+                      已有
+                      {{ tool.ratingCount ?? Math.floor(Math.random() * 100) }}
+                      人评分
                     </div>
                   </div>
-                  <div class="rating-count">
-                    已有
-                    {{ tool.ratingCount ?? Math.floor(Math.random() * 100) }}
-                    人评分
-                  </div>
-                </div>
-              </template>
-            </Card>
+                </template>
+              </Card>
+            </div>
           </div>
-        </div>
+
+          <!-- 显示剩余类别的加载状态 -->
+          <div v-if="loading" class="skeleton-container">
+            <div v-for="i in 2" :key="i" class="skeleton-category">
+              <div class="skeleton-title"></div>
+              <div class="skeleton-cards">
+                <div v-for="j in 4" :key="j" class="skeleton-card">
+                  <div class="skeleton-header"></div>
+                  <div class="skeleton-body"></div>
+                  <div class="skeleton-info"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+        <template v-else>
+          <div class="skeleton-container">
+            <div v-for="i in 3" :key="i" class="skeleton-category">
+              <div class="skeleton-title"></div>
+              <div class="skeleton-cards">
+                <div v-for="j in 4" :key="j" class="skeleton-card">
+                  <div class="skeleton-header"></div>
+                  <div class="skeleton-body"></div>
+                  <div class="skeleton-info"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
       </el-main>
       <el-footer>
         <div class="footer">Footer</div>
@@ -316,5 +364,77 @@ const scrollToCategory = (category: string) => {
     display: none;
     width: 0;
   }
+}
+
+.skeleton-container {
+  padding: 20px;
+}
+
+.skeleton-category {
+  margin-bottom: 40px;
+}
+
+.skeleton-title {
+  height: 24px;
+  width: 120px;
+  background: var(--el-skeleton-color);
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.skeleton-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.skeleton-card {
+  height: 160px;
+  background: var(--el-skeleton-color);
+  border-radius: 3px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .skeleton-header {
+    height: 48px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+  }
+
+  .skeleton-body {
+    height: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  .skeleton-info {
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+.skeleton-card,
+.skeleton-title {
+  background: linear-gradient(
+    90deg,
+    var(--el-skeleton-color) 25%,
+    var(--el-skeleton-to-color) 37%,
+    var(--el-skeleton-color) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-loading 1.4s ease infinite;
 }
 </style>

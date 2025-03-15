@@ -6,8 +6,8 @@ import {
   createStyleImportPlugin,
   ElementPlusResolve,
 } from "vite-plugin-style-import";
-import viteCompression from "vite-plugin-compression"; // gzip压缩减少包体积
-import { visualizer } from "rollup-plugin-visualizer"; // 打包分析工具
+import viteCompression from "vite-plugin-compression";
+import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
   plugins: [

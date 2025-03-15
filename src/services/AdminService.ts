@@ -1,5 +1,8 @@
 // services/adminServices.ts
 import axios from "axios";
+import service from "./config";
+
+///// 代码请求路径修改，出现/api混乱问题 2025.3.14 /////
 
 /* Admin Operations 
   - User Management
@@ -26,8 +29,8 @@ export const UpdateUser = async (
   username: string
 ) => {
   try {
-    const response = await axios.put(
-      "/api/auth",
+    const response = await service.put(
+      "/auth",
       {
         Authorization,
         password,
@@ -54,8 +57,8 @@ export const DeleteUser = async (
   Authorization: string
 ) => {
   try {
-    const response = await axios.post(
-      "/api/auth",
+    const response = await service.post(
+      "/auth",
       {
         Authorization,
       },
@@ -86,8 +89,8 @@ export const AddUser = async (
     password,
   };
   try {
-    const response = await axios.post(
-      "/api/auth",
+    const response = await service.post(
+      "/auth",
       {
         Authorization,
         user,
@@ -111,8 +114,8 @@ export const QueryUser = async (
   role: string
 ) => {
   try {
-    const response = await axios.post(
-      "/api/auth",
+    const response = await service.post(
+      "/auth",
       {
         Authorization,
       },
