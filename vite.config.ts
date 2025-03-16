@@ -20,6 +20,15 @@ export default defineConfig({
     visualizer({ open: true }),
   ],
   base: "./",
+  build: {
+    rollupOptions: {
+      external: (id) => {
+        return (
+          id.includes("backup/ai_tools.json") || id.includes("backup/tools.ts")
+        );
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

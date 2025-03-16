@@ -109,8 +109,11 @@ const loadedCategories = computed(() => {
                 <template #info>
                   <div class="tool-info">
                     <div class="rating">
-                      <span class="rating-score">{{ tool.score }}</span>
-                      <div class="rating-stars">
+                      <span class="rating-score"
+                        >{{ tool.score ?? Math.floor(Math.random() * 5) }}
+                      </span>
+                      <span style="margin-left: 4px">⭐</span>
+                      <!-- <div class="rating-stars">
                         <el-rate
                           v-model="tool.score"
                           disabled
@@ -118,12 +121,14 @@ const loadedCategories = computed(() => {
                           score-template="{value}"
                           :show-score="false"
                         />
+                      </div> -->
+                      <div class="rating-count">
+                        已有
+                        {{
+                          tool.ratingCount ?? Math.floor(Math.random() * 100)
+                        }}
+                        人评分
                       </div>
-                    </div>
-                    <div class="rating-count">
-                      已有
-                      {{ tool.ratingCount ?? Math.floor(Math.random() * 100) }}
-                      人评分
                     </div>
                   </div>
                 </template>
@@ -225,7 +230,6 @@ const loadedCategories = computed(() => {
     }
   }
 
-  // 主要内容区
   .main {
     padding: 5px 10px 0 20px;
 
@@ -314,7 +318,7 @@ const loadedCategories = computed(() => {
       -webkit-box-orient: vertical;
       line-height: 1.3;
       max-height: 3em;
-      margin: 0 0 4px 0;
+      margin: 0 0 8px 0;
       flex-grow: 1;
     }
     .tool-info {
@@ -325,18 +329,22 @@ const loadedCategories = computed(() => {
       .rating {
         display: flex;
         align-items: center;
-        gap: 4px;
 
         .rating-score {
           font-size: 13px;
           font-weight: 600;
           color: #ff9800;
+          padding-top: 1px;
         }
 
         .rating-stars {
           line-height: 1;
           transform: scale(0.8);
           transform-origin: left;
+        }
+
+        .rating-count {
+          margin-left: 10px;
         }
       }
     }

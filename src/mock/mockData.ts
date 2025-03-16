@@ -1,6 +1,11 @@
 // mock/mockData.ts
 import Mock from "mockjs";
-import { tools } from "../../backup/tools";
+// import { tools } from "../../backup/tools";
+import toolsData from "../../backup/ai_tools.json";
+
+const tools = {
+  value: toolsData,
+};
 
 console.log("mockData.ts - tools 导入检查:", {
   toolsExists: !!tools,

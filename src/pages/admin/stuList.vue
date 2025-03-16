@@ -112,7 +112,7 @@ import { useAdminStore } from "@/stores/useAdminStore";
 import { Search } from "@element-plus/icons-vue";
 // @ts-ignore
 import Add from "@/pages/admin/component/button.vue";
-// 考虑/view 重命名为 /pages
+
 const object = ref("student");
 const adminStore = useAdminStore();
 const currentPage = ref(1);

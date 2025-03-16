@@ -2,14 +2,13 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import { getCategories, getTools } from "@/services";
-// import { tools } from "../../backup/tools";
 
 export const useToolsStore = defineStore("tools", () => {
   const categories = ref<string[]>([]);
   const toolsByCategory = ref<Record<string, Tool[]>>({});
   const isLoading = ref(false);
   const loadedCategories = ref<Set<string>>(new Set());
-  const CACHE_TIME = 10 * 60 * 1000; // 10分钟缓存
+  const CACHE_TIME = 60 * 1000; // 10分钟缓存
 
   interface Tool {
     id: number;
@@ -137,7 +136,7 @@ export const useToolsStore = defineStore("tools", () => {
   const mapTool = (tool: any): Tool => ({
     id: tool.id,
     name: tool.name,
-    logo_url: tool.logo_url,
+    logo_url: tool.logoUrl,
     url: tool.url,
     description: tool.description,
     score: tool.score,
