@@ -1,6 +1,5 @@
 // mock/mockData.ts
 import Mock from "mockjs";
-// import { tools } from "../../backup/tools";
 import toolsData from "../../backup/ai_tools.json";
 
 const tools = {
@@ -12,10 +11,6 @@ console.log("mockData.ts - tools 导入检查:", {
   toolsValueExists: !!(tools && tools.value),
   toolsLength: tools?.value?.length,
 });
-
-/* 
-  生产环境下移除默认的用户名和密码
-*/
 
 // 1.1 用户注册
 Mock.mock("/api/user/register", "post", (req) => {

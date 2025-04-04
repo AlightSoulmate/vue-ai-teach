@@ -1,3 +1,7 @@
+/**
+  * 2025.3.29 初始化/重绘页面的时候，走马灯logo出现快速闪烁的情况, 猜测是由于异步加载导致短时多次刷新数据集，暂未修复。
+  */
+
 <template>
   <div>
     <nav class="top-nav">
@@ -5,46 +9,31 @@
     </nav>
     <div class="page-container">
       <div class="title">
-        <div class="front">{{ h1Title }}</div>
-        <div class="end">{{ h1TitleEnd }}</div>
+        <div class="front">{{ TitleFront }}</div>
+        <div class="end">{{ TitleEnd }}</div>
       </div>
       <div class="slip"><Slip class="slip-inner" /></div>
       <div class="enter">
         <Enter class="enter-inner" @click="handleLogin" />
       </div>
-      <div class="carousel"><Carousel class="carousel-inner" /></div>
-      <!-- <div class="left-section">
-      <div class="content-wrapper">
-        <div class="big-logo">
-          <img :src="logoSrc" ></img>
-        </div>
+      <div class="carousel">
+        <Carousel class="carousel-inner" />
       </div>
-    </div>
-    <div class="right-section">
-      <div class="login-container">
-        <EnterDialog />
-      </div>
-    </div> -->
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import TopNav from "@/components/topNav/login/index.vue";
+import TopNav from "@/components/topnav/login/index.vue";
 import Enter from "@/components/use/newButton.vue";
-import EnterDialog from "@/components/use/enter.vue";
 // @ts-ignore
 import Slip from "@/components/use/textSlip.vue";
 import Carousel from "@/components/use/carousel.vue";
 
 const router = useRouter();
-const h1Title = ref("浙江外国语学院");
-const h1TitleEnd = ref("AI智能教学平台");
-const h2Title = ref(
-  "AI驱动的直观教学反馈与改进，以智能化评估帮助教师和学生完成创新"
-);
-const logoSrc = ref("https://a1.x914.com/alight/i/AITeach/loginpage-logo.png");
+const TitleFront = ref("浙江外国语学院");
+const TitleEnd = ref("AI智能教学平台");
 
 const handleLogin = () => {
   router.push("/form");
@@ -54,6 +43,9 @@ const handleLogin = () => {
 * {
   margin: 0;
   padding: 0;
+}
+::-webkit-scrollbar {
+  display: none;
 }
 .top-nav {
   position: relative;

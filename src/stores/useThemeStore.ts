@@ -7,8 +7,13 @@ export const useThemeStore = defineStore("theme", () => {
   const toggleTheme = (): void => {
     isDarkTheme.value = !isDarkTheme.value;
     const newTheme = isDarkTheme.value ? "dark" : "light";
-    document.documentElement.setAttribute("data-theme", newTheme);
-    localStorage.setItem("theme", newTheme);
+
+    // 使用requestAnimationFrame确保在下一个渲染帧开始时执行DOM更新
+    // 这可以减少重排和重绘带来的性能问题
+    requestAnimationFrame(() => {
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+    });
   };
 
   const initTheme = (): void => {
@@ -20,7 +25,11 @@ export const useThemeStore = defineStore("theme", () => {
     const savedTheme =
       localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
     isDarkTheme.value = savedTheme === "dark";
-    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    // 同样使用requestAnimationFrame来设置初始主题
+    requestAnimationFrame(() => {
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    });
   };
 
   return {

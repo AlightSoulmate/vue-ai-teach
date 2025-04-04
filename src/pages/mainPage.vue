@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import TopNav from "@/components/topNav/main/index.vue";
+import TopNav from "@/components/topnav/main/index.vue";
 import Menus from "@/components/menus/index.vue";
 import Loading from "@/components/use/loading.vue";
 

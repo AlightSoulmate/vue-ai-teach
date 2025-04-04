@@ -167,7 +167,7 @@ onMounted(async () => {
 
     await nextTick();
     if (innerRef.value) {
-      max.value = innerRef.value.clientHeight - scrollHeight.value;
+      max.value = Math.max(0, innerRef.value.clientHeight - scrollHeight.value);
     }
   } catch (error) {
     console.error("初始化失败:", error);
@@ -297,6 +297,7 @@ const submitRating = debounceStore.debounce(handleSubmitRating, DEBOUNCE_DELAY);
         </div>
       </el-scrollbar>
       <el-slider
+        v-if="max > 0"
         v-model="value"
         :max="max"
         :format-tooltip="formatTooltip"

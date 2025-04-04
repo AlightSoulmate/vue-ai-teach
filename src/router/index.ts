@@ -90,13 +90,15 @@ router.beforeEach((to, from) => {
   const LoginPage = {
     from: from.name === "Login",
     to: to.name === "Login",
+    toForm: to.name === "Form",
   };
+  
   if (auth && LoginPage.to && !LoginPage.from) {
     return { name: "Home" };
   }
-  // if (!auth && !LoginPage.to && LoginPage.from) {
-  //   return { name: "Login" };
-  // }
+  if (!auth && !LoginPage.to && LoginPage.from && !LoginPage.toForm) {
+    return { name: "Login" };
+  }
 });
 
 export default router;

@@ -20,9 +20,7 @@ const observer = new IntersectionObserver(
 );
 
 onMounted(() => {
-  if (cardRef.value) {
-    observer.observe(cardRef.value);
-  }
+  cardRef.value && observer.observe(cardRef.value);
 });
 
 onUnmounted(() => {
@@ -69,6 +67,7 @@ onUnmounted(() => {
   opacity: 0;
   transform: translateY(20px);
   visibility: hidden;
+  transition: box-shadow 0.3s ease;
 
   &.is-visible {
     opacity: 1;
@@ -109,6 +108,8 @@ onUnmounted(() => {
     flex-direction: column;
     position: relative;
     z-index: 1;
+    color: var(--text-color);
+    transition: color 0.2s ease;
 
     .card-header {
       display: flex;
@@ -135,6 +136,7 @@ onUnmounted(() => {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        transition: color 0.2s ease;
       }
     }
 
@@ -143,7 +145,7 @@ onUnmounted(() => {
     }
   }
 
-  ::v-deep(.card-content:hover) {
+  &:hover .card-content {
     color: rgba(255, 255, 255, 0.9);
   }
 
