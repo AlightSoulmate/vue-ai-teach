@@ -14,7 +14,7 @@ dist-ssr
 coverage
 *.local
 status.html
-backup
+# backup
 
 /cypress/videos/
 /cypress/screenshots/
