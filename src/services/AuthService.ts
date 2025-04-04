@@ -58,7 +58,10 @@ export const login = async (
         password,
         role,
       });
+      console.log(response.status);
       return response.data;
+      if (response.status === 200) return response.data;
+      else throw new Error("登录失败");
     }
   } catch (error: any) {
     console.log(error);
@@ -82,6 +85,7 @@ export const change = async (
       nickname,
       username,
     });
+    console.log(response.data);
     return response.data;
   } catch (error: any) {
     console.log(error);

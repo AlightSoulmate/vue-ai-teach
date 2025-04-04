@@ -8,7 +8,7 @@ export const useToolsStore = defineStore("tools", () => {
   const toolsByCategory = ref<Record<string, Tool[]>>({});
   const isLoading = ref(false);
   const loadedCategories = ref<Set<string>>(new Set());
-  const CACHE_TIME = 60 * 1000; // 10分钟缓存
+  const CACHE_TIME = 5 * 60 * 1000; // 缓存10秒
 
   interface Tool {
     id: number;
@@ -136,7 +136,7 @@ export const useToolsStore = defineStore("tools", () => {
   const mapTool = (tool: any): Tool => ({
     id: tool.id,
     name: tool.name,
-    logo_url: tool.logoUrl,
+    logo_url: tool.logo_url,
     url: tool.url,
     description: tool.description,
     score: tool.score,

@@ -17,18 +17,9 @@ export default defineConfig({
       resolves: [ElementPlusResolve()],
     }),
     viteCompression(),
-    visualizer({ open: true }),
+    visualizer({ open: false }),
   ],
   base: "./",
-  build: {
-    rollupOptions: {
-      external: (id) => {
-        return (
-          id.includes("backup/ai_tools.json") || id.includes("backup/tools.ts")
-        );
-      },
-    },
-  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
@@ -37,13 +28,6 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173,
-    proxy: {
-      // "/api": {
-      //   target: "https://frp-man.com:49044",
-      //   changeOrigin: true,
-      //   rewrite: (path) => path.replace(/^\/api/, ""),
-      // },
-    },
   },
   css: {
     preprocessorOptions: {

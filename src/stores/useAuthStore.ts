@@ -3,17 +3,17 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import { register, login, change } from "@/services";
 import { useRouter } from "vue-router";
-import { ElNotification, ElMessageBox } from "element-plus";
+import { ElNotification, ElMessageBox, ElMessage } from "element-plus";
 import type { User } from "@/interfaces";
 
 export const useAuthStore = defineStore("auth", () => {
   const router = useRouter();
   const errorMessage = ref<string>("");
   const isAuthenticated = ref<boolean>(false);
-  const username = ref<string>("ycy");
-  const password = ref<string>("123456");
+  const username = ref<string>("");
+  const password = ref<string>("");
   const isLogin = ref<boolean>(true);
-  const isFresh = ref<number>(1); //临时变量，用于判断是否需要强制被批量导入的学生在首登时修改密码
+  const isFresh = ref<number>(0); //临时变量，用于判断是否需要强制被批量导入的学生在首登时修改密码
   const roles = ref<string[]>(["admin", "teacher", "student"]);
   const currentRole = ref<string>("student");
   const currentRoleCN = computed(() => {
@@ -84,7 +84,27 @@ export const useAuthStore = defineStore("auth", () => {
   };
 
   // 修改密码
-  const changeUserPassword = () => {};
+  const changeUserPassword = async (
+    newNickname: string,
+    oldPassword: string,
+    newPassword: string
+  ) => {
+    const data = await change(
+      user.value.token,
+      newNickname,
+      oldPassword,
+      newPassword,
+      user.value.username
+    );
+    localStorage.setItem("user", JSON.stringify(user.value));
+    ElNotification({
+      title: "修改成功",
+      message: "个人信息修改成功",
+      type: "success",
+    });
+    console.log(data);
+  };
+
   // 修改昵称
   const changeUserNickname = () => {
     ElMessageBox.prompt("请输入新昵称", "修改昵称", {
@@ -193,7 +213,7 @@ export const useAuthStore = defineStore("auth", () => {
       errorMessage.value = "";
       currentRole.value = user.value.role;
       localStorage.setItem("user", JSON.stringify(user.value));
-
+      localStorage.setItem("isFresh", JSON.stringify(isFresh.value));
       ElNotification({
         title: `欢迎登入，${user.value.nickname?.trim() || "未设置昵称"}${
           user.value.role === "student" || user.value.role === "teacher"
@@ -209,6 +229,11 @@ export const useAuthStore = defineStore("auth", () => {
       await router.push("/");
     } catch (error: any) {
       console.log(error);
+      if (error.message === "user not found") {
+        ElMessage.error("用户不存在！");
+      } else {
+        ElMessage.error(error.message);
+      }
       errorMessage.value = error.message ?? "登录失败";
     }
   };
@@ -242,7 +267,7 @@ export const useAuthStore = defineStore("auth", () => {
       });
       router.push("/");
     } catch (error: any) {
-      console.log(error);
+      console.error(error);
       errorMessage.value = error.message ?? "注册失败";
     }
   };

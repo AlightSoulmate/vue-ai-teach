@@ -1,28 +1,43 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { useToolsStore } from "@/stores/useToolsStore";
 import { useSelectedToolStore } from "@/stores/useSelectedToolStore";
+import { change } from "@/services/AuthService";
+import { ElMessageBox, ElMessage } from "element-plus";
+
 import Card from "@/components/main/Card.vue";
 import BackTop from "@/components/use/backTop.vue";
+import type { FormInstance, FormRules } from "element-plus";
 
 const route = useRouter();
 const toolsStore = useToolsStore();
 const selectToolStore = useSelectedToolStore();
 const activeName = ref("对话模型");
 const titleH1 = ref("AI / LLM 模型工具集");
-const titleH2 = ref(
-  "100+中文 AI / LLM工具本站链接直达、体验工具后可以留下您对它的评价并写下评分的依据，谢谢！"
-);
+
+// const titleH2 = ref(
+//   "100+中文 AI / LLM工具本站链接直达、体验工具后可以留下您对它的评价并写下评分的依据，谢谢！"
+// );
+
 const loading = ref(true);
 const initialLoading = ref(true);
+const authStore = useAuthStore();
+const dialogFormVisible = ref(false);
+const formLabelWidth = "140px";
+const form = reactive({
+  name: "",
+  oldPwd: "",
+  newPwd: "",
+  delivery: false,
+  type: [],
+  resource: "",
+  desc: "",
+});
 
 const handleClick = (e: MouseEvent) => {
   e.preventDefault();
-};
-
-const gotoSite = (url: string) => {
-  window.location.href = url;
 };
 
 const gotoDetail = (tool: any) => {
@@ -36,7 +51,80 @@ const handleSelect = (category: string) => {
   scrollToCategory(category);
 };
 
+// 修改密码和昵称
+const passwordDialogVisible = ref(false);
+const passwordFormRef = ref<FormInstance>();
+
+// (密码)表单数据
+const passwordForm = reactive({
+  nickname: "",
+  oldPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+});
+
+// 密码表单验证规则
+const passwordRules = reactive<FormRules>({
+  oldPassword: [{ required: true, message: "请输入旧密码", trigger: "blur" }],
+  newPassword: [
+    { required: true, message: "请输入新密码", trigger: "blur" },
+    { min: 6, max: 18, message: "密码长度必须在6-18位之间", trigger: "blur" },
+  ],
+  confirmPassword: [
+    { required: true, message: "请确认新密码", trigger: "blur" },
+    {
+      validator: (rule, value, callback) => {
+        if (value !== passwordForm.newPassword) {
+          callback(new Error("两次输入的密码不一致"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+});
+
+// 提交修改
+const submitPasswordChange = () => {
+  passwordFormRef.value?.validate(async (valid) => {
+    if (valid) {
+      try {
+        const data = await change(
+          authStore.user.token,
+          passwordForm.nickname,
+          passwordForm.oldPassword,
+          passwordForm.newPassword,
+          authStore.user.username
+        );
+        authStore.user.token = data.Authorization;
+        authStore.user.nickname = passwordForm.nickname;
+        localStorage.setItem("user", JSON.stringify(authStore.user));
+        authStore.isFresh = 0;
+        localStorage.setItem("isFresh", JSON.stringify(authStore.isFresh));
+        ElMessage.success("修改成功");
+        passwordDialogVisible.value = false;
+        // 重置表单
+        passwordForm.oldPassword = "";
+        passwordForm.newPassword = "";
+        passwordForm.confirmPassword = "";
+        passwordForm.nickname = "";
+      } catch {
+        ElMessage.error("修改失败,请重试");
+      }
+    }
+  });
+};
+
 onMounted(async () => {
+  // 1. 检查是否已登录
+  authStore.checkAuth();
+  if (authStore.isFresh==1) {
+    // dialogFormVisible.value = true;
+    passwordDialogVisible.value = true;
+  }
+
+  // 2. 加载工具列表
   initialLoading.value = true;
   loading.value = true;
 
@@ -68,6 +156,11 @@ const loadedCategories = computed(() => {
     toolsStore.loadedCategories.has(category)
   );
 });
+
+const ChangeInfoHandleSubmit = () => {
+  authStore.changeUserPassword(form.name, form.oldPwd, form.newPwd);
+  dialogFormVisible.value = false;
+};
 </script>
 
 <template>
@@ -192,12 +285,104 @@ const loadedCategories = computed(() => {
       <BackTop />
     </div>
   </el-container>
+
+  <!-- 对话框 ONE -->
+  <el-dialog
+    v-model="dialogFormVisible"
+    title="🚀 起一个昵称吧，同时重置密码"
+    width="600"
+    height="400"
+    :show-close="false"
+    :close-on-press-escape="false"
+    :close-on-click-modal="false"
+  >
+    <el-form :model="form">
+      <el-form-item label="设置昵称" :label-width="formLabelWidth">
+        <el-input v-model="form.name" autocomplete="off" />
+      </el-form-item>
+      <el-form-item label="输入原密码" :label-width="formLabelWidth">
+        <el-input v-model="form.oldPwd" autocomplete="off" type="password" />
+      </el-form-item>
+      <el-form-item label="输入新密码" :label-width="formLabelWidth">
+        <el-input v-model="form.newPwd" autocomplete="off" type="password" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="dialogFormVisible = false"> 取消修改 </el-button>
+        <el-button type="primary" @click="ChangeInfoHandleSubmit">
+          确定修改
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <!-- 对话框 TWO -->
+  <!-- 修改密码对话框 -->
+  <el-dialog
+    v-model="passwordDialogVisible"
+    :title="`hi! ${authStore.user.username} | 为自己设置一下昵称和密码吧`"
+    width="400px"
+    center
+    destroy-on-close
+    append-to-body
+    :modal-append-to-body="true"
+    class="password-dialog"
+    :show-close="false"
+    :close-on-press-escape="false"
+    :close-on-click-modal="false"
+  >
+    <el-form
+      :model="passwordForm"
+      :rules="passwordRules"
+      ref="passwordFormRef"
+      label-width="100px"
+      status-icon
+    >
+      <el-form-item label="昵称" prop="nickname">
+        <el-input
+          v-model="passwordForm.nickname"
+          type="password"
+          show-password
+          placeholder="请输入昵称"
+        />
+      </el-form-item>
+      <el-form-item label="旧密码" prop="oldPassword">
+        <el-input
+          v-model="passwordForm.oldPassword"
+          type="password"
+          show-password
+          placeholder="请输入旧密码"
+        />
+      </el-form-item>
+      <el-form-item label="新密码" prop="newPassword">
+        <el-input
+          v-model="passwordForm.newPassword"
+          type="password"
+          show-password
+          placeholder="请输入新密码"
+        />
+      </el-form-item>
+      <el-form-item label="确认密码" prop="confirmPassword">
+        <el-input
+          v-model="passwordForm.confirmPassword"
+          type="password"
+          show-password
+          placeholder="请确认新密码"
+        />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="passwordDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitPasswordChange">确认</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <style scoped lang="scss">
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
@@ -444,5 +629,20 @@ const loadedCategories = computed(() => {
   );
   background-size: 400% 100%;
   animation: skeleton-loading 1.4s ease infinite;
+}
+
+/* 添加对话框TWO样式 */
+:deep(.password-dialog) {
+  z-index: 3000 !important; /* 确保对话框在最上层 */
+}
+
+:deep(.el-overlay) {
+  z-index: 2999 !important; /* 确保遮罩层在对话框下方但在其他内容上方 */
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 </style>

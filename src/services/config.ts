@@ -1,17 +1,18 @@
 import axios from "axios";
-import { getBaseUrl, isMockEnabled, getMockApi } from "@/utils/env";
+import { getBaseUrl } from "@/utils/env";
 
 // 创建axios实例
 const service = axios.create({
-  baseURL: isMockEnabled() ? getMockApi() : getBaseUrl(),
-  timeout: 10000,
+  baseURL: getBaseUrl(),
+  timeout: 8000,
 });
 
 // 请求拦截器
 service.interceptors.request.use(
   (config) => {
-    console.log("Request URL:", config.url);
-    console.log("Request data:", config.data);
+    console.log("🔍 Base URL:", getBaseUrl());
+    console.log("🔍 Request URL:", config.url);
+    console.log("🔍 Request data:", config.data);
     return config;
   },
   (error) => {

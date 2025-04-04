@@ -35,7 +35,7 @@ const handleCollapse = (val: boolean): void => {
 onMounted(() => {
   setTimeout(() => {
     isLoading.value = false;
-  }, 500);
+  }, 400);
 });
 </script>
 

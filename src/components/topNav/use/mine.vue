@@ -54,13 +54,15 @@ const submitPasswordChange = () => {
       try {
         const data = await change(
           authStore.user.token,
+          authStore.user.nickname,
           passwordForm.oldPassword,
           passwordForm.newPassword,
-          authStore.user.nickname,
           authStore.user.username
         );
         authStore.user.token = data.Authorization;
         localStorage.setItem("user", JSON.stringify(authStore.user));
+        authStore.isFresh = 0;
+        localStorage.setItem("isFresh", JSON.stringify(authStore.isFresh));
         ElMessage.success("密码修改成功");
         passwordDialogVisible.value = false;
         // 重置表单
@@ -86,9 +88,9 @@ const handleLogout = () => {
 };
 
 // 修改密码
-const handleModifyPassword = () => {
-  authStore.changeUserPassword();
-};
+// const handleModifyPassword = () => {
+//   authStore.changeUserPassword();
+// };
 
 const handleModifyNickname = () => {
   authStore.changeUserNickname();

@@ -1,5 +1,5 @@
 import Mock from "mockjs";
-import { isMockEnabled } from "@/utils/env";
+import { isMockEnabled, isDevMode } from "@/utils/env";
 
 interface MockConfig {
   timeout: string | number;
@@ -14,19 +14,19 @@ const mockConfig: MockConfig = {
 Mock.setup(mockConfig);
 
 export const initMockService = async (): Promise<void> => {
-  if (!isMockEnabled()) {
+  if (!isDevMode() || !isMockEnabled()) {
+    console.error("Mock服务已禁用");
     return;
   }
 
   try {
     await import("./mockData");
-    console.log("Mock 服务启动成功");
+    console.log("🚀 Mock start up success");
   } catch (error) {
-    console.error("Mock 服务启动失败:", error);
-    throw new Error("Mock 服务初始化失败");
+    console.error("🚫 Mock start up failed:", error);
   }
 };
 
-if (import.meta.env.DEV) {
+if (isDevMode() && isMockEnabled()) {
   initMockService();
 }

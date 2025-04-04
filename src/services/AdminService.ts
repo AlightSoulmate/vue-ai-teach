@@ -2,7 +2,7 @@
 import axios from "axios";
 import service from "./config";
 
-///// 代码请求路径修改，出现/api混乱问题 2025.3.14 /////
+// 出现/api混乱 2025.3.14
 
 /* Admin Operations 
   - User Management
@@ -12,7 +12,9 @@ import service from "./config";
 // Get users
 export const GetUsers = async (Authorization: string) => {
   try {
-    const response = await axios.post("/api/auth", Authorization);
+    const response = await axios.get("/auth", {
+      data: Authorization,
+    });
     return response.data;
   } catch (error: any) {
     throw error.response ? error.response.data : { message: "请求失败" };
@@ -57,18 +59,15 @@ export const DeleteUser = async (
   Authorization: string
 ) => {
   try {
-    const response = await service.post(
-      "/auth",
-      {
+    const response = await service.delete("/auth", {
+      data: {
         Authorization,
       },
-      {
-        params: {
-          id,
-          role,
-        },
-      }
-    );
+      params: {
+        id,
+        role,
+      },
+    });
     return response.data;
   } catch (error: any) {
     throw error.response ? error.response.data : { message: "请求失败" };
@@ -114,18 +113,15 @@ export const QueryUser = async (
   role: string
 ) => {
   try {
-    const response = await service.post(
-      "/auth",
-      {
+    const response = await service.get("/auth", {
+      data: {
         Authorization,
       },
-      {
-        params: {
-          username,
-          role,
-        },
-      }
-    );
+      params: {
+        username,
+        role,
+      },
+    });
     return response.data;
   } catch (error: any) {
     throw error.response ? error.response.data : { message: "请求失败" };

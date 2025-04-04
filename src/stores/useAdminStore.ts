@@ -10,6 +10,7 @@ import {
 } from "@/services";
 import type { User, queryUser } from "@/interfaces";
 import { ElMessage } from "element-plus";
+import { useAuthStore } from "./useAuthStore";
 
 export const useAdminStore = defineStore("admin", () => {
   const students = ref<User[]>([]);
@@ -18,11 +19,14 @@ export const useAdminStore = defineStore("admin", () => {
   const totalStudents = ref<number>(0);
   const totalTeachers = ref<number>(0);
   const totalTools = ref<number>(0);
+  const authStore = useAuthStore();
 
   // Get Users
   const fetchStudents = async () => {
     try {
-      const token = JSON.parse(localStorage.getItem("user") as any).token;
+      // const token = JSON.parse(localStorage.getItem("user") as any).
+      // token;
+      const token = authStore.user.token;
       const data = await GetUsers(token);
       students.value = data.students;
       countSize(students.value, "student");
@@ -34,7 +38,8 @@ export const useAdminStore = defineStore("admin", () => {
   // Get Teachers
   const fetchTeachers = async () => {
     try {
-      const token = JSON.parse(localStorage.getItem("user") as any).token;
+      // const token = JSON.parse(localStorage.getItem("user") as any).token;
+      const token = authStore.user.token;
       const data = await GetUsers(token);
       teachers.value = data.teachers;
       countSize(teachers.value, "teacher");
@@ -56,7 +61,8 @@ export const useAdminStore = defineStore("admin", () => {
     nickname: string,
     username: string
   ) => {
-    const token = JSON.parse(localStorage.getItem("user") as any).token;
+    // const token = JSON.parse(localStorage.getItem("user") as any).token;
+    const token = authStore.user.token;
     try {
       const pwd = password || "";
       const response = await UpdateUser(
@@ -79,7 +85,8 @@ export const useAdminStore = defineStore("admin", () => {
 
   // Delete A user
   const deleteUser = async (id: number, role: string) => {
-    const token = JSON.parse(localStorage.getItem("user") as any).token;
+    // const token = JSON.parse(localStorage.getItem("user") as any).token;
+    const token = authStore.user.token;
     try {
       const response = await DeleteUser(id, role, token);
       console.log(response.message);
@@ -99,8 +106,8 @@ export const useAdminStore = defineStore("admin", () => {
     password: string,
     role: string
   ) => {
-    const token = JSON.parse(localStorage.getItem("user") as any).token;
-
+    // const token = JSON.parse(localStorage.getItem("user") as any).token;
+    const token = authStore.user.token;
     try {
       const response = await AddUser(token, nickname, username, password, role);
       console.log(response.message);
@@ -122,7 +129,8 @@ export const useAdminStore = defineStore("admin", () => {
     message: "",
   });
   const queryUser = async (username: string, role: string) => {
-    const token = JSON.parse(localStorage.getItem("user") as any).token;
+    // const token = JSON.parse(localStorage.getItem("user") as any).token;
+    const token = authStore.user.token;
     try {
       const response = await QueryUser(token, username, role);
       console.log(response);
