@@ -87,22 +87,18 @@ const router = createRouter({
 router.beforeEach((to, from) => {
   const authStore = useAuthStore();
   const auth = authStore.isAuthenticated;
-  const LoginPage = {
+  const loginPage = {
     from: from.name === "Login",
     to: to.name === "Login",
     toForm: to.name === "Form",
   };
 
-  // 如果未认证且不是前往登录页或表单页，则重定向到登录页
-  if (!auth && !LoginPage.to && !LoginPage.toForm) {
+  if (!auth && !loginPage.to && !loginPage.toForm) {
     return { name: "Login" };
-  }
-  // 如果已认证且尝试访问登录页（但不是从登录页来），则重定向到首页
-  else if (auth && LoginPage.to && !LoginPage.from) {
+  } else if (auth && loginPage.to && !loginPage.from) {
     return { name: "Home" };
   }
 
-  // 其他情况正常通过
   return true;
 });
 
