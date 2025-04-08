@@ -33,10 +33,10 @@ const handleLogin = () => {
         />
       </div>
       <div class="nav-right">
+        <!-- <Illustrate /> -->
         <Theme />
-        <Illustrate />
-        <Github />
-        <div class="auth-buttons">
+        <!-- <Github /> -->
+        <!-- <div class="auth-buttons">
           <el-button
             type="primary"
             text
@@ -52,22 +52,7 @@ const handleLogin = () => {
           >
             注册
           </el-button>
-          <!-- <el-button
-            type="primary"
-            text
-            @click="authStore.switchToLogin"
-            :class="{ active: authStore.isLogin }"
-          >
-            登录
-          </el-button>
-          <el-button
-            type="primary"
-            @click="authStore.switchToRegister"
-            :class="{ active: !authStore.isLogin }"
-          >
-            注册
-          </el-button> -->
-        </div>
+        </div> -->
       </div>
     </div>
   </div>

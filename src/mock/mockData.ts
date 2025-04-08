@@ -77,7 +77,7 @@ Mock.mock("/api/user", "post", (req) => {
 });
 
 // 1.5 管理员获取用户列表
-Mock.mock("/api/auth", "post", (Authorization) => {
+Mock.mock("/api/auth", "get", (Authorization) => {
   console.log("mock管理员获取用户列表", Authorization);
   if (Authorization) {
     return {
@@ -271,6 +271,48 @@ Mock.mock("/api/evaluation", "post", (req) => {
   };
 });
 
+// 1.12 获取用户历史上传的评价报告
+// Mock.mock("/api/evaluation/history", "post", (req) => {
+//   console.log("mock获取用户历史上传的评价报告", req.body);
+
+//   return {
+//     history: [
+//       {
+//         id: 1,
+//         fileName: "AI工具评测报告.docx",
+//         uploadTime: "2024-04-01 14:30:45",
+//         toolName: "ChatGPT",
+//         evaluationResult: "优秀",
+//         downloadUrl: "/reports/report1.docx",
+//       },
+//       {
+//         id: 2,
+//         fileName: "Midjourney使用评价.docx",
+//         uploadTime: "2024-03-25 09:12:30",
+//         toolName: "Midjourney",
+//         evaluationResult: "良好",
+//         downloadUrl: "/reports/report2.docx",
+//       },
+//       {
+//         id: 3,
+//         fileName: "Claude评测报告.pdf",
+//         uploadTime: "2024-03-10 16:45:22",
+//         toolName: "Claude",
+//         evaluationResult: "优秀",
+//         downloadUrl: "/reports/report3.pdf",
+//       },
+//       {
+//         id: 4,
+//         fileName: "DALL-E 3评测.docx",
+//         uploadTime: "2024-02-15 10:20:15",
+//         toolName: "DALL-E 3",
+//         evaluationResult: "良好",
+//         downloadUrl: "/reports/report4.docx",
+//       },
+//     ],
+//   };
+// });
+
 // 2.1 获取某一类别下的工具列表
 Mock.mock(new RegExp("/api/tools\\?category=.+"), "get", (options) => {
   console.log("mock获取某一类别下的工具列表", options);
@@ -319,66 +361,67 @@ Mock.mock(new RegExp(`/api/tools/\\d+`), "get", (options: any) => {
     rates: [
       //评分列表
       {
-        user: Mock.Random.cname(), //昵称
-        rating: 5, //评分
+        user: Mock.Random.cname(),
+        rating: 5,
         comment:
-          "GitHub, Inc. 成立于 2008 年，最初是一家独立的公司，专注于提供基于 Git 的代码托管和协作开发平台。2018 年 微软以 75 亿美元的价格收购了 GitHub，将其纳入微软生态，但 GitHub 仍然保持独立运营，并继续支持开源社区和开发者。", //评价
+          "豆包的回答非常准确，能够很好地理解我的问题，并且提供了详细的解释。",
       },
       {
         user: Mock.Random.cname(),
         rating: 3.5,
-        comment: "comment-two",
+        comment:
+          "智谱清言在技术问题上的回答很专业，但在一些日常问题上表现一般。",
       },
       {
         user: Mock.Random.cname(),
         rating: 5,
-        comment: "comment-three",
+        comment:
+          "DeepSeek的代码能力很强，能够快速生成高质量的代码，非常推荐给开发者使用。",
       },
       {
         user: Mock.Random.cname(),
         rating: 4.5,
-        comment:
-          "在 CORS（跨域资源共享，Cross-Origin Resource Sharing） 机制中，HTTP 请求被分为 简单请求（Simple Request）和 预检请求（Preflight Request）。它们用于处理浏览器向不同源（跨域）发送请求时的安全性校验。",
+        comment: "豆包在中文处理方面表现优秀，能够很好地理解中文语境。",
       },
       {
         user: Mock.Random.cname(),
         rating: 2.5,
-        comment: "comment-five",
+        comment: "智谱清言的响应速度有时较慢，但回答质量还是不错的。",
       },
       {
         user: Mock.Random.cname(),
         rating: 1.5,
-        comment: "comment-six",
+        comment: "DeepSeek在某些专业领域的知识还不够全面，需要继续改进。",
       },
       {
         user: Mock.Random.cname(),
         rating: 1.5,
-        comment: "comment-seven",
+        comment: "豆包在回答复杂问题时有时会偏离主题，需要更精准的回答。",
       },
       {
         user: Mock.Random.cname(),
         rating: 5,
-        comment: "comment-eight",
+        comment: "智谱清言在学术研究方面提供了很多有价值的参考。",
       },
       {
         user: Mock.Random.cname(),
         rating: 4,
-        comment: "comment-nine",
+        comment: "DeepSeek的界面设计很友好，使用起来很流畅。",
       },
       {
         user: Mock.Random.cname(),
         rating: 1.5,
-        comment: "comment-ten",
+        comment: "豆包在回答一些技术问题时显得不够专业。",
       },
       {
         user: Mock.Random.cname(),
         rating: 5,
-        comment: "comment-eleven",
+        comment: "智谱清言的多语言支持做得很好，可以处理多种语言的问题。",
       },
       {
         user: Mock.Random.cname(),
         rating: 4,
-        comment: "comment-twelve",
+        comment: "DeepSeek的学习能力很强，能够根据用户反馈不断改进。",
       },
     ],
   };

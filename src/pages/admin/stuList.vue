@@ -1,5 +1,6 @@
 <template>
   <h1 class="title">学生管理</h1>
+
   <div class="before-container">
     <div class="search">
       <el-icon><Search /></el-icon>
@@ -16,10 +17,56 @@
         </template>
       </el-autocomplete>
     </div>
+    <div class="refresh">
+      <el-button @click="manualRefresh" type="primary" size="small"
+        >手动刷新列表</el-button
+      >
+    </div>
     <div class="add">
-      <Add v-model="text" />
+      <div
+        class="button"
+        data-tooltip="Size: 20Mb"
+        @click="dialogVisible = true"
+      >
+        <div class="button-wrapper">
+          <div class="text" :title="text">{{ text }}</div>
+          <el-icon class="icon" style="transform: scale(1.2)"><Plus /></el-icon>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- 添加学生对话框 -->
+  <el-dialog
+    v-model="dialogVisible"
+    title="添加新学生"
+    width="30%"
+    :before-close="handleDialogClose"
+  >
+    <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
+      <el-form-item label="用户名" prop="username">
+        <el-input v-model="form.username" placeholder="请输入用户名"></el-input>
+      </el-form-item>
+      <el-form-item label="昵称" prop="nickname">
+        <el-input v-model="form.nickname" placeholder="请输入昵称"></el-input>
+      </el-form-item>
+      <el-form-item label="密码" prop="password">
+        <el-input
+          v-model="form.password"
+          type="password"
+          placeholder="请输入密码"
+          show-password
+        ></el-input>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitForm">确认</el-button>
+      </span>
+    </template>
+  </el-dialog>
+
   <div class="container">
     <el-table
       :data="adminStore.students"
@@ -30,21 +77,21 @@
       <el-table-column
         prop="id"
         label="ID"
-        width="100"
+        width="80"
         header-align="center"
         align="center"
       />
       <el-table-column
         prop="nickname"
         label="Nickname"
-        width="160"
+        width="120"
         header-align="center"
         align="center"
       />
       <el-table-column
         prop="username"
         label="Username"
-        width="160"
+        width="120"
         header-align="center"
         align="center"
       />
@@ -63,7 +110,7 @@
             @click="handleNicknameUpdate(row)"
             title="nickname"
           >
-            Modify Nickname
+            修改昵称
           </el-button>
           <el-button
             link
@@ -72,7 +119,7 @@
             @click="handleUsernameUpdate(row)"
             title="username"
           >
-            Modify Username
+            修改用户名
           </el-button>
           <el-button
             link
@@ -81,7 +128,7 @@
             @click="handlePasswordUpdate(row)"
             title="password"
           >
-            Modify Password
+            修改密码
           </el-button>
           <el-button
             link
@@ -89,7 +136,7 @@
             @click="handleDeleteUpdate(row)"
             size="small"
             style="color: red"
-            >Delete</el-button
+            >删除</el-button
           >
         </template>
       </el-table-column>
@@ -109,9 +156,8 @@
 import { ref, onMounted, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useAdminStore } from "@/stores/useAdminStore";
-import { Search } from "@element-plus/icons-vue";
-// @ts-ignore
-import Add from "@/pages/admin/component/button.vue";
+import { Search, Plus } from "@element-plus/icons-vue";
+import type { FormInstance, FormRules } from "element-plus";
 
 const object = ref("student");
 const adminStore = useAdminStore();
@@ -121,31 +167,98 @@ const total = ref(0);
 const state = ref("");
 const text = ref("添加新学生");
 
+// 添加学生相关
+const dialogVisible = ref(false);
+const formRef = ref<FormInstance>();
+const form = ref({
+  username: "",
+  nickname: "",
+  password: "",
+});
+
+const rules = ref<FormRules>({
+  username: [
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    { min: 6, max: 18, message: "用户名长度必须在6-18位之间", trigger: "blur" },
+  ],
+  nickname: [
+    { required: true, message: "请输入昵称", trigger: "blur" },
+    { min: 2, max: 18, message: "昵称长度必须在2-18位之间", trigger: "blur" },
+  ],
+  password: [
+    { required: true, message: "请输入密码", trigger: "blur" },
+    { min: 6, max: 18, message: "密码长度必须在6-18位之间", trigger: "blur" },
+  ],
+});
+
+const handleDialogClose = (done: () => void) => {
+  formRef.value?.resetFields();
+  done();
+};
+
+const submitForm = async () => {
+  if (!formRef.value) return;
+
+  await formRef.value.validate(async (valid: boolean) => {
+    if (valid) {
+      try {
+        await adminStore.addUser(
+          form.value.nickname,
+          form.value.username,
+          form.value.password,
+          "student"
+        );
+
+        dialogVisible.value = false;
+        formRef.value?.resetFields();
+        adminStore.fetchStudents();
+        ElMessage.success("添加学生成功");
+      } catch (error) {}
+    }
+  });
+};
+
+const manualRefresh = async () => {
+  try {
+    await adminStore.fetchStudents();
+    ElMessage.success("列表刷新成功");
+  } catch (error) {
+    ElMessage.error("刷新失败: " + (error as Error).message);
+  }
+};
+
 const handlePageChange = (page: number) => {
   currentPage.value = page;
 };
+
 const handleNicknameUpdate = (row: any) => {
   ElMessageBox.prompt("请输入新昵称", "修改昵称", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
-    inputPattern: /^.{2,10}$/,
-    inputErrorMessage: "昵称长度必须在2-10位之间",
+    inputPattern: /^.{2,18}$/,
+    inputErrorMessage: "昵称长度必须在2-18位之间",
+    inputValue: row.nickname,
   })
     .then(({ value }) => {
       if (value) {
-        const user = {
+        let user = {
           id: row.id,
           nickname: value,
           username: row.username,
         };
         let password = "";
-        adminStore.updateUserInfo(
-          user.id,
-          object.value,
-          password,
-          user.nickname,
-          user.username
-        );
+        adminStore
+          .updateUserInfo(
+            user.id,
+            object.value,
+            password,
+            user.nickname,
+            user.username
+          )
+          .then(() => {
+            adminStore.fetchStudents();
+            ElMessage.success("修改昵称成功");
+          });
       }
     })
     .catch(() => {
@@ -157,27 +270,33 @@ const handleNicknameUpdate = (row: any) => {
 };
 const handleUsernameUpdate = (row: any) => {
   console.log(row);
-  ElMessageBox.prompt(`请输入新用户名 (不建议随意修改用户名)`, "修改用户名", {
+  ElMessageBox.prompt(`请输入新用户名 (一般为学号、工号，不建议随意修改)`, "修改用户名", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
-    inputPattern: /^.{2,18}$/,
-    inputErrorMessage: "用户名长度必须在2-18位之间",
+    inputPattern: /^.{6,18}$/,
+    inputErrorMessage: "用户名长度必须在6-18位之间",
+    inputValue: row.username,
   })
     .then(({ value }) => {
       if (value) {
-        const user = {
+        let user = {
           id: row.id,
           nickname: row.nickname,
           username: value,
         };
         let password = "";
-        adminStore.updateUserInfo(
-          user.id,
-          object.value,
-          password,
-          user.nickname,
-          user.username
-        );
+        adminStore
+          .updateUserInfo(
+            user.id,
+            object.value,
+            password,
+            user.nickname,
+            user.username
+          )
+          .then(() => {
+            adminStore.fetchStudents();
+            ElMessage.success("修改用户名成功");
+          });
       }
     })
     .catch(() => {
@@ -202,13 +321,18 @@ const handlePasswordUpdate = (row: any) => {
           nickname: row.nickname,
           username: row.username,
         };
-        adminStore.updateUserInfo(
-          user.id,
-          object.value,
-          user.password,
-          user.nickname,
-          user.username
-        );
+        adminStore
+          .updateUserInfo(
+            user.id,
+            object.value,
+            user.password,
+            user.nickname,
+            user.username
+          )
+          .then(() => {
+            adminStore.fetchStudents();
+            ElMessage.success("修改密码成功");
+          });
       }
     })
     .catch(() => {
@@ -223,22 +347,27 @@ const handleDeleteUpdate = (row: any) => {
     `该操作将永久删除用户 (昵称:${row.nickname} 用户名:${row.username}) ,请谨慎操作`,
     "确认删除",
     {
-      confirmButtonText: "OK",
-      cancelButtonText: "Cancel",
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
       type: "warning",
     }
   )
-    .then(() => {
-      ElMessage({
-        type: "success",
-        message: "Delete completed",
-      });
-      adminStore.deleteUser(row.id, object.value);
+    .then(async () => {
+      try {
+        await adminStore.deleteUser(row.id, object.value);
+        adminStore.fetchStudents();
+        ElMessage.success("删除用户成功");
+      } catch (error) {
+        ElMessage({
+          type: "error",
+          message: `删除失败: ${(error as Error).message}`,
+        });
+      }
     })
     .catch(() => {
       ElMessage({
         type: "info",
-        message: "Delete canceled",
+        message: "已取消删除操作",
       });
     });
 };
@@ -279,13 +408,19 @@ watch(currentPage, () => {
 onMounted(() => {
   setTimeout(() => {
     adminStore.fetchStudents();
+    total.value = adminStore.totalStudents;
   }, 100);
 });
+
+watch(
+  () => adminStore.totalStudents,
+  (newValue) => {
+    total.value = newValue;
+  }
+);
 </script>
 <style lang="scss" scoped>
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 .title {
@@ -294,6 +429,21 @@ onMounted(() => {
   font-size: 20px;
   font-weight: 600;
 }
+
+.debug-section {
+  margin: 0 50px 15px;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  font-size: 12px;
+
+  pre {
+    margin-bottom: 10px;
+    white-space: pre-wrap;
+  }
+}
+
 .before-container {
   display: flex;
   justify-content: space-between;
@@ -310,11 +460,100 @@ onMounted(() => {
     justify-content: flex-end;
   }
 }
+.refresh {
+  margin: 13px 130px 10px 0;
+}
 .add {
   width: 5%;
   margin: 10px 130px 10px 0;
   transform: scale(0.9);
 }
+
+.button {
+  --width: 100px;
+  --height: 35px;
+  --tooltip-height: 35px;
+  --tooltip-width: 90px;
+  --gap-between-tooltip-to-button: 18px;
+  --button-color: #1163ff;
+  --tooltip-color: #fff;
+  width: var(--width);
+  height: var(--height);
+  background: var(--button-color);
+  position: relative;
+  text-align: center;
+  border-radius: 0.45em;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.button::after,
+.button::before {
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.5s;
+}
+
+.text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-wrapper,
+.text,
+.icon {
+  overflow: hidden;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  color: #fff;
+}
+
+.text {
+  top: 0;
+}
+
+.text,
+.icon {
+  transition: top 0.5s;
+}
+
+.icon {
+  color: #fff;
+  top: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button:hover {
+  background: #6c18ff;
+}
+
+.button:hover .text {
+  top: -100%;
+}
+
+.button:hover .icon {
+  top: 0;
+}
+
+.button:hover:before,
+.button:hover:after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.button:hover:after {
+  bottom: calc(var(--height) + var(--gap-between-tooltip-to-button) - 20px);
+}
+
+.button:hover:before {
+  bottom: calc(var(--height) + var(--gap-between-tooltip-to-button));
+}
+
 // 搜索
 .search {
   width: 30%;

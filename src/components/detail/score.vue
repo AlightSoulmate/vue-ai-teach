@@ -15,7 +15,7 @@ interface SelectedTool {
 const max = ref(0);
 const value = ref(0);
 const inputLess = ref(false);
-const scrollHeight = ref<number>(390);
+const scrollHeight = ref<number>(360);
 const innerRef = ref<HTMLDivElement>();
 const scrollbarRef = ref<ScrollbarInstance>();
 const submitRef = ref();
@@ -23,6 +23,7 @@ const scoreStore = useScoreStore();
 const debounceStore = useDebounceStore();
 const selectedToolId = ref<SelectedTool>({ id: "" });
 const lastSubmitDate = ref("");
+const hasSubmittedCurrentTool = ref(false);
 
 const MIN_COMMENT_LENGTH = 10;
 const DEBOUNCE_DELAY = 500;
@@ -56,23 +57,33 @@ const toNumber = (value: string | number): number => {
 };
 
 const canSubmit = computed(() => {
-  const toolId = selectedToolId.value?.id;
   return (
-    toolId &&
-    !debounceStore.dailySubmitManager.checkDailySubmit(toolId) &&
-    !debounceStore.isSubmitting
+    !hasSubmittedCurrentTool.value &&
+    !debounceStore.isSubmitting &&
+    selectedToolId.value?.id
   );
 });
 
 const submitButtonText = computed(() => {
   if (debounceStore.isSubmitting) return "提交中...";
-
-  const toolId = selectedToolId.value?.id;
-  if (toolId && debounceStore.dailySubmitManager.checkDailySubmit(toolId)) {
-    return "今日已提交";
-  }
+  if (hasSubmittedCurrentTool.value) return "今日已提交";
   return "提交评分";
 });
+
+const reversedRates = computed(() => {
+  const rates = [...(scoreStore.toolsDetail.rates || [])].reverse();
+  // 过滤掉没有评论内容的项
+  return rates.filter((rate) => rate.comment && rate.comment.trim() !== "");
+});
+
+const resetEvaluationState = () => {
+  scoreStore.rateStandards.forEach((standard) => {
+    standard.score = 0;
+  });
+  scoreStore.rate.comment = "";
+  hasSubmittedCurrentTool.value = false;
+  lastSubmitDate.value = "";
+};
 
 const handleSubmitRating = async () => {
   try {
@@ -86,9 +97,9 @@ const handleSubmitRating = async () => {
 
       const toolId = toNumber(tool.id);
       await scoreStore.evaluationTransmission(toolId);
-      debounceStore.dailySubmitManager.recordSubmit(toolId);
-      lastSubmitDate.value =
-        debounceStore.dailySubmitManager.getLastSubmitDate(toolId);
+
+      hasSubmittedCurrentTool.value = true;
+      lastSubmitDate.value = new Date().toISOString().split("T")[0];
 
       showMessage("评分提交成功，感谢您的参与！", "success");
     });
@@ -115,7 +126,10 @@ const startSpeechRecognition = () => {
   }
 
   if (!("webkitSpeechRecognition" in window)) {
-    showMessage("您的浏览器不支持 Web Speech API，请使用 Chrome！", "warning");
+    showMessage(
+      "您的浏览器不支持 Web Speech API，请使用 Chrome 浏览器！",
+      "warning"
+    );
     return;
   }
 
@@ -153,24 +167,54 @@ const startSpeechRecognition = () => {
   recognition.start();
 };
 
+watch(
+  () => getToolFromStorage().id,
+  (newId, oldId) => {
+    if (newId && newId !== oldId) {
+      console.log("工具ID变化，重置评分状态:", oldId, "->", newId);
+      resetEvaluationState();
+    }
+  },
+  { immediate: true }
+);
+
 onMounted(async () => {
   try {
     const tool = getToolFromStorage();
     selectedToolId.value = tool;
+    console.log("当前工具信息:", tool);
+
+    resetEvaluationState();
 
     if (tool.id) {
       const toolId = toNumber(tool.id);
-      await scoreStore.ToolsDetailGet(toolId);
-      lastSubmitDate.value =
-        debounceStore.dailySubmitManager.getLastSubmitDate(toolId);
+      console.log("开始获取工具详情，工具ID:", toolId);
+      try {
+        await scoreStore.ToolsDetailGet(toolId);
+        console.log("获取到的工具详情:", scoreStore.toolsDetail);
+        console.log("获取到的评分标准:", scoreStore.rateStandards);
+      } catch (detailError: any) {
+        console.error("获取工具详情失败:", detailError);
+        console.error("错误详情:", {
+          message: detailError?.message || "未知错误",
+          stack: detailError?.stack,
+          toolId: toolId,
+        });
+        throw detailError;
+      }
     }
 
     await nextTick();
     if (innerRef.value) {
       max.value = Math.max(0, innerRef.value.clientHeight - scrollHeight.value);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("初始化失败:", error);
+    console.error("完整错误信息:", {
+      name: error?.name || "未知错误类型",
+      message: error?.message || "未知错误信息",
+      stack: error?.stack,
+    });
     showMessage("初始化失败，请刷新页面重试", "error");
   }
 });
@@ -227,7 +271,7 @@ const submitRating = debounceStore.debounce(handleSubmitRating, DEBOUNCE_DELAY);
         <div class="comment">
           <el-input
             type="textarea"
-            placeholder="留下您的宝贵评价，帮助其他用户了解此工具（每个工具每日仅限一次评价）..."
+            placeholder="留下您的宝贵评价，帮助其他用户了解此工具 （每个工具每日仅限一次评价）"
             class="comment-input"
             :autosize="{ minRows: 3, maxRows: 6 }"
             maxlength="500"
@@ -272,32 +316,44 @@ const submitRating = debounceStore.debounce(handleSubmitRating, DEBOUNCE_DELAY);
         :height="`${scrollHeight}px`"
       >
         <div ref="innerRef">
-          <div
-            class="score-content"
-            v-for="score in scoreStore.toolsDetail.rates"
-            :key="score.id"
-          >
-            <div class="score-content-item">
-              <div class="score-header">
-                <div class="score-content-item-title">
-                  <el-avatar :size="26" class="user-avatar">
-                    {{ score.user.charAt(0) }}
-                  </el-avatar>
-                  <span class="user-nickname">@{{ score.user }}</span>
+          <template v-if="reversedRates && reversedRates.length > 0">
+            <div
+              class="score-content"
+              v-for="score in reversedRates"
+              :key="score.id"
+              v-show="score.comment && score.comment.trim()"
+            >
+              <div class="score-content-item">
+                <div class="score-header">
+                  <div class="score-content-item-title">
+                    <el-avatar :size="24" class="user-avatar">
+                      {{ score.user.charAt(0) }}
+                    </el-avatar>
+                    <span class="user-nickname"
+                      >@{{ score.user || "未设置昵称用户" }}</span
+                    >
+                  </div>
+                  <div class="score-content-item-score">
+                    <span>评分：</span>{{ score.rating }} ⭐
+                  </div>
                 </div>
-                <div class="score-content-item-score">
-                  <span>评分：</span>{{ score.rating }} ⭐
+                <div class="score-content-item-content" v-if="score.comment">
+                  {{ score.comment }}
                 </div>
-              </div>
-              <div class="score-content-item-content">
-                {{ score.comment }}
               </div>
             </div>
-          </div>
+          </template>
+          <template v-else>
+            <div class="no-comments">
+              <el-icon class="icon"><ChatDotRound /></el-icon>
+              <div class="message">暂无用户评价</div>
+              <div class="sub-message">成为第一个评价此工具的用户吧</div>
+            </div>
+          </template>
         </div>
       </el-scrollbar>
       <el-slider
-        v-if="max > 0"
+        v-if="max > 0 && reversedRates && reversedRates.length > 0"
         v-model="value"
         :max="max"
         :format-tooltip="formatTooltip"
@@ -313,6 +369,8 @@ $box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 $hover-box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 $transition-duration: 0.3s;
 $primary-color: #409eff;
+$gradient-start: #3498db;
+$gradient-end: #2c3e50;
 $warning-color: #ff9800;
 $text-secondary: #909399;
 
@@ -324,14 +382,16 @@ $text-secondary: #909399;
 @mixin hover-effect {
   transition: all $transition-duration ease;
   &:hover {
-    box-shadow: $hover-box-shadow;
+    box-shadow: 0 8px 20px rgba($gradient-start, 0.12);
+    transform: translateY(-3px);
   }
 }
 
 @mixin card-style {
   background: var(--background-color);
   border-radius: $border-radius;
-  box-shadow: $box-shadow;
+  box-shadow: 0 6px 16px rgba($gradient-start, 0.08);
+  border: 1px solid rgba($gradient-start, 0.05);
 }
 
 * {
@@ -341,18 +401,18 @@ $text-secondary: #909399;
 }
 
 .main-container {
-  margin: 20px 30px 10px;
-  padding: 15px 20px;
+  margin: 20px 0 10px;
+  padding: 24px 20px;
   display: flex;
-  gap: 30px;
+  gap: 40px;
 }
 
 .main-score-container {
-  flex: 0.6;
+  flex: 0.4;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  min-width: 290px;
+  min-width: 270px;
 
   .content {
     width: 100%;
@@ -361,235 +421,394 @@ $text-secondary: #909399;
 
 .title {
   @include flex-center;
-  gap: 8px;
-  font-style: italic;
-  font-weight: bold;
+  gap: 12px;
+  font-weight: 600;
   color: var(--text-color);
-  margin-bottom: 20px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #eaeaea;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba($gradient-start, 0.1);
   width: 100%;
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 120px;
+    height: 2px;
+    background: linear-gradient(to right, $gradient-start, $gradient-end);
+  }
 
   .el-icon {
-    font-size: $xxlarge-font-size;
-    color: var(--text-color);
+    font-size: 22px;
+    color: $gradient-start;
   }
 }
 
 .rating-container {
   width: 100%;
-  padding: 5px 0 5px 5px;
+  padding: 15px;
   @include card-style;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   @include hover-effect;
 
   .rating-item {
     @include flex-center;
-    gap: 12px;
-    margin: 6px 0;
-    padding: 6px 8px;
-    border-bottom: 1px dashed #eaeaea;
+    gap: 16px;
+    margin: 10px 0;
+    padding: 12px 14px;
+    border-radius: 8px;
+    transition: all $transition-duration ease;
 
-    &:last-child {
-      border-bottom: none;
+    &:hover {
+      background: rgba($gradient-start, 0.03);
+    }
+
+    &:not(:last-child) {
+      border-bottom: 1px solid rgba($gradient-start, 0.1);
+      padding-bottom: 15px;
     }
 
     .rating-title {
-      min-width: 80px;
+      min-width: 90px;
       font-weight: 500;
-      font-size: $medium-font-size;
-      color: var(--text-color);
+      font-size: 15px;
+      color: $gradient-end;
     }
 
     .score-label {
-      font-size: $medium-font-size;
-      color: $primary-color;
+      font-size: 15px;
+      margin-left: 8px;
+      color: $gradient-start;
       font-weight: 500;
     }
   }
 }
 
 .criteria-container {
-  color: var(--text-color);
+  padding: 15px;
   background-color: var(--background-color);
-}
 
-.criteria-header {
-  font-weight: bold;
-  margin-bottom: 10px;
-  color: $primary-color;
-  border-bottom: 1px solid #eaeaea;
-}
+  .criteria-header {
+    font-size: 16px;
+    font-weight: 600;
+    color: $gradient-start;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba($gradient-start, 0.1);
+  }
 
-.criteria-list {
-  width: 100%;
-  padding-left: 20px;
-  font-size: $small-font-size;
+  .criteria-list {
+    padding-left: 20px;
 
-  li {
-    margin-bottom: 8px;
-    text-align: left;
-    line-height: 1.4;
+    li {
+      margin-bottom: 8px;
+      color: var(--text-color);
+      position: relative;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: -15px;
+        top: 8px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: $gradient-start;
+      }
+    }
   }
 }
 
 .comment {
-  margin: 20px 0;
+  margin-bottom: 24px;
   width: 100%;
 
   .comment-input {
-    width: 100%;
-
-    ::v-deep(.el-textarea__inner) {
+    :deep(.el-textarea__inner) {
+      background-color: var(--background-color);
       border-radius: 8px;
-      padding: 12px;
+      border: 1px solid rgba($gradient-start, 0.2);
       transition: all $transition-duration ease;
 
       &:focus {
-        box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+        border-color: $gradient-start;
+        box-shadow: 0 0 0 2px rgba($gradient-start, 0.1);
+      }
+
+      &:hover {
+        border-color: $gradient-start;
       }
     }
   }
 
   .input-less {
-    font-size: 12px;
-    padding: 4px 0 0 2px;
-    margin-bottom: -6px;
     color: $warning-color;
+    font-size: 13px;
+    margin-top: 6px;
+    padding-left: 5px;
   }
 }
 
 .submit-wrapper {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-top: 15px;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 
-  .el-icon {
-    font-size: 22px;
-    color: $primary-color;
-    margin: 5px;
-    cursor: pointer;
-  }
+  .submit-buttons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 
-  .submit-btn {
-    padding: 10px 24px;
-    font-size: 15px;
-    border-radius: 8px;
-    transition: all $transition-duration ease;
+    .mic-icon {
+      font-size: 24px;
+      color: $gradient-start;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      background: rgba($gradient-start, 0.1);
+      transition: all $transition-duration ease;
 
-    &:not(:disabled):hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba($primary-color, 0.3);
+      &:hover {
+        transform: scale(1.1);
+        background: rgba($gradient-start, 0.2);
+      }
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, $gradient-start, $gradient-end);
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-weight: 500;
+      box-shadow: 0 4px 10px rgba($gradient-start, 0.3);
+      transition: all $transition-duration ease;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba($gradient-start, 0.4);
+      }
+
+      &:disabled {
+        opacity: 0.7;
+        background: linear-gradient(
+          135deg,
+          rgba($gradient-start, 0.6),
+          rgba($gradient-end, 0.6)
+        );
+      }
     }
   }
 
   .submit-info {
-    margin-top: 10px;
     font-size: 13px;
     color: $text-secondary;
   }
 }
 
 .main-upload-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex: 0.6;
+  min-width: 300px;
+}
 
-  .score-title {
-    font-size: 20px;
+.tool-details {
+  @include card-style;
+  padding: 15px 16px;
+  margin-bottom: 15px;
+  @include hover-effect;
+  max-height: 444px;
+}
+
+.score-content {
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
   }
 
-  .tool-details {
-    width: 100%;
-    padding: 10px 20px;
-    @include card-style;
+  .score-content-item {
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: rgba($gradient-start, 0.03);
+    border: 1px solid rgba($gradient-start, 0.08);
+    transition: all $transition-duration ease;
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
 
-    .score-content {
-      white-space: wrap;
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba($gradient-start, 0.1);
+      background: rgba($gradient-start, 0.05);
+    }
+
+    .score-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 10px;
-      background-color: var(--background-color);
-      padding: 8px 6px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-      @include hover-effect;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed rgba($gradient-start, 0.1);
 
-      &:last-child {
-        margin-bottom: 0;
+      .score-content-item-title {
+        @include flex-center;
+        gap: 8px;
 
-        &::after {
-          content: "没有更多评论了~";
-          margin: 0 auto;
-          display: flex;
-          align-items: center;
-          padding-top: 10px;
-          font-size: 12px;
-          color: #666;
+        .user-avatar {
+          background: linear-gradient(135deg, $gradient-start, $gradient-end);
+          color: white;
+          font-weight: 500;
+          box-shadow: 0 4px 10px rgba($gradient-start, 0.2);
+        }
+
+        .user-nickname {
+          font-weight: 500;
+          color: $gradient-end;
+          font-size: 13px;
+        }
+      }
+
+      .score-content-item-score {
+        color: $gradient-start;
+        font-weight: 500;
+        padding: 2px 10px;
+        background: rgba($gradient-start, 0.05);
+        border-radius: 20px;
+        font-size: 14px;
+
+        span {
+          color: $text-secondary;
+          font-weight: normal;
         }
       }
     }
-  }
 
-  .score-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .score-content-item-title {
-      @include flex-center;
-      gap: 8px;
-      font-weight: 600;
+    .score-content-item-content {
       color: var(--text-color);
-
-      .user-avatar {
-        background-color: $primary-color;
-        color: white;
-        transform: scale(1.1);
-        font-size: 12px;
-      }
-
-      .user-nickname {
-        font-size: 12px;
-        margin-top: -15px;
-      }
-    }
-
-    .score-content-item-score {
-      font-size: 14px;
-      color: $warning-color;
-      font-weight: bold;
-      margin-top: -15px;
-
-      span {
-        color: $text-secondary;
-        font-weight: normal;
-      }
+      line-height: 1.5;
+      font-size: 13px;
+      padding: 0 2px 2px 2px;
+      margin-top: -2px;
     }
   }
+}
 
-  .score-content-item-content {
-    display: flex;
-    flex-wrap: wrap;
-    font-size: 14px;
-    color: var(--text-color);
-    padding: 0 30px;
-    margin-top: -10px;
-    margin-left: 5px;
-    white-space: wrap;
+.no-comments {
+  text-align: center;
+  padding: 30px 0;
+  color: $text-secondary;
+
+  .icon {
+    font-size: 50px;
+    color: rgba($gradient-start, 0.2);
+    margin-bottom: 15px;
+  }
+
+  .message {
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  .sub-message {
+    font-size: 13px;
+    opacity: 0.8;
+  }
+}
+
+:deep(.el-slider) {
+  margin-top: 20px;
+
+  .el-slider__bar {
+    background-color: $gradient-start;
+  }
+
+  .el-slider__button {
+    border-color: $gradient-start;
+  }
+}
+
+@media (max-width: 1200px) {
+  .main-container {
+    padding: 20px 15px;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 992px) {
+  .main-container {
+    flex-direction: column;
+    padding: 15px 10px;
+  }
+
+  .main-score-container,
+  .main-upload-container {
+    flex: 1;
     width: 100%;
+    min-width: 100%;
+  }
+
+  .tool-details {
+    max-height: 350px;
+  }
+
+  .title::after {
+    width: 100px;
   }
 }
 
-.el-popper {
-  background-color: var(--background-color) !important;
+@media (max-width: 768px) {
+  .main-container {
+    padding: 10px 5px;
+    margin: 10px 0;
+  }
+
+  .rating-container .rating-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+
+    .rating-title {
+      margin-bottom: 5px;
+    }
+  }
+
+  .score-content-item {
+    padding: 12px 14px;
+
+    .score-header {
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .score-content-item-title {
+        flex: 1;
+        min-width: 120px;
+      }
+
+      .score-content-item-score {
+        font-size: 13px;
+        padding: 1px 8px;
+      }
+    }
+  }
 }
 
-:deep(.el-popover.el-popper) {
-  max-width: none;
-  width: 300px !important;
-  border-radius: 8px;
-  background-color: var(--background-color) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+@media (min-height: 900px) {
+  .score-content-item {
+    padding: 12px 14px;
+
+    .score-header {
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+    }
+
+    .score-content-item-content {
+      line-height: 1.4;
+    }
+  }
 }
 </style>

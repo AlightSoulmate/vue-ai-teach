@@ -7,7 +7,7 @@ const scoreStore = useScoreStore();
 const description = ref<string>(
   "在这里，你可以提交关于该AI工具的详细评价报告，请确保您的报告包含完整的使用体验，建议根据评分模块的类目分别进行评价。"
 );
-const uploadFileSupport = ref<string[]>([".docx", ".doc", ".pdf"]);
+const uploadFileSupport = ref<string[]>([".docx", ".doc"]);
 const FilenameDefault = ref<string>("点击或拖拽文件到此处上传");
 </script>
 
@@ -18,6 +18,7 @@ const FilenameDefault = ref<string>("点击或拖拽文件到此处上传");
       <span>提交评价报告</span>
     </div>
 
+    <!-- 上传评价内容 -->
     <div class="content">
       <div class="description">
         {{ description }}
@@ -59,24 +60,49 @@ const FilenameDefault = ref<string>("点击或拖拽文件到此处上传");
 </template>
 
 <style scoped lang="scss">
+$border-radius: 16px;
+$border-radius-sm: 12px;
+$transition-duration: 0.3s;
+$primary-color: #409eff;
+$gradient-start: #3498db;
+$gradient-end: #2c3e50;
+$box-shadow: 0 8px 20px rgba($gradient-start, 0.08);
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .upload-container {
-  padding: 20px;
+  padding: 25px 30px;
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 600;
   color: var(--text-color);
   margin-bottom: 20px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #eaeaea;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba($gradient-start, 0.1);
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(to right, $gradient-start, $gradient-end);
+  }
 
   .el-icon {
     font-size: 24px;
-    color: var(--el-color-primary);
+    color: $gradient-start;
   }
 }
 
@@ -86,40 +112,71 @@ const FilenameDefault = ref<string>("点击或拖拽文件到此处上传");
 
 .description {
   color: var(--text-color-secondary);
-  font-size: 14px;
-  line-height: 1.6;
-  margin-bottom: 14px;
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 20px;
+  padding: 15px 18px;
+  background: rgba($gradient-start, 0.03);
+  border-radius: $border-radius-sm;
+  border-left: 3px solid $gradient-start;
+  position: relative;
+
+  &::before {
+    content: '"';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    font-size: 40px;
+    line-height: 1;
+    color: rgba($gradient-start, 0.2);
+  }
 }
 
 .upload-section {
-  background-color: var(--el-fill-color-blank);
-  border-radius: 8px;
-  padding: 10px 20px;
+  background-color: var(--background-color);
+  border-radius: $border-radius-sm;
+  padding: 20px;
+  box-shadow: $box-shadow;
+  border: 1px solid rgba($gradient-start, 0.05);
+  transition: all $transition-duration ease;
+
+  &:hover {
+    box-shadow: 0 12px 28px rgba($gradient-start, 0.12);
+    transform: translateY(-3px);
+  }
 }
 
 .input-wrapper {
   position: relative;
-  border: 2px dashed var(--el-border-color);
-  border-radius: 8px;
-  padding: 30px 20px;
+  border: 2px dashed rgba($gradient-start, 0.3);
+  border-radius: $border-radius-sm;
+  padding: 40px 20px;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all $transition-duration ease;
   cursor: pointer;
+  background: rgba($gradient-start, 0.02);
 
   &:hover {
-    border-color: var(--el-color-primary);
-    background-color: var(--el-fill-color-light);
+    border-color: $gradient-start;
+    background-color: rgba($gradient-start, 0.05);
   }
 
   &.has-file {
-    border-color: var(--el-color-success);
-    background-color: var(--el-color-success-light);
+    border-color: #67c23a;
+    background-color: rgba(#67c23a, 0.05);
+    border-style: solid;
   }
 
   .upload-icon {
-    font-size: 48px;
-    color: var(--el-text-color-secondary);
-    margin-bottom: 16px;
+    font-size: 60px;
+    color: rgba($gradient-start, 0.6);
+    margin-bottom: 20px;
+    transition: all $transition-duration ease;
+
+    &:hover {
+      transform: scale(1.05);
+      color: $gradient-start;
+    }
   }
 
   input[type="file"] {
@@ -135,28 +192,49 @@ const FilenameDefault = ref<string>("点击或拖拽文件到此处上传");
 
 .file-name {
   display: block;
-  color: var(--el-text-color-primary);
-  font-size: 16px;
-  margin-bottom: 8px;
+  color: var(--text-color);
+  font-size: 17px;
+  font-weight: 500;
+  margin-bottom: 12px;
 }
 
 .file-hint {
   display: block;
-  color: var(--el-text-color-secondary);
-  font-size: 12px;
+  color: var(--text-color-secondary);
+  font-size: 13px;
+  background: rgba($gradient-start, 0.05);
+  padding: 5px 12px;
+  border-radius: 30px;
+  display: inline-block;
+  margin-top: 8px;
 }
 
 .upload-btn {
   width: 100%;
-  margin-top: 20px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  margin-top: 24px;
+  height: 46px;
+  @include flex-center;
+  gap: 10px;
+  border: none;
+  background: linear-gradient(135deg, $gradient-start, $gradient-end);
+  color: white;
+  font-weight: 600;
+  border-radius: $border-radius-sm;
+  font-size: 16px;
+  transition: all $transition-duration ease;
+  box-shadow: 0 6px 12px rgba($gradient-start, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba($gradient-start, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 
   .el-icon {
-    font-size: 16px;
+    font-size: 18px;
   }
 }
 </style>

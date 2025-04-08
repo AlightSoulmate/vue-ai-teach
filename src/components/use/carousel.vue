@@ -93,14 +93,14 @@
 }
 </style>
 <script lang="ts" setup>
-import { useToolsStore } from "@/stores/useToolsStore";
+import { useLoginToolsStore } from "@/stores/useLoginToolsStore";
 import { onMounted, computed } from "vue";
 
-const toolsStore = useToolsStore();
+const loginToolsStore = useLoginToolsStore();
 
 // 获取所有工具
 const allTools = computed(() => {
-  const tools = Object.values(toolsStore.toolsByCategory || {}).flat();
+  const tools = Object.values(loginToolsStore.toolsByCategory || {}).flat();
   return tools;
 });
 
@@ -121,7 +121,7 @@ const thirdRowTools = computed(() => {
 });
 
 onMounted(() => {
-  toolsStore.fetchCategory();
+  loginToolsStore.fetchCategory();
 });
 </script>
 <template>

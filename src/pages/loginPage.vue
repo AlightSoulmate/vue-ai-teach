@@ -1,23 +1,33 @@
-/**
-  * 2025.3.29 初始化/重绘页面的时候，走马灯logo出现快速闪烁的情况, 猜测是由于异步加载导致短时多次刷新数据集，暂未修复。
-  */
-
 <template>
-  <div>
+  <div class="login-page">
     <nav class="top-nav">
       <TopNav />
     </nav>
-    <div class="page-container">
-      <div class="title">
-        <div class="front">{{ TitleFront }}</div>
-        <div class="end">{{ TitleEnd }}</div>
+    <div class="hero-section">
+      <div class="decorative-elements">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+        <div class="dot dot-1"></div>
+        <div class="dot dot-2"></div>
+        <div class="dot dot-3"></div>
       </div>
-      <div class="slip"><Slip class="slip-inner" /></div>
-      <div class="enter">
-        <Enter class="enter-inner" @click="handleLogin" />
+      <div class="hero-content">
+        <div class="title">
+          <div class="front">{{ TitleFront }}</div>
+          <div class="end">{{ TitleEnd }}</div>
+        </div>
+        <div class="slip">
+          <Slip class="slip-inner" />
+        </div>
+        <div class="enter">
+          <Enter class="enter-inner" @click="handleLogin" />
+        </div>
       </div>
-      <div class="carousel">
-        <Carousel class="carousel-inner" />
+      <div class="hero-image">
+        <div class="carousel">
+          <Carousel class="carousel-inner" />
+        </div>
       </div>
     </div>
   </div>
@@ -43,177 +53,216 @@ const handleLogin = () => {
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
+
 ::-webkit-scrollbar {
   display: none;
 }
+
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--background-color) 0%, #f5f7fa 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.decorative-elements {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 121, 45, 0.1),
+    rgba(255, 77, 77, 0.1)
+  );
+  animation: float 6s ease-in-out infinite;
+
+  &.circle-1 {
+    width: 300px;
+    height: 300px;
+    top: -100px;
+    left: -100px;
+    animation-delay: 0s;
+  }
+
+  &.circle-2 {
+    width: 200px;
+    height: 200px;
+    bottom: -50px;
+    right: -50px;
+    animation-delay: 2s;
+  }
+
+  &.circle-3 {
+    width: 150px;
+    height: 150px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: 4s;
+  }
+}
+
+.dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff792d;
+  opacity: 0.3;
+  animation: pulse 2s ease-in-out infinite;
+
+  &.dot-1 {
+    top: 20%;
+    left: 20%;
+    animation-delay: 0s;
+  }
+
+  &.dot-2 {
+    top: 60%;
+    right: 20%;
+    animation-delay: 1s;
+  }
+
+  &.dot-3 {
+    bottom: 20%;
+    left: 40%;
+    animation-delay: 2s;
+  }
+}
+
 .top-nav {
   position: relative;
+  z-index: 10;
 }
-.page-container {
-  overflow: hidden;
-  color: var(--text-color);
-  width: 100%;
-  height: 92vh;
-  background-color: var(--background-color);
-  // background-image: linear-gradient(
-  //     0deg,
-  //     transparent 24%,
-  //     var(--color) 25%,
-  //     var(--color) 26%,
-  //     transparent 27%,
-  //     transparent 74%,
-  //     var(--color) 75%,
-  //     var(--color) 76%,
-  //     transparent 77%,
-  //     transparent
-  //   ),
-  //   linear-gradient(
-  //     90deg,
-  //     transparent 24%,
-  //     var(--color) 25%,
-  //     var(--color) 26%,
-  //     transparent 27%,
-  //     transparent 74%,
-  //     var(--color) 75%,
-  //     var(--color) 76%,
-  //     transparent 77%,
-  //     transparent
-  //   );
-  background-size: 55px 55px;
+
+.hero-section {
   display: flex;
-  padding-top: 0;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 92vh;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  gap: 4rem;
   position: relative;
+  z-index: 1;
 }
 
-.left-section {
-  flex: 1.3;
+.hero-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding-right: 2rem;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-image {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10rem 4rem 3rem 4rem;
-  margin-top: 250px;
-}
-
-.content-wrapper {
-  max-width: 800px;
-  transform: translateY(-2rem);
-}
-
-.right-section {
-  flex: 0.7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 4rem 3.5rem 0;
-  margin-right: 100px;
-  margin-top: 250px;
-}
-
-.login-container {
-  width: 100%;
-  max-width: 380px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  border-radius: 16px;
-  transition: transform 0.3s ease;
-  &:hover {
-    transform: translateY(-5px);
-  }
 }
 
 .title {
-  position: absolute;
-  margin: 0 auto;
-  overflow: hidden;
-  width: 100%;
   text-align: center;
+  margin-bottom: 2rem;
   display: flex;
-  margin-top: 60px;
-  transition: all 0.5s ease;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
 
   .front {
-    flex: 1;
-    text-align: right;
-    align-items: right;
-    font-size: 3.4rem;
-    font-weight: 600;
+    font-size: 4rem;
+    font-weight: 800;
     color: var(--text-color);
-    margin-bottom: 1.5rem;
     letter-spacing: -1px;
-    animation: fadeInTitle 0.7s ease;
-    white-space: normal;
+    animation: slideUp 0.8s ease-out;
+    line-height: 1.2;
+    text-align: center;
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #ff792d, #ff4d4d);
+      border-radius: 2px;
+      animation: widthGrow 1s ease-out forwards;
+    }
   }
+
   .end {
-    flex: 1;
-    text-align: left;
-    padding-left: 5px;
-    font-size: 3.4rem;
-    font-weight: 600;
+    font-size: 4rem;
+    font-weight: 800;
     color: #ff792d;
-    margin-bottom: 1.5rem;
-    animation: fadeInTitleEnd 1.1s ease;
-    white-space: normal;
-    margin-left: 5px;
+    letter-spacing: -1px;
+    animation: slideUp 1s ease-out;
+    background: linear-gradient(45deg, #ff792d, #ff4d4d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.2;
+    text-align: center;
   }
 }
 
 .slip {
-  background-color: var(--background-color);
-  position: absolute;
-  margin: 0 auto;
-  overflow: hidden;
   width: 100%;
+  max-width: 600px;
+  margin: 1rem auto;
+  animation: fadeIn 1s ease-out;
   display: flex;
-  margin-top: 150px;
-  transition: all 0.5s ease;
+  justify-content: center;
+  align-items: center;
 }
 
-.slip-inner {
-  margin: 0 auto;
-  transition: all 0.5s ease;
-}
 .enter {
-  position: absolute;
-  margin: 0 auto;
-  overflow: hidden;
-  width: 100%;
-  text-align: center;
+  margin: 2rem auto;
+  animation: fadeIn 1.2s ease-out;
+  width: auto;
   display: flex;
-  margin-top: 260px;
-  transition: all 0.5s ease;
-}
-.enter-inner {
-  margin: 0 auto;
-  transform: scale(0.8);
-  transition: all 0.5s ease;
-}
-.carousel {
-  margin-top: 400px;
-  transition: all 0.5s ease;
-}
+  justify-content: center;
 
-.big-logo {
-  margin-top: -80px;
-  width: 100%;
-  height: 380px;
-  margin-bottom: 2.5rem;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    transition: transform 0.5s ease;
+  .enter-inner {
+    transform: scale(1);
+    transition: transform 0.3s ease;
 
     &:hover {
-      transform: scale(1.02);
+      transform: scale(1.05);
     }
   }
 }
 
-@keyframes fadeIn {
+.carousel {
+  width: 100%;
+  max-width: 600px;
+  animation: fadeIn 1.4s ease-out;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -221,88 +270,108 @@ const handleLogin = () => {
   }
 }
 
-@keyframes fadeInTitle {
+@keyframes fadeIn {
   from {
-    transform: translateY(70px);
+    opacity: 0;
   }
   to {
-    transform: translateY(0);
+    opacity: 1;
   }
 }
-@keyframes fadeInTitleEnd {
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+}
+
+@keyframes widthGrow {
   from {
-    transform: translateY(-120px);
+    width: 0;
+    opacity: 0;
   }
   to {
-    transform: translateY(0);
+    width: 60px;
+    opacity: 1;
   }
 }
 
 @media (max-width: 1200px) {
-  .left-section {
-    padding: 2rem;
+  .hero-section {
+    gap: 2rem;
+    padding: 1.5rem;
   }
 
-  .h1-title {
-    font-size: 3rem;
+  .title {
+    .front,
+    .end {
+      font-size: 3.5rem;
+    }
   }
 }
 
-@media (max-width: 968px) {
-  .page-container {
+@media (max-width: 992px) {
+  .hero-section {
     flex-direction: column;
+    text-align: center;
+    gap: 3rem;
   }
 
-  .left-section {
-    padding: 2rem 1.5rem;
-  }
-
-  .right-section {
-    width: 100%;
-    min-height: auto;
-    padding: 2rem 1rem;
-  }
-
-  .login-container {
-    margin: 0 auto;
-  }
-
-  .big-logo {
-    height: 300px;
-    margin-top: -40px;
-  }
-
-  .h1-title {
-    font-size: 2.5rem;
+  .hero-content {
+    align-items: center;
+    padding-right: 0;
     text-align: center;
   }
 
-  .h2-title {
+  .title {
+    align-items: center;
     text-align: center;
+  }
+
+  .carousel {
+    max-width: 500px;
   }
 }
 
 @media (max-width: 768px) {
   .title {
-    flex-direction: column;
-
-    .front {
-      text-align: center;
-    }
+    .front,
     .end {
-      text-align: center;
-      padding-left: 0;
+      font-size: 2.5rem;
     }
   }
-  .left-section {
-    display: none; // 不占位
-    // visibility: hidden; // 占位
+
+  .hero-section {
+    padding: 1rem;
   }
-  .right-section {
-    margin-top: 260px;
-    transition: all 0.5s ease;
-    align-items: center;
-    margin-left: -50px;
+}
+
+@media (max-width: 480px) {
+  .title {
+    .front,
+    .end {
+      font-size: 2rem;
+    }
+  }
+
+  .hero-section {
+    padding: 0.5rem;
   }
 }
 </style>

@@ -1,12 +1,14 @@
 // @/stores/useScoreStore.ts
-// 传递评分给后端
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import { saveAs } from "file-saver";
-import { Document, Packer, Paragraph, type IParagraphOptions } from "docx";
-import axios from "axios";
 import { ElMessage } from "element-plus";
-import { uploadRate, getDetail } from "@/services/ToolsService";
+import {
+  uploadRate,
+  getDetail,
+  uploadEvaluationFile,
+  getEvaluationResult,
+  generateAndDownloadReport,
+} from "@/services";
 
 export const useScoreStore = defineStore("score", () => {
   interface Eval {
@@ -16,9 +18,20 @@ export const useScoreStore = defineStore("score", () => {
     averageScore: number;
     comment: string;
   }
+  interface ReportHistory {
+    id: number;
+    fileName: string;
+    uploadTime: string;
+    toolName: string;
+    evaluationResult: string;
+    downloadUrl: string;
+  }
+
   const userFile = ref<File | null>(null);
   const uploading = ref(false);
   const userFileName = ref("");
+  const reportHistory = ref<ReportHistory[]>([]);
+  const loadingHistory = ref(false);
   const rateStandards = ref([
     {
       name: "内容质量",
@@ -88,11 +101,8 @@ export const useScoreStore = defineStore("score", () => {
     averageScore: 0,
     comment: "",
   });
-  function unicodeToUtf8(str: string) {
-    return JSON.parse('"' + str + '"');
-  }
 
-  // 上传 - 选择文件
+  // 选择文件
   const handleUserFileChange = (e: Event) => {
     const files = (e.target as HTMLInputElement).files;
     if (files && files.length > 0) {
@@ -100,36 +110,29 @@ export const useScoreStore = defineStore("score", () => {
       userFileName.value = files[0].name;
     }
   };
-  // 上传 - 点击上传btn
+
+  // 点击上传
   const handleUpload = async () => {
     if (!userFile.value) {
       ElMessage.warning("请选择文件");
       return;
     }
+
     const formData = new FormData();
     formData.append("file", userFile.value);
+
     const Authorization = JSON.parse(
       localStorage.getItem("user") as string
     ).token;
     formData.append("Authorization", Authorization);
+
     console.log(Authorization, formData.get("file"));
     uploading.value = true;
+
     try {
-      // const response = await axios.post(
-      //   "https://frp-man.com:49044/evaluation/upload",
-      //   formData,
-      //   {
-      //     headers: {
-      //       "Content-Type": "multipart/form-data",
-      //     },
-      //   }
-      // );
-      const response = await axios.post("/api/evaluation/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      const message = response.data.message;
+      // 使用服务函数上传文件
+      const response = await uploadEvaluationFile(formData);
+      const message = response.message;
       console.log(message);
       ElMessage.success("正在评估，请稍后");
 
@@ -140,41 +143,24 @@ export const useScoreStore = defineStore("score", () => {
             const Authorization = JSON.parse(
               localStorage.getItem("user") as string
             ).token;
-            // const resp = await axios.post(
-            //   "https://frp-man.com:49044/evaluation",
-            //   {
-            //     Authorization,
-            //   }
-            // );
-            const resp = await axios.post("/api/evaluation", {
-              Authorization,
-            });
+
+            // 使用服务函数获取评价结果
+            const resp = await getEvaluationResult(Authorization);
 
             // 获取到评估结果
             const status = resp.status;
             console.log("状态码为", status);
             if (status === 200) {
-              const originalText = resp.data.message;
+              const originalText = resp.message;
               const reportText = JSON.parse(
                 '"' + originalText.replace(/\\\\/g, "\\") + '"'
               ); // 将unicode转为中文
               console.log(reportText);
               ElMessage.success("评估完成，正在生成报告");
-              // 创建Word文档并下载
-              const paragraphs = reportText
-                .split("\n")
-                .map((line: string | IParagraphOptions) => new Paragraph(line));
-              const doc = new Document({
-                sections: [
-                  {
-                    properties: {},
-                    children: paragraphs,
-                  },
-                ],
-              });
-              const blob = await Packer.toBlob(doc);
+
+              // 使用服务函数生成并下载报告
               const user = JSON.parse(localStorage.getItem("user") as string);
-              saveAs(blob, `${user.username}的评测报告.docx`);
+              await generateAndDownloadReport(reportText, user.username);
 
               console.log("评估完成");
               return true;
@@ -190,6 +176,7 @@ export const useScoreStore = defineStore("score", () => {
             return false;
           }
         };
+
         // 轮询
         const interval = setInterval(async () => {
           const isComplete = await pollEvaluation();
@@ -209,6 +196,8 @@ export const useScoreStore = defineStore("score", () => {
     }
   };
 
+  const toolsDetail = ref<any>({});
+
   // 评分传后端
   const evaluationTransmission = async (toolId: number) => {
     const score = calculateWeightedAverage();
@@ -221,21 +210,31 @@ export const useScoreStore = defineStore("score", () => {
     try {
       const resp = await uploadRate(token, rateValue, toolId);
       console.log(resp.message);
-      ToolsDetailGet(toolId);
+      // 立即获取更新后的数据
+      await ToolsDetailGet(toolId);
     } catch (e: any) {
       console.error("评价失败", e);
     }
   };
-  const toolsDetail = ref<any>({});
+
   const ToolsDetailGet = async (toolId: number) => {
     try {
-      const resp = await getDetail(toolId);
-      console.log(resp);
-      toolsDetail.value = resp;
+      // 强制重置状态
+      toolsDetail.value = {};
+
+      // 获取新数据
+      const response = await getDetail(toolId);
+      console.log("获取到的工具详情:", response);
+
+      // 直接更新状态
+      toolsDetail.value = response;
+      return response;
     } catch (e: any) {
       console.error("获取工具详情失败", e);
+      throw e.response ? e.response.data : { message: "请求失败" };
     }
   };
+
   // 平均分计算
   const calculateWeightedAverage = (): number => {
     const weights = [0.3, 0.25, 0.25, 0.1, 0.1];
@@ -253,6 +252,8 @@ export const useScoreStore = defineStore("score", () => {
     uploading,
     toolsDetail,
     userFileName,
+    reportHistory,
+    loadingHistory,
     handleUpload,
     handleUserFileChange,
     ToolsDetailGet,

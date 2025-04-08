@@ -1,1 +1,1 @@
-##### ./AI_TOOLS、./tools(弃用)：开发环境下 mock 工具数据集，在 @/mock/mockData 中初始化
+#### ./AI_TOOLS：开发环境下 mock 数据集，在 @/mock/mockData 中初始化

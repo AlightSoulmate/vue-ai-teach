@@ -7,7 +7,7 @@ const service = axios.create({
   timeout: 8000,
 });
 
-// 请求拦截器
+// 请拦截器
 service.interceptors.request.use(
   (config) => {
     console.log("🔍 Base URL:", getBaseUrl());
@@ -26,6 +26,9 @@ service.interceptors.response.use(
     return response;
   },
   (error) => {
+    if (error.code === "ERR_CERT_AUTHORITY_INVALID") {
+      console.warn("SSL证书验证失败，请确认您使用的是可信任的HTTPS连接");
+    }
     return Promise.reject(error);
   }
 );

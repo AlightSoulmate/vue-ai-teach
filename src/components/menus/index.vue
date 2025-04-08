@@ -12,7 +12,14 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { computed } from "vue";
 
 const authStore = useAuthStore();
-const activeMenu = ref("/home");
+const activeMenu = ref(
+  computed(() => {
+    if (authStore.user.role === "admin") {
+      return "/admin";
+    }
+    return "/home";
+  })
+);
 const isCollapse = ref<boolean>(false);
 
 const role = computed(() => ({
@@ -24,6 +31,7 @@ const role = computed(() => ({
 const paths = ref<Record<any, string>>({
   tools: "/home",
   forum: "/forum",
+  admin: "/admin",
   toolList: "/toolList",
   stuList: "/stuList",
   teaList: "/teaList",
@@ -65,23 +73,32 @@ const emit = defineEmits(["collapse"]);
       :collapse="isCollapse"
       router
     >
-      <el-sub-menu index="1">
-        <template #title>
-          <el-icon><Location /></el-icon>
-          <span>热门AI工具</span>
-        </template>
-        <el-menu-item :index="paths.tools">工具集</el-menu-item>
-        <el-menu-item :index="paths.forum">论坛</el-menu-item>
-      </el-sub-menu>
-      <el-sub-menu :index="paths.admin" v-if="role.isAdmin">
-        <template #title>
-          <el-icon><Location /></el-icon>
-          <span>管理中心</span>
-        </template>
-        <el-menu-item :index="paths.toolList">工具管理</el-menu-item>
-        <el-menu-item :index="paths.stuList">学生管理</el-menu-item>
-        <el-menu-item :index="paths.teaList">教师管理</el-menu-item>
-      </el-sub-menu>
+      <template v-if="!role.isAdmin">
+        <el-sub-menu index="1">
+          <template #title>
+            <el-icon><Location /></el-icon>
+            <span>热门AI工具</span>
+          </template>
+          <el-menu-item :index="paths.tools">工具集</el-menu-item>
+          <el-menu-item :index="paths.forum">论坛</el-menu-item>
+        </el-sub-menu>
+      </template>
+
+      <template v-if="role.isAdmin">
+        <el-menu-item :index="paths.toolList">
+          <el-icon><IconMenu /></el-icon>
+          <span>工具管理</span>
+        </el-menu-item>
+        <el-menu-item :index="paths.stuList">
+          <el-icon><IconMenu /></el-icon>
+          <span>学生管理</span>
+        </el-menu-item>
+        <el-menu-item :index="paths.teaList">
+          <el-icon><IconMenu /></el-icon>
+          <span>教师管理</span>
+        </el-menu-item>
+      </template>
+
       <el-menu-item :index="paths.teacherCrouse" v-if="role.isTeacher">
         <el-icon><IconMenu /></el-icon>
         <span>我的课程（老师）</span>
@@ -120,7 +137,7 @@ const emit = defineEmits(["collapse"]);
   position: absolute;
   right: -40px;
   top: 8px;
-  z-index: 2000;
+  z-index: 9999;
 }
 
 .collapse-btn {

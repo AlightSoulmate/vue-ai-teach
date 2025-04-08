@@ -13,7 +13,7 @@ export const useAuthStore = defineStore("auth", () => {
   const username = ref<string>("");
   const password = ref<string>("");
   const isLogin = ref<boolean>(true);
-  const isFresh = ref<number>(0); //临时变量，用于判断是否需要强制被批量导入的学生在首登时修改密码
+  const isFresh = ref<number>(0);
   const roles = ref<string[]>(["admin", "teacher", "student"]);
   const currentRole = ref<string>("student");
   const currentRoleCN = computed(() => {
@@ -61,9 +61,6 @@ export const useAuthStore = defineStore("auth", () => {
     localStorage.removeItem("user");
 
     await router.push("/login");
-    // if (router.currentRoute.value.path === "/login") {
-    //   router.go(0);
-    // }
   };
 
   // 检查登录状态
@@ -97,9 +94,8 @@ export const useAuthStore = defineStore("auth", () => {
       user.value.username
     );
     localStorage.setItem("user", JSON.stringify(user.value));
-    ElNotification({
-      title: "修改成功",
-      message: "个人信息修改成功",
+    ElMessage({
+      message: "密码修改成功",
       type: "success",
     });
     console.log(data);
@@ -297,6 +293,13 @@ export const useAuthStore = defineStore("auth", () => {
     localStorage.setItem("currentRole", currentRole.value);
   };
 
+  const setRole = (role: string) => {
+    if (roles.value.includes(role)) {
+      currentRole.value = role;
+      localStorage.setItem("currentRole", currentRole.value);
+    }
+  };
+
   return {
     user,
     roles,
@@ -318,6 +321,7 @@ export const useAuthStore = defineStore("auth", () => {
     resetForm,
     enterLogin,
     switchRole,
+    setRole,
     switchToLogin,
     enterRegister,
     changeUserNickname,

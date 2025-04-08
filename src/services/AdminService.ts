@@ -1,22 +1,22 @@
 // services/adminServices.ts
-import axios from "axios";
 import service from "./config";
-
-// 出现/api混乱 2025.3.14
-
-/* Admin Operations 
-  - User Management
-  - Tool Management
-*/
 
 // Get users
 export const GetUsers = async (Authorization: string) => {
   try {
-    const response = await axios.get("/auth", {
-      data: Authorization,
+    console.log("发送GetUsers请求");
+    console.log(Authorization);
+    const response = await service.get("/auth", {
+      headers: {
+        Authorization,
+      },
     });
+
+    console.log("获取用户列表响应:", response.data);
     return response.data;
   } catch (error: any) {
+    console.error("获取用户列表错误:", error);
+    console.error("错误详情:", error.response?.data || error.message);
     throw error.response ? error.response.data : { message: "请求失败" };
   }
 };
@@ -30,24 +30,29 @@ export const UpdateUser = async (
   nickname: string,
   username: string
 ) => {
+  const user = {
+    nickname,
+    username,
+    password,
+  };
   try {
     const response = await service.put(
       "/auth",
       {
         Authorization,
-        password,
-        nickname,
-        username,
+        user,
       },
       {
         params: {
-          id,
           role,
+          id,
         },
       }
     );
+    console.log(response.data);
     return response.data;
   } catch (error: any) {
+    console.error("更新用户信息错误:", error);
     throw error.response ? error.response.data : { message: "请求失败" };
   }
 };
@@ -59,8 +64,9 @@ export const DeleteUser = async (
   Authorization: string
 ) => {
   try {
+    console.log(Authorization);
     const response = await service.delete("/auth", {
-      data: {
+      headers: {
         Authorization,
       },
       params: {
@@ -68,8 +74,11 @@ export const DeleteUser = async (
         role,
       },
     });
+
     return response.data;
   } catch (error: any) {
+    console.error("删除用户错误:", error);
+    console.log(error.response?.data);
     throw error.response ? error.response.data : { message: "请求失败" };
   }
 };
@@ -102,6 +111,7 @@ export const AddUser = async (
     );
     return response.data;
   } catch (error: any) {
+    console.error("添加用户错误:", error);
     throw error.response ? error.response.data : { message: "请求失败" };
   }
 };
@@ -113,17 +123,82 @@ export const QueryUser = async (
   role: string
 ) => {
   try {
-    const response = await service.get("/auth", {
-      data: {
+    const response = await service.post(
+      "/auth",
+      {
         Authorization,
       },
-      params: {
-        username,
-        role,
+      {
+        params: {
+          username,
+          role,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error("查询用户错误:", error);
+    throw error.response ? error.response.data : { message: "请求失败" };
+  }
+};
+
+// Update tools' info
+export const UpdateTool = async (
+  Authorization: string,
+  tool: object,
+  toolId: number
+) => {
+  try {
+    const response = await service.put(`/tools/${toolId}`, {
+      Authorization,
+      tool,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("更新工具信息错误:", error);
+    throw error.response ? error.response.data : { message: "请求失败" };
+  }
+};
+
+// Delete tools
+export const DeleteTool = async (Authorization: string, toolId: number) => {
+  try {
+    const response = await service.delete(`/tools/${toolId}`, {
+      data: {
+        Authorization,
       },
     });
     return response.data;
   } catch (error: any) {
+    console.error("删除工具错误:", error);
+    throw error.response ? error.response.data : { message: "请求失败" };
+  }
+};
+
+// Add tools
+export const AddTool = async (
+  Authorization: string,
+  name: string,
+  category: string,
+  url: string,
+  logo_url: string,
+  description: string
+) => {
+  const tool = {
+    name,
+    category,
+    url,
+    logo_url,
+    description,
+  };
+  try {
+    const response = await service.post("/tools", {
+      Authorization,
+      tool,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("添加工具错误:", error);
     throw error.response ? error.response.data : { message: "请求失败" };
   }
 };
