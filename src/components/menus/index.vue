@@ -30,6 +30,7 @@ const role = computed(() => ({
 
 const paths = ref<Record<any, string>>({
   tools: "/home",
+  history: "/history",
   forum: "/forum",
   admin: "/admin",
   toolList: "/toolList",
@@ -80,6 +81,7 @@ const emit = defineEmits(["collapse"]);
             <span>热门AI工具</span>
           </template>
           <el-menu-item :index="paths.tools">工具集</el-menu-item>
+          <el-menu-item :index="paths.history">历史评价记录</el-menu-item>
           <el-menu-item :index="paths.forum">论坛</el-menu-item>
         </el-sub-menu>
       </template>
