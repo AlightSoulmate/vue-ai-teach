@@ -87,11 +87,6 @@ const handleLogout = () => {
     });
 };
 
-// 修改密码
-// const handleModifyPassword = () => {
-//   authStore.changeUserPassword();
-// };
-
 const handleModifyNickname = () => {
   authStore.changeUserNickname();
 };
@@ -142,7 +137,6 @@ onMounted(() => {
     </template>
   </el-dropdown>
 
-  <!-- 修改密码对话框 -->
   <el-dialog
     v-model="passwordDialogVisible"
     title="修改密码"
@@ -255,13 +249,12 @@ onMounted(() => {
   gap: 8px;
 }
 
-/* 添加对话框样式 */
 :deep(.password-dialog) {
-  z-index: 3000 !important; /* 确保对话框在最上层 */
+  z-index: 3000 !important;
 }
 
 :deep(.el-overlay) {
-  z-index: 2999 !important; /* 确保遮罩层在对话框下方但在其他内容上方 */
+  z-index: 2999 !important;
 }
 
 .dialog-footer {

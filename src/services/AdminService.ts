@@ -1,5 +1,7 @@
 // services/adminServices.ts
 import service from "./config";
+import { ElMessage } from "element-plus";
+import router from "@/router";
 
 // Get users
 export const GetUsers = async (Authorization: string) => {
@@ -15,9 +17,31 @@ export const GetUsers = async (Authorization: string) => {
     console.log("获取用户列表响应:", response.data);
     return response.data;
   } catch (error: any) {
-    console.error("获取用户列表错误:", error);
-    console.error("错误详情:", error.response?.data || error.message);
-    throw error.response ? error.response.data : { message: "请求失败" };
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          ElMessage.error("登录状态过期，请重新登录!");
+          localStorage.removeItem("user");
+          router.push("/form");
+          break;
+        case 403:
+          ElMessage.error("没有权限访问");
+          break;
+        case 404:
+          ElMessage.error("请求的资源不存在");
+          break;
+        case 500:
+          ElMessage.error("服务器内部错误");
+          break;
+        default:
+          ElMessage.error(`请求失败: ${error.message}`);
+      }
+    } else if (error.code === "ECONNABORTED") {
+      ElMessage.error("请求超时，请检查网络连接");
+    } else {
+      ElMessage.error("网络错误，请检查网络连接");
+    }
+    return Promise.reject(error);
   }
 };
 
@@ -52,8 +76,31 @@ export const UpdateUser = async (
     console.log(response.data);
     return response.data;
   } catch (error: any) {
-    console.error("更新用户信息错误:", error);
-    throw error.response ? error.response.data : { message: "请求失败" };
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          ElMessage.error("登录状态过期，请重新登录!");
+          localStorage.removeItem("user");
+          router.push("/form");
+          break;
+        case 403:
+          ElMessage.error("没有权限访问");
+          break;
+        case 404:
+          ElMessage.error("请求的资源不存在");
+          break;
+        case 500:
+          ElMessage.error("服务器内部错误");
+          break;
+        default:
+          ElMessage.error(`请求失败: ${error.message}`);
+      }
+    } else if (error.code === "ECONNABORTED") {
+      ElMessage.error("请求超时，请检查网络连接");
+    } else {
+      ElMessage.error("网络错误，请检查网络连接");
+    }
+    return Promise.reject(error);
   }
 };
 
@@ -77,9 +124,31 @@ export const DeleteUser = async (
 
     return response.data;
   } catch (error: any) {
-    console.error("删除用户错误:", error);
-    console.log(error.response?.data);
-    throw error.response ? error.response.data : { message: "请求失败" };
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          ElMessage.error("登录状态过期，请重新登录!");
+          localStorage.removeItem("user");
+          router.push("/form");
+          break;
+        case 403:
+          ElMessage.error("没有权限访问");
+          break;
+        case 404:
+          ElMessage.error("请求的资源不存在");
+          break;
+        case 500:
+          ElMessage.error("服务器内部错误");
+          break;
+        default:
+          ElMessage.error(`请求失败: ${error.message}`);
+      }
+    } else if (error.code === "ECONNABORTED") {
+      ElMessage.error("请求超时，请检查网络连接");
+    } else {
+      ElMessage.error("网络错误，请检查网络连接");
+    }
+    return Promise.reject(error);
   }
 };
 
@@ -111,8 +180,31 @@ export const AddUser = async (
     );
     return response.data;
   } catch (error: any) {
-    console.error("添加用户错误:", error);
-    throw error.response ? error.response.data : { message: "请求失败" };
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          ElMessage.error("登录状态过期，请重新登录!");
+          localStorage.removeItem("user");
+          router.push("/form");
+          break;
+        case 403:
+          ElMessage.error("没有权限访问");
+          break;
+        case 404:
+          ElMessage.error("请求的资源不存在");
+          break;
+        case 500:
+          ElMessage.error("服务器内部错误");
+          break;
+        default:
+          ElMessage.error(`请求失败: ${error.message}`);
+      }
+    } else if (error.code === "ECONNABORTED") {
+      ElMessage.error("请求超时，请检查网络连接");
+    } else {
+      ElMessage.error("网络错误，请检查网络连接");
+    }
+    return Promise.reject(error);
   }
 };
 
@@ -137,8 +229,31 @@ export const QueryUser = async (
     );
     return response.data;
   } catch (error: any) {
-    console.error("查询用户错误:", error);
-    throw error.response ? error.response.data : { message: "请求失败" };
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          ElMessage.error("登录状态过期，请重新登录!");
+          localStorage.removeItem("user");
+          router.push("/form");
+          break;
+        case 403:
+          ElMessage.error("没有权限访问");
+          break;
+        case 404:
+          ElMessage.error("请求的资源不存在");
+          break;
+        case 500:
+          ElMessage.error("服务器内部错误");
+          break;
+        default:
+          ElMessage.error(`请求失败: ${error.message}`);
+      }
+    } else if (error.code === "ECONNABORTED") {
+      ElMessage.error("请求超时，请检查网络连接");
+    } else {
+      ElMessage.error("网络错误，请检查网络连接");
+    }
+    return Promise.reject(error);
   }
 };
 
@@ -155,8 +270,31 @@ export const UpdateTool = async (
     });
     return response.data;
   } catch (error: any) {
-    console.error("更新工具信息错误:", error);
-    throw error.response ? error.response.data : { message: "请求失败" };
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          ElMessage.error("登录状态过期，请重新登录!");
+          localStorage.removeItem("user");
+          router.push("/form");
+          break;
+        case 403:
+          ElMessage.error("没有权限访问");
+          break;
+        case 404:
+          ElMessage.error("请求的资源不存在");
+          break;
+        case 500:
+          ElMessage.error("服务器内部错误");
+          break;
+        default:
+          ElMessage.error(`请求失败: ${error.message}`);
+      }
+    } else if (error.code === "ECONNABORTED") {
+      ElMessage.error("请求超时，请检查网络连接");
+    } else {
+      ElMessage.error("网络错误，请检查网络连接");
+    }
+    return Promise.reject(error);
   }
 };
 
@@ -170,8 +308,31 @@ export const DeleteTool = async (Authorization: string, toolId: number) => {
     });
     return response.data;
   } catch (error: any) {
-    console.error("删除工具错误:", error);
-    throw error.response ? error.response.data : { message: "请求失败" };
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          ElMessage.error("登录状态过期，请重新登录!");
+          localStorage.removeItem("user");
+          router.push("/form");
+          break;
+        case 403:
+          ElMessage.error("没有权限访问");
+          break;
+        case 404:
+          ElMessage.error("请求的资源不存在");
+          break;
+        case 500:
+          ElMessage.error("服务器内部错误");
+          break;
+        default:
+          ElMessage.error(`请求失败: ${error.message}`);
+      }
+    } else if (error.code === "ECONNABORTED") {
+      ElMessage.error("请求超时，请检查网络连接");
+    } else {
+      ElMessage.error("网络错误，请检查网络连接");
+    }
+    return Promise.reject(error);
   }
 };
 
@@ -198,7 +359,30 @@ export const AddTool = async (
     });
     return response.data;
   } catch (error: any) {
-    console.error("添加工具错误:", error);
-    throw error.response ? error.response.data : { message: "请求失败" };
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          ElMessage.error("登录状态过期，请重新登录!");
+          localStorage.removeItem("user");
+          router.push("/form");
+          break;
+        case 403:
+          ElMessage.error("没有权限访问");
+          break;
+        case 404:
+          ElMessage.error("请求的资源不存在");
+          break;
+        case 500:
+          ElMessage.error("服务器内部错误");
+          break;
+        default:
+          ElMessage.error(`请求失败: ${error.message}`);
+      }
+    } else if (error.code === "ECONNABORTED") {
+      ElMessage.error("请求超时，请检查网络连接");
+    } else {
+      ElMessage.error("网络错误，请检查网络连接");
+    }
+    return Promise.reject(error);
   }
 };

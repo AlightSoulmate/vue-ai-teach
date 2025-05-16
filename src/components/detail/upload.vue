@@ -40,7 +40,7 @@ const FilenameDefault = ref<string>("点击或拖拽文件到此处上传");
               {{ scoreStore.userFileName || FilenameDefault }}
             </span>
             <span class="file-hint">
-              支持 {{ uploadFileSupport.join(", ") }} 格式
+              支持 {{ uploadFileSupport.join(", ") }} 格式, 单个文件上限为2MB
             </span>
           </div>
         </div>
@@ -57,6 +57,28 @@ const FilenameDefault = ref<string>("点击或拖拽文件到此处上传");
       </div>
     </div>
   </div>
+
+  <!-- 添加进度弹窗 -->
+  <el-dialog
+    v-model="scoreStore.uploading"
+    title="文件上传进度"
+    width="30%"
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
+    :show-close="false"
+  >
+    <div class="progress-content">
+      <el-progress
+        :percentage="scoreStore.progress"
+        :status="scoreStore.progress === 100 ? 'success' : ''"
+        :stroke-width="15"
+      />
+      <p class="progress-text" v-if="scoreStore.progress < 100">
+        正在上传文件: {{ scoreStore.progress }}%
+      </p>
+      <p class="progress-text" v-else>评估处理中，请耐心等待...</p>
+    </div>
+  </el-dialog>
 </template>
 
 <style scoped lang="scss">
@@ -236,5 +258,20 @@ $box-shadow: 0 8px 20px rgba($gradient-start, 0.08);
   .el-icon {
     font-size: 18px;
   }
+}
+
+.progress-content {
+  padding: 20px;
+  text-align: center;
+
+  .progress-text {
+    margin-top: 15px;
+    color: #606266;
+    font-size: 14px;
+  }
+}
+
+.el-progress {
+  margin: 10px 0;
 }
 </style>

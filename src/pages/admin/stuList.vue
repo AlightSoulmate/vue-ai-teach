@@ -36,7 +36,6 @@
     </div>
   </div>
 
-  <!-- 添加学生对话框 -->
   <el-dialog
     v-model="dialogVisible"
     title="添加新学生"
@@ -167,7 +166,6 @@ const total = ref(0);
 const state = ref("");
 const text = ref("添加新学生");
 
-// 添加学生相关
 const dialogVisible = ref(false);
 const formRef = ref<FormInstance>();
 const form = ref({
@@ -212,8 +210,10 @@ const submitForm = async () => {
         dialogVisible.value = false;
         formRef.value?.resetFields();
         adminStore.fetchStudents();
-        ElMessage.success("添加学生成功");
-      } catch (error) {}
+        ElMessage.success("添加成功");
+      } catch (error) {
+        ElMessage.error("未知错误");
+      }
     }
   });
 };
@@ -221,7 +221,7 @@ const submitForm = async () => {
 const manualRefresh = async () => {
   try {
     await adminStore.fetchStudents();
-    ElMessage.success("列表刷新成功");
+    ElMessage.success("列表已刷新");
   } catch (error) {
     ElMessage.error("刷新失败: " + (error as Error).message);
   }
@@ -262,21 +262,22 @@ const handleNicknameUpdate = (row: any) => {
       }
     })
     .catch(() => {
-      ElMessage({
-        type: "info",
-        message: "取消修改",
-      });
+      ElMessage.info("取消修改");
     });
 };
 const handleUsernameUpdate = (row: any) => {
   console.log(row);
-  ElMessageBox.prompt(`请输入新用户名 (一般为学号、工号，不建议随意修改)`, "修改用户名", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    inputPattern: /^.{6,18}$/,
-    inputErrorMessage: "用户名长度必须在6-18位之间",
-    inputValue: row.username,
-  })
+  ElMessageBox.prompt(
+    `请输入新用户名 (一般为学号、工号，不建议随意修改)`,
+    "修改用户名",
+    {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      inputPattern: /^.{6,18}$/,
+      inputErrorMessage: "用户名长度必须在6-18位之间",
+      inputValue: row.username,
+    }
+  )
     .then(({ value }) => {
       if (value) {
         let user = {
@@ -300,10 +301,7 @@ const handleUsernameUpdate = (row: any) => {
       }
     })
     .catch(() => {
-      ElMessage({
-        type: "info",
-        message: "取消修改",
-      });
+      ElMessage.info("取消修改");
     });
 };
 const handlePasswordUpdate = (row: any) => {
@@ -331,15 +329,12 @@ const handlePasswordUpdate = (row: any) => {
           )
           .then(() => {
             adminStore.fetchStudents();
-            ElMessage.success("修改密码成功");
+            ElMessage.success("修改成功");
           });
       }
     })
     .catch(() => {
-      ElMessage({
-        type: "info",
-        message: "取消修改",
-      });
+      ElMessage.info("取消修改");
     });
 };
 const handleDeleteUpdate = (row: any) => {
@@ -356,19 +351,13 @@ const handleDeleteUpdate = (row: any) => {
       try {
         await adminStore.deleteUser(row.id, object.value);
         adminStore.fetchStudents();
-        ElMessage.success("删除用户成功");
+        ElMessage.success("删除成功");
       } catch (error) {
-        ElMessage({
-          type: "error",
-          message: `删除失败: ${(error as Error).message}`,
-        });
+        ElMessage.error("删除失败");
       }
     })
     .catch(() => {
-      ElMessage({
-        type: "info",
-        message: "已取消删除操作",
-      });
+      ElMessage.info("取消删除");
     });
 };
 let timeout: ReturnType<typeof setTimeout>;
@@ -419,6 +408,7 @@ watch(
   }
 );
 </script>
+
 <style lang="scss" scoped>
 * {
   box-sizing: border-box;
@@ -554,7 +544,6 @@ watch(
   bottom: calc(var(--height) + var(--gap-between-tooltip-to-button));
 }
 
-// 搜索
 .search {
   width: 30%;
   margin: 10px 0 10px 50px;

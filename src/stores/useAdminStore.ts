@@ -11,7 +11,7 @@ import {
   DeleteTool,
   AddTool,
 } from "@/services";
-import type { User, queryUser, Student, Teacher } from "@/interfaces";
+import type { queryUser, Student, Teacher } from "@/interfaces";
 import { ElMessage } from "element-plus";
 import { useAuthStore } from "./useAuthStore";
 
@@ -28,22 +28,16 @@ export const useAdminStore = defineStore("admin", () => {
   const fetchStudents = async () => {
     try {
       const token = authStore.user.token;
-
-      console.log("开始获取学生列表...");
       const data = await GetUsers(token);
 
       if (data && data.student) {
         students.value = data.student;
         countSize(students.value, "student");
-        console.log("学生列表，数量:", students.value.length);
-        ElMessage.success("获取学生列表成功");
       } else {
-        console.error("学生列表返回数据格式有误:", data);
-        ElMessage.warning("获取学生列表失败");
+        ElMessage.warning("返回数据格式有误");
       }
     } catch (error) {
-      console.error("学生列表获取异常:", error);
-      ElMessage.error("获取学生列表失败，请检查网络或服务状态");
+      ElMessage.error("数据获取失败");
     }
   };
 
@@ -55,9 +49,10 @@ export const useAdminStore = defineStore("admin", () => {
       teachers.value = data.teachers;
       // countSize(teachers.value, "teacher");
     } catch {
-      console.error("教师列表获取异常");
+      ElMessage.error("教师列表获取异常");
     }
   };
+
   const countSize = (Users: Student[] | Teacher[], role: string) => {
     role === "student"
       ? (totalStudents.value = Users.length)
@@ -82,13 +77,9 @@ export const useAdminStore = defineStore("admin", () => {
         nickname,
         username
       );
-      console.log(response);
-      ElMessage({
-        type: "success",
-        message: "修改成功",
-      });
-    } catch (e: any) {
-      console.error(e);
+      ElMessage.success("修改成功");
+    } catch (error: any) {
+      ElMessage.error(error?.message);
     }
   };
 
@@ -97,23 +88,14 @@ export const useAdminStore = defineStore("admin", () => {
     const token = authStore.user.token;
     try {
       const response = await DeleteUser(id, role, token);
-      console.log(response.message);
-      ElMessage({
-        type: "success",
-        message: "删除成功",
-      });
-      // 如果是删除学生，刷新学生列表
+      ElMessage.success("修改成功");
       if (role === "student") {
         fetchStudents();
       } else if (role === "teacher") {
         fetchTeachers();
       }
     } catch (e: any) {
-      console.error(e);
-      ElMessage({
-        type: "error",
-        message: e.message || "删除失败，请重试",
-      });
+      ElMessage.error("删除失败");
     }
   };
 
@@ -127,11 +109,7 @@ export const useAdminStore = defineStore("admin", () => {
     const token = authStore.user.token;
     try {
       const response = await AddUser(token, nickname, username, password, role);
-      console.log(response.message);
-      ElMessage({
-        type: "success",
-        message: "添加成功",
-      });
+      ElMessage.success("添加成功");
     } catch (e: any) {
       console.error(e);
     }
@@ -149,14 +127,10 @@ export const useAdminStore = defineStore("admin", () => {
     const token = authStore.user.token;
     try {
       const response = await QueryUser(token, username, role);
-      console.log(response);
-      ElMessage({
-        type: "success",
-        message: "查询成功",
-      });
+      ElMessage.success("查询成功");
       userFound.value = response.user;
-    } catch (e: any) {
-      console.error(e);
+    } catch (error: any) {
+      ElMessage.error(error?.message);
     }
   };
 
@@ -179,12 +153,9 @@ export const useAdminStore = defineStore("admin", () => {
     };
     try {
       const response = await UpdateTool(token, tool, toolId);
-      ElMessage({
-        type: "success",
-        message: "修改成功",
-      });
-    } catch (e: any) {
-      console.error(e);
+      ElMessage.success("修改成功");
+    } catch (error: any) {
+      console.error(error?.message);
     }
   };
 
@@ -193,13 +164,9 @@ export const useAdminStore = defineStore("admin", () => {
     const token = authStore.user.token;
     try {
       const response = await DeleteTool(token, toolId);
-      console.log(response.message);
-      ElMessage({
-        type: "success",
-        message: "删除成功",
-      });
-    } catch (e: any) {
-      console.error(e);
+      ElMessage.success("删除成功");
+    } catch (error: any) {
+      ElMessage.error(error);
     }
   };
 
@@ -226,14 +193,10 @@ export const useAdminStore = defineStore("admin", () => {
         type: "success",
         message: "工具添加成功",
       });
+      ElMessage.success("工具添加成功");
       return response;
-    } catch (e: any) {
-      console.error(e);
-      ElMessage({
-        type: "error",
-        message: e.message || "添加失败，请重试",
-      });
-      throw e;
+    } catch (error: any) {
+      ElMessage.error("工具添加失败");
     }
   };
 

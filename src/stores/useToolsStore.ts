@@ -1,5 +1,4 @@
 // @/stores/useToolsStore.ts
-import { ref } from "vue";
 import { defineStore } from "pinia";
 import { getCategories, getTools } from "@/services";
 
@@ -22,7 +21,7 @@ export const useToolsStore = defineStore("tools", {
     loadedCategories: new Set<string>(),
     loadedToolsCount: 0,
     totalToolsCount: 0,
-    CACHE_TIME: 3 * 1000, // 缓存30s
+    CACHE_TIME: 10 * 1000, // 缓存10s
   }),
 
   actions: {

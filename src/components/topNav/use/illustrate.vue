@@ -6,7 +6,6 @@ import {
   MagicStick,
 } from "@element-plus/icons-vue";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { ref } from "vue";
 
 const authStore = useAuthStore();
 const InstructionsTitle = " 使用说明";

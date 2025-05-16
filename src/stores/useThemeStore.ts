@@ -21,12 +21,12 @@ export const useThemeStore = defineStore("theme", () => {
     const prefersDark =
       window.matchMedia &&
       window.matchMedia("(prefers-color-scheme: dark)").matches;
-    // 优先使用本地存储的主题
+    // 优先使用本地主题
     const savedTheme =
       localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
     isDarkTheme.value = savedTheme === "dark";
 
-    // 同样使用requestAnimationFrame来设置初始主题
+    // 使用requestAnimationFrame设置初始主题
     requestAnimationFrame(() => {
       document.documentElement.setAttribute("data-theme", savedTheme);
     });

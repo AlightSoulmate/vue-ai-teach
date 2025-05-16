@@ -8,7 +8,6 @@ import type { User } from "@/interfaces";
 
 export const useAuthStore = defineStore("auth", () => {
   const router = useRouter();
-  const errorMessage = ref<string>("");
   const isAuthenticated = ref<boolean>(false);
   const username = ref<string>("");
   const password = ref<string>("");
@@ -80,37 +79,15 @@ export const useAuthStore = defineStore("auth", () => {
     });
   };
 
-  // 修改密码
-  const changeUserPassword = async (
-    newNickname: string,
-    oldPassword: string,
-    newPassword: string
-  ) => {
-    const data = await change(
-      user.value.token,
-      newNickname,
-      oldPassword,
-      newPassword,
-      user.value.username
-    );
-    localStorage.setItem("user", JSON.stringify(user.value));
-    ElMessage({
-      message: "密码修改成功",
-      type: "success",
-    });
-    console.log(data);
-  };
-
   // 修改昵称
   const changeUserNickname = () => {
     ElMessageBox.prompt("请输入新昵称", "修改昵称", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
       inputPattern: /^.{2,10}$/,
-      inputErrorMessage: "昵称长度必须在2-10位之间",
+      inputErrorMessage: "昵称长度在2-10位之间",
     })
       .then(async ({ value }) => {
-        console.log(value);
         const data = await change(
           user.value.token,
           value,
@@ -120,15 +97,10 @@ export const useAuthStore = defineStore("auth", () => {
         );
         user.value.nickname = data.user.nickname;
         localStorage.setItem("user", JSON.stringify(user.value));
-        ElNotification({
-          title: "修改昵称成功",
-          message: "昵称修改成功",
-          type: "success",
-        });
-        console.log(data.user.nickname);
+        ElMessage.success("修改昵称成功");
       })
       .catch(() => {
-        console.log("取消修改昵称");
+        ElMessage.info("取消修改");
       });
   };
 
@@ -196,7 +168,6 @@ export const useAuthStore = defineStore("auth", () => {
         loginForm.value.password,
         currentRole.value
       );
-      console.log(data);
       user.value = {
         id: data.user.id,
         nickname: data.user.nickname?.trim() || "未设置昵称",
@@ -206,31 +177,14 @@ export const useAuthStore = defineStore("auth", () => {
       };
       isAuthenticated.value = true;
       isFresh.value = data.user.is_fresh;
-      errorMessage.value = "";
       currentRole.value = user.value.role;
       localStorage.setItem("user", JSON.stringify(user.value));
       localStorage.setItem("isFresh", JSON.stringify(isFresh.value));
-      ElNotification({
-        title: `欢迎登入，${user.value.nickname?.trim() || "未设置昵称"}${
-          user.value.role === "student" || user.value.role === "teacher"
-            ? user.value.role === "student"
-              ? "同学"
-              : "老师"
-            : "管理员"
-        }`,
-        message: "登录成功",
-        type: "success",
-      });
+      ElMessage.success("登录成功");
 
       await router.push("/");
     } catch (error: any) {
-      console.log(error);
-      if (error.message === "user not found") {
-        ElMessage.error("用户不存在！");
-      } else {
-        ElMessage.error(error.message);
-      }
-      errorMessage.value = error.message ?? "登录失败";
+      ElMessage.error(error?.message);
     }
   };
 
@@ -243,7 +197,6 @@ export const useAuthStore = defineStore("auth", () => {
         registerForm.value.password,
         currentRole.value
       );
-      console.log(data);
       user.value = {
         id: data.user.id,
         nickname: data.user.nickname?.trim() || "未设置昵称",
@@ -252,19 +205,13 @@ export const useAuthStore = defineStore("auth", () => {
         token: data.Authorization,
       };
       isAuthenticated.value = true;
-      errorMessage.value = "";
       currentRole.value = data.user.role;
       localStorage.setItem("user", JSON.stringify(user.value));
 
-      ElNotification({
-        title: `欢迎你，新${user.value.role === "student" ? "同学" : "老师"}`,
-        message: "注册成功",
-        type: "success",
-      });
+      ElMessage.success("注册成功");
       router.push("/");
     } catch (error: any) {
-      console.error(error);
-      errorMessage.value = error.message ?? "注册失败";
+      console.error(error?.message);
     }
   };
 
@@ -311,7 +258,6 @@ export const useAuthStore = defineStore("auth", () => {
     currentRole,
     currentRoleCN,
     isFresh,
-    errorMessage,
     registerForm,
     registerErrors,
     isAuthenticated,
@@ -325,7 +271,6 @@ export const useAuthStore = defineStore("auth", () => {
     switchToLogin,
     enterRegister,
     changeUserNickname,
-    changeUserPassword,
     switchToRegister,
     validateLoginForm,
     validateRegisterForm,

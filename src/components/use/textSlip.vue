@@ -1,13 +1,10 @@
 <style scoped>
 .card {
-  /* color used to softly clip top and bottom of the .words container */
-  /* --bg-color: #212121; */
   background-color: var(--background-color);
   padding: 1rem 2rem;
   border-radius: 1.25rem;
 }
 .loader {
-  /* color: rgb(124, 124, 124); */
   font-family: "Poppins", sans-serif;
   font-weight: 600;
   font-size: 30px;
@@ -28,18 +25,6 @@
   overflow: hidden;
   position: relative;
 }
-/* .words::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    var(--background-color) 10%,
-    transparent 30%,
-    transparent 70%,
-    var(--background-color) 90%
-  );
-  z-index: 20;
-} */
 
 .word {
   display: block;

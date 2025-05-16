@@ -36,8 +36,8 @@ import { ref, onMounted, onUnmounted } from "vue";
 const isVisible = ref(false);
 
 const checkScroll = () => {
-  // 当滚动超过90vh时显示按钮
-  isVisible.value = window.scrollY > window.innerHeight * 0.9;
+  // 当滚动超过 80vh 时显示按钮
+  isVisible.value = window.scrollY > window.innerHeight * 0.8;
 };
 
 const scrollToTop = () => {
@@ -144,7 +144,7 @@ button:hover .clone > :nth-child(3) {
 button:hover .clone > :nth-child(4) {
   transition-delay: 0.3s;
 }
-/* icon style and hover */
+
 button svg {
   width: 20px;
   right: 0;

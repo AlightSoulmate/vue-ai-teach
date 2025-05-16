@@ -909,7 +909,6 @@ onMounted(async () => {
   gap: 10px;
 }
 
-/* 对话框动画 */
 :deep(.el-dialog) {
   border-radius: 8px;
   overflow: hidden;
@@ -943,7 +942,6 @@ onMounted(async () => {
   }
 }
 
-/* 输入框动画 */
 :deep(.el-input__wrapper) {
   transition: all 0.3s ease;
 

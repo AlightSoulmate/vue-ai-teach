@@ -189,16 +189,11 @@
 <script lang="ts" setup>
 import { useAuthStore } from "@/stores/useAuthStore";
 import { watch, defineEmits, onMounted, ref } from "vue";
-import Loading from "@/components/use/loading.vue";
-import EnterDialog from "@/components/use/enter.vue";
 
 const emit = defineEmits(["usernameChange"]);
 const authStore = useAuthStore();
 
-const isLoading = ref<boolean>(true);
-const currentUsername = ref<string>("");
 const showPassword = ref<boolean>(false);
-let debounceTimer: number | null = null;
 
 const selectRole = (role: string) => {
   authStore.setRole(role);
@@ -208,7 +203,6 @@ const togglePassword = () => {
   showPassword.value = !showPassword.value;
 };
 
-// 监听登录表单用户名变化
 watch(
   () => authStore.loginForm.username,
   (newUsername) => {
@@ -216,7 +210,6 @@ watch(
   }
 );
 
-// 监听注册表单用户名变化
 watch(
   () => authStore.registerForm.username,
   (newUsername) => {
@@ -234,40 +227,12 @@ watch(
   color: #fff;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
   animation: fadeIn 0.6s ease-out;
 
   &:hover {
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-    // transform: translateY(-5px);
-  }
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: -100px;
-    left: -100px;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    background: radial-gradient(rgba(255, 255, 255, 0.1), transparent);
-    z-index: 0;
-    animation: pulse 15s infinite alternate;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: -80px;
-    right: -80px;
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
-    background: radial-gradient(rgba(139, 92, 246, 0.1), transparent);
-    z-index: 0;
-    animation: pulse 12s infinite alternate-reverse;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -521,7 +486,6 @@ watch(
   color: rgba(243, 244, 246, 1);
   font-size: 1rem;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) inset;
 
   &::placeholder {
     color: rgba(156, 163, 175, 0.7);
@@ -624,14 +588,6 @@ watch(
 
   &:hover::before {
     left: 100%;
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: translateY(1px);
   }
 }
 

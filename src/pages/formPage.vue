@@ -2,9 +2,6 @@
   <div class="form-page">
     <div class="background-effects">
       <div class="circle circle-1"></div>
-      <div class="circle circle-2"></div>
-      <div class="circle circle-3"></div>
-      <div class="circle circle-4"></div>
     </div>
     <div v-if="isLoading" class="loader-container">
       <Loading />
@@ -16,32 +13,13 @@
         </div>
         <h1 class="brand-title">
           欢迎回来
-          <span v-if="currentUsername">，{{ currentUsername }}</span>
-          <span v-else class="username-placeholder">，____</span>
+          <span v-if="currentUsername"> {{ currentUsername }}</span>
+          <span v-else class="username-placeholder"> ____</span>
         </h1>
-        <p class="brand-subtitle">登录您的账户以体验所有功能</p>
-        <div class="feature-list">
-          <div class="feature-item">
-            <span class="feature-icon">✨</span>
-            <span class="feature-text">优质的学习资源</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">📚</span>
-            <span class="feature-text">便捷的课程管理</span>
-          </div>
-          <div class="feature-item">
-            <span class="feature-icon">🔍</span>
-            <span class="feature-text">详尽的学习分析</span>
-          </div>
-        </div>
+        <p class="brand-subtitle">登录账户以体验完整功能</p>
       </div>
-      <!-- <div class="form-section"> -->
       <EnterDialog class="form-section" @username-change="updateUsername" />
-      <!-- </div> -->
     </div>
-    <footer class="page-footer">
-      <p>© 2025 AITEACH · 保留所有权利</p>
-    </footer>
   </div>
 </template>
 <script lang="ts" setup>
@@ -147,48 +125,29 @@ onMounted(() => {
   margin: 0 auto;
   z-index: 1;
   position: relative;
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   overflow: hidden;
 }
 
 .brand-section {
   flex: 1;
-  padding: 3rem;
+  padding-left: 5rem;
+  margin-top: -10rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   position: relative;
-  background: linear-gradient(
-    135deg,
-    rgba(30, 41, 59, 0.9),
-    rgba(15, 23, 42, 0.9)
-  );
   color: white;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
-    opacity: 0.3;
-    z-index: -1;
-  }
 }
 
 .logo {
-  margin-bottom: 2rem;
   display: inline-block;
 }
 
 .logo-icon {
   font-size: 3rem;
   background: linear-gradient(to right, #a78bfa, #60a5fa);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   position: relative;
@@ -200,6 +159,7 @@ onMounted(() => {
   font-weight: 700;
   margin-bottom: 1rem;
   background: linear-gradient(to right, #a78bfa, #60a5fa);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   position: relative;
@@ -209,6 +169,7 @@ onMounted(() => {
     display: inline-block;
     font-weight: 700;
     background: linear-gradient(to right, #f472b6, #ec4899);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: fadeIn 0.5s ease-out;
@@ -249,6 +210,7 @@ onMounted(() => {
     opacity: 0.6;
     font-style: italic;
     background: linear-gradient(to right, #9ca3af, #6b7280);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: pulse 1.5s infinite alternate ease-in-out;
@@ -291,15 +253,6 @@ onMounted(() => {
 .form-section {
   width: 480px;
 }
-
-// .form-section {
-//   flex: 1.2;
-//   padding: 0;
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-// }
-
 
 .page-footer {
   position: absolute;

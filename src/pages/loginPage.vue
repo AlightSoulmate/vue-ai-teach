@@ -6,19 +6,11 @@
     <div class="hero-section">
       <div class="decorative-elements">
         <div class="circle circle-1"></div>
-        <div class="circle circle-2"></div>
-        <div class="circle circle-3"></div>
-        <div class="dot dot-1"></div>
-        <div class="dot dot-2"></div>
-        <div class="dot dot-3"></div>
       </div>
       <div class="hero-content">
         <div class="title">
           <div class="front">{{ TitleFront }}</div>
           <div class="end">{{ TitleEnd }}</div>
-        </div>
-        <div class="slip">
-          <Slip class="slip-inner" />
         </div>
         <div class="enter">
           <Enter class="enter-inner" @click="handleLogin" />
@@ -91,51 +83,6 @@ const handleLogin = () => {
     top: -100px;
     left: -100px;
     animation-delay: 0s;
-  }
-
-  &.circle-2 {
-    width: 200px;
-    height: 200px;
-    bottom: -50px;
-    right: -50px;
-    animation-delay: 2s;
-  }
-
-  &.circle-3 {
-    width: 150px;
-    height: 150px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    animation-delay: 4s;
-  }
-}
-
-.dot {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ff792d;
-  opacity: 0.3;
-  animation: pulse 2s ease-in-out infinite;
-
-  &.dot-1 {
-    top: 20%;
-    left: 20%;
-    animation-delay: 0s;
-  }
-
-  &.dot-2 {
-    top: 60%;
-    right: 20%;
-    animation-delay: 1s;
-  }
-
-  &.dot-3 {
-    bottom: 20%;
-    left: 40%;
-    animation-delay: 2s;
   }
 }
 

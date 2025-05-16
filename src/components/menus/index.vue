@@ -20,7 +20,7 @@ const activeMenu = ref(
     return "/home";
   })
 );
-const isCollapse = ref<boolean>(false);
+const isCollapse = ref<boolean>(true);
 
 const role = computed(() => ({
   isStudent: authStore.user.role === "student",
@@ -131,13 +131,14 @@ const emit = defineEmits(["collapse"]);
   position: fixed;
   background-color: var(--background-color);
   border-right: 1px solid var(--border-color);
+  z-index: 100;
 }
 
 .collapse-trigger {
   position: absolute;
   right: -40px;
   top: 8px;
-  z-index: 9999;
+  z-index: 100;
 }
 
 .collapse-btn {
@@ -152,6 +153,7 @@ const emit = defineEmits(["collapse"]);
   cursor: pointer;
   transition: all 0.3s;
   background-color: transparent;
+  z-index: 100;
 }
 
 .collapse-btn:hover {
@@ -173,14 +175,12 @@ const emit = defineEmits(["collapse"]);
   width: 200px;
   min-height: 400px;
   background-color: var(--background-color);
-  /* border-right: 1px solid var(--border-color); */
 }
 
 .el-menu {
   background-color: var(--background-color);
 }
 
-/* 菜单项样式 */
 :deep(.el-menu-item) {
   color: var(--text-color) !important;
   background-color: var(--background-color);
@@ -195,7 +195,6 @@ const emit = defineEmits(["collapse"]);
   background-color: var(--active-background-color);
 }
 
-/* 子菜单样式 */
 :deep(.el-sub-menu__title) {
   color: var(--text-color) !important;
   background-color: var(--background-color);
@@ -209,13 +208,11 @@ const emit = defineEmits(["collapse"]);
   background-color: var(--background-color);
 }
 
-/* 图标颜色 */
 :deep(.el-menu-item .el-icon),
 :deep(.el-sub-menu__title .el-icon) {
   color: var(--text-color);
 }
 
-/* 激活状态的图标颜色 */
 :deep(.el-menu-item.is-active .el-icon) {
   color: var(--el-color-primary);
 }

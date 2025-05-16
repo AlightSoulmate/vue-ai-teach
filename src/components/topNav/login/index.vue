@@ -1,24 +1,14 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import Icon from "../use/icon.vue";
-import Illustrate from "../use/illustrate.vue";
 import Theme from "../use/theme.vue";
-import Github from "../use/github.vue";
-import { useAuthStore } from "@/stores/useAuthStore";
 import { useThemeStore } from "@/stores/useThemeStore";
-import { useRouter } from "vue-router";
 
-const router = useRouter();
-const authStore = useAuthStore();
 const themeStore = useThemeStore();
 const logo = ref("https://a1.x914.com/alight/i/AITeach/white-zisu-logo.png");
 const logoDark = ref(
   "https://a1.x914.com/alight/i/AITeach/black-zisu-logo.png"
 );
-
-const handleLogin = () => {
-  router.push("/form");
-};
 </script>
 
 <template>
@@ -33,26 +23,7 @@ const handleLogin = () => {
         />
       </div>
       <div class="nav-right">
-        <!-- <Illustrate /> -->
         <Theme />
-        <!-- <Github /> -->
-        <!-- <div class="auth-buttons">
-          <el-button
-            type="primary"
-            text
-            @click="handleLogin"
-            :class="{ active: authStore.isLogin }"
-          >
-            登录
-          </el-button>
-          <el-button
-            type="primary"
-            @click="handleLogin"
-            :class="{ active: !authStore.isLogin }"
-          >
-            注册
-          </el-button>
-        </div> -->
       </div>
     </div>
   </div>
@@ -77,14 +48,14 @@ const handleLogin = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 10px;
-  /* background: rgba(255, 255, 255, 0.1); */
-  /* backdrop-filter: blur(10px); */
-  /* -webkit-backdrop-filter: blur(10px); */
-  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
-  /* border-bottom: 1px solid rgba(255, 255, 255, 0.2); */
-  z-index: 1000;
-  transition: all 0.3s ease-in-out;
+  padding: 0 24px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 5000;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-left,
@@ -97,13 +68,6 @@ const handleLogin = () => {
 .logo {
   padding: 1px 10px 0 10px;
   width: 190px;
-}
-
-.auth-buttons {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: 16px;
 }
 
 :deep(.el-button) {

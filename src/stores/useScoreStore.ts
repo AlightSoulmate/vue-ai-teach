@@ -5,28 +5,12 @@ import { ElMessage } from "element-plus";
 import {
   uploadRate,
   getDetail,
-  uploadEvaluationFile,
+  uploadEvaluationFileByFileId,
   getEvaluationResult,
   generateAndDownloadReport,
 } from "@/services";
-
+import type { Eval, ReportHistory } from "@/interfaces";
 export const useScoreStore = defineStore("score", () => {
-  interface Eval {
-    username: string;
-    tool: string;
-    category: string;
-    averageScore: number;
-    comment: string;
-  }
-  interface ReportHistory {
-    id: number;
-    fileName: string;
-    uploadTime: string;
-    toolName: string;
-    evaluationResult: string;
-    downloadUrl: string;
-  }
-
   const userFile = ref<File | null>(null);
   const uploading = ref(false);
   const userFileName = ref("");
@@ -101,6 +85,35 @@ export const useScoreStore = defineStore("score", () => {
     averageScore: 0,
     comment: "",
   });
+  const lastUploadRecord = ref<{
+    timestamp: number;
+    fileName: string;
+  } | null>(null);
+
+  // 节流检查函数
+  const checkThrottle = (fileName: string): boolean => {
+    if (!lastUploadRecord.value) {
+      return true;
+    }
+
+    const now = Date.now();
+    const STOP_TIME = 10 * 1000; // 10秒
+
+    if (
+      lastUploadRecord.value.fileName === fileName &&
+      now - lastUploadRecord.value.timestamp < STOP_TIME
+    ) {
+      const remainingSeconds = Math.ceil(
+        (STOP_TIME - (now - lastUploadRecord.value.timestamp)) / 1000
+      );
+      ElMessage.warning(
+        `请求过于频繁，请等待 ${remainingSeconds} 秒后再次上传`
+      );
+      return false;
+    }
+
+    return true;
+  };
 
   // 选择文件
   const handleUserFileChange = (e: Event) => {
@@ -111,6 +124,20 @@ export const useScoreStore = defineStore("score", () => {
     }
   };
 
+  const progress = ref(0); // 进度状态
+  // 文件读取与分片
+  const CHUNK_SIZE = 1 * 1024 * 1024; // 每片 1MB
+  function splitFile(file: File): Blob[] {
+    const chunks: Blob[] = [];
+    let start = 0;
+    while (start < file.size) {
+      const end = Math.min(start + CHUNK_SIZE, file.size);
+      chunks.push(file.slice(start, end));
+      start = end;
+    }
+    return chunks;
+  }
+
   // 点击上传
   const handleUpload = async () => {
     if (!userFile.value) {
@@ -118,78 +145,78 @@ export const useScoreStore = defineStore("score", () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", userFile.value);
+    //节流检查
+    if (!checkThrottle(userFile.value.name)) {
+      return;
+    }
 
     const Authorization = JSON.parse(
       localStorage.getItem("user") as string
     ).token;
-    formData.append("Authorization", Authorization);
-
-    console.log(Authorization, formData.get("file"));
     uploading.value = true;
 
     try {
-      // 使用服务函数上传文件
-      const response = await uploadEvaluationFile(formData);
-      const message = response.message;
-      console.log(message);
-      ElMessage.success("正在评估，请稍后");
+      lastUploadRecord.value = {
+        timestamp: Date.now(),
+        fileName: userFile.value.name,
+      };
 
-      if (message) {
+      let response = null;
+      let lastMessage = null;
+      const chunks = splitFile(userFile.value);
+      const fileSum = chunks.length;
+      for (let i = 0; i < chunks.length; i++) {
+        const formData = new FormData();
+        formData.append("Authorization", Authorization);
+        formData.append("file", chunks[i]);
+        formData.append("fileSum", String(fileSum));
+        response = await uploadEvaluationFileByFileId(formData, i + 1);
+        progress.value = Math.round(((i + 1) / fileSum) * 100);
+      }
+
+      if (lastMessage) {
         // 轮询函数
         const pollEvaluation = async () => {
           try {
-            const Authorization = JSON.parse(
-              localStorage.getItem("user") as string
-            ).token;
-
-            // 使用服务函数获取评价结果
             const resp = await getEvaluationResult(Authorization);
 
-            // 获取到评估结果
-            const status = resp.status;
-            console.log("状态码为", status);
-            if (status === 200) {
+            if (resp.status === 200) {
+              uploading.value = false;
+              progress.value = 0;
               const originalText = resp.message;
               const reportText = JSON.parse(
                 '"' + originalText.replace(/\\\\/g, "\\") + '"'
-              ); // 将unicode转为中文
+              );
               console.log(reportText);
-              ElMessage.success("评估完成，正在生成报告");
 
-              // 使用服务函数生成并下载报告
               const user = JSON.parse(localStorage.getItem("user") as string);
+
               await generateAndDownloadReport(reportText, user.username);
 
-              console.log("评估完成");
               return true;
-            } else if (status === 204) {
-              console.log("继续轮询");
+            } else {
+              progress.value = 100;
+              ElMessage.info("正在轮询");
               return false;
             }
-            console.log("继续轮询");
-            return false;
           } catch (e) {
-            console.error("轮询评估结果失败", e);
-            console.log("出错继续轮询");
+            ElMessage.warning("未知错误,继续轮询");
             return false;
           }
         };
 
-        // 轮询
+        // 轮询 每2.5秒
         const interval = setInterval(async () => {
           const isComplete = await pollEvaluation();
           if (isComplete) {
-            console.log("停止轮询");
+            ElMessage.success("评估完成");
             clearInterval(interval);
           }
-        }, 2000);
+        }, 2500);
       } else {
-        ElMessage.error(message || "上传失败");
+        ElMessage.error(lastMessage as any);
       }
     } catch (error) {
-      ElMessage.error("上传失败");
       console.error(error);
     } finally {
       uploading.value = false;
@@ -208,39 +235,31 @@ export const useScoreStore = defineStore("score", () => {
     };
     const token = JSON.parse(localStorage.getItem("user") as string).token;
     try {
-      const resp = await uploadRate(token, rateValue, toolId);
-      console.log(resp.message);
-      // 立即获取更新后的数据
+      await uploadRate(token, rateValue, toolId);
+      ElMessage.success("评分上传成功");
       await ToolsDetailGet(toolId);
-    } catch (e: any) {
-      console.error("评价失败", e);
+    } catch (error: any) {
+      ElMessage.error("评分上传失败");
     }
   };
 
   const ToolsDetailGet = async (toolId: number) => {
     try {
-      // 强制重置状态
       toolsDetail.value = {};
-
-      // 获取新数据
       const response = await getDetail(toolId);
-      console.log("获取到的工具详情:", response);
-
-      // 直接更新状态
       toolsDetail.value = response;
       return response;
     } catch (e: any) {
-      console.error("获取工具详情失败", e);
-      throw e.response ? e.response.data : { message: "请求失败" };
+      ElMessage.error("工具详情获取失败");
     }
   };
 
   // 平均分计算
   const calculateWeightedAverage = (): number => {
-    const weights = [0.3, 0.25, 0.25, 0.1, 0.1];
+    const WEIGHTS = [0.3, 0.25, 0.25, 0.1, 0.1];
     let weightedSum = 0;
     rateStandards.value.forEach((standard, index) => {
-      weightedSum += standard.score * weights[index];
+      weightedSum += standard.score * WEIGHTS[index];
     });
     return parseFloat(weightedSum.toFixed(1));
   };
@@ -248,12 +267,15 @@ export const useScoreStore = defineStore("score", () => {
   return {
     rateStandards,
     rate,
+    progress,
     userFile,
     uploading,
     toolsDetail,
     userFileName,
     reportHistory,
     loadingHistory,
+    lastUploadRecord,
+    checkThrottle,
     handleUpload,
     handleUserFileChange,
     ToolsDetailGet,

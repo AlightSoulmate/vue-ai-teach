@@ -1,6 +1,4 @@
-<!-- 
-  CSS手写无边界走马灯 @Luca Yu
--->
+<!-- CSS 无边界走马灯 github.com/AlightSoulmate -->
 
 <style scoped>
 .card {
