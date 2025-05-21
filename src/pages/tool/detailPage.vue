@@ -13,8 +13,11 @@
 </template>
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import TopNav from "@/components/topnav/main/index.vue";
+//@ts-ignore
+import TopNav from "@/components/topNav/main/index.vue";
+//@ts-ignore
 import Main from "@/components/detail/index.vue";
+//@ts-ignore
 import Loading from "@/components/use/loading.vue";
 
 const isLoading = ref(true);

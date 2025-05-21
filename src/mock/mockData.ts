@@ -491,3 +491,16 @@ Mock.mock("/api/tools/search", "get", (req) => {
 //     message: "用户贡献工具成功",
 //   };
 // });
+
+//历史评价
+Mock.mock("/api/evaluation/history", "get", (req) => {
+  console.log("mock历史评价", req.body);
+  return {
+    data: [
+      {
+        date:2025518,
+        content:"good",
+      },
+    ],
+  };
+});
