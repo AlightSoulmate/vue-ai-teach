@@ -13,7 +13,7 @@
 </template>
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
-import TopNav from "@/components/topnav/main/index.vue";
+import TopNav from "@/components/topNav/main/index.vue";
 import Main from "@/components/detail/index.vue";
 import Loading from "@/components/use/loading.vue";
 

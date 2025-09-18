@@ -57,6 +57,9 @@
           show-password
         ></el-input>
       </el-form-item>
+      <el-form-item label="班级" prop="class">
+        <el-input v-model="form.cno" placeholder="请输入班级"></el-input>
+      </el-form-item>
     </el-form>
     <template #footer>
       <span class="dialog-footer">
@@ -83,14 +86,21 @@
       <el-table-column
         prop="nickname"
         label="Nickname"
-        width="120"
+        width="130"
         header-align="center"
         align="center"
       />
       <el-table-column
         prop="username"
         label="Username"
-        width="120"
+        width="130"
+        header-align="center"
+        align="center"
+      />
+      <el-table-column
+        prop="class"
+        label="Class"
+        width="100"
         header-align="center"
         align="center"
       />
@@ -172,6 +182,7 @@ const form = ref({
   username: "",
   nickname: "",
   password: "",
+  cno:"",
 });
 
 const rules = ref<FormRules>({
@@ -266,7 +277,6 @@ const handleNicknameUpdate = (row: any) => {
     });
 };
 const handleUsernameUpdate = (row: any) => {
-  console.log(row);
   ElMessageBox.prompt(
     `请输入新用户名 (一般为学号、工号，不建议随意修改)`,
     "修改用户名",

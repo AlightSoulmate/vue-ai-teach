@@ -47,7 +47,6 @@ export const useAdminStore = defineStore("admin", () => {
       const token = authStore.user.token;
       const data = await GetUsers(token);
       teachers.value = data.teachers;
-      // countSize(teachers.value, "teacher");
     } catch {
       ElMessage.error("教师列表获取异常");
     }
@@ -69,13 +68,13 @@ export const useAdminStore = defineStore("admin", () => {
   ) => {
     const token = authStore.user.token;
     try {
-      const response = await UpdateUser(
+      await UpdateUser(
         id,
         role,
         token,
         password ?? "",
         nickname,
-        username
+        username,
       );
       ElMessage.success("修改成功");
     } catch (error: any) {
@@ -87,7 +86,7 @@ export const useAdminStore = defineStore("admin", () => {
   const deleteUser = async (id: number, role: string) => {
     const token = authStore.user.token;
     try {
-      const response = await DeleteUser(id, role, token);
+      await DeleteUser(id, role, token);
       ElMessage.success("修改成功");
       if (role === "student") {
         fetchStudents();
@@ -121,6 +120,7 @@ export const useAdminStore = defineStore("admin", () => {
     nickname: "",
     username: "",
     role: "",
+    cno: "",
     message: "",
   });
   const queryUser = async (username: string, role: string) => {
@@ -188,11 +188,6 @@ export const useAdminStore = defineStore("admin", () => {
         logo_url,
         description
       );
-      console.log(response.message);
-      ElMessage({
-        type: "success",
-        message: "工具添加成功",
-      });
       ElMessage.success("工具添加成功");
       return response;
     } catch (error: any) {

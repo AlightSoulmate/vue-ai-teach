@@ -5,7 +5,6 @@ import { Checked, ChatDotRound, Microphone } from "@element-plus/icons-vue";
 import { useScoreStore } from "@/stores/useScoreStore";
 import { useDebounceStore } from "@/stores/useDebounceStore";
 import type { ScrollbarInstance } from "element-plus";
-import type { SpeechRecognitionEvent } from "@/interfaces";
 
 interface SelectedTool {
   id: string | number;
@@ -27,7 +26,6 @@ const hasSubmittedCurrentTool = ref(false);
 
 const MIN_COMMENT_LENGTH = 10;
 const DEBOUNCE_DELAY = 500;
-const MAX_COMMENT_LENGTH = 500;
 const RATE_COLORS = ["#C6D1DE", "#409EFF", "#67C23A"];
 const RATE_MAX = 5;
 
@@ -119,54 +117,6 @@ const scroll = ({ scrollTop }: { scrollTop: number }) => {
 
 const formatTooltip = (value: number) => `${value} px`;
 
-const startSpeechRecognition = () => {
-  if (!canSubmit.value) {
-    showMessage("您今天已经提交过评分，请换个工具尝试或明天再来！", "warning");
-    return;
-  }
-
-  if (!("webkitSpeechRecognition" in window)) {
-    showMessage(
-      "您的浏览器不支持 Web Speech API，请使用 Chrome 浏览器！",
-      "warning"
-    );
-    return;
-  }
-
-  const recognition = new (window as any).webkitSpeechRecognition();
-  recognition.lang = "zh-CN";
-  recognition.continuous = false;
-  recognition.interimResults = false;
-
-  recognition.onstart = () => {
-    console.log("语音识别开始...");
-    showMessage("请开始说话...", "info");
-  };
-
-  recognition.onresult = (event: SpeechRecognitionEvent) => {
-    const result = event.results[0][0].transcript;
-    console.log("识别结果:", result);
-    if (result.length > MAX_COMMENT_LENGTH) {
-      scoreStore.rate.comment = result.slice(0, MAX_COMMENT_LENGTH);
-      showMessage("评论已超过最大长度限制，已自动截断", "warning");
-    } else {
-      scoreStore.rate.comment = result;
-    }
-  };
-
-  recognition.onerror = (event: any) => {
-    console.error("语音识别错误:", event.error);
-    showMessage("语音识别失败，请重试", "error");
-  };
-
-  recognition.onend = () => {
-    console.log("语音识别结束");
-    showMessage("语音识别已完成", "success");
-  };
-
-  recognition.start();
-};
-
 watch(
   () => getToolFromStorage().id,
   (newId, oldId) => {
@@ -182,24 +132,14 @@ onMounted(async () => {
   try {
     const tool = getToolFromStorage();
     selectedToolId.value = tool;
-    console.log("当前工具信息:", tool);
-
     resetEvaluationState();
 
     if (tool.id) {
       const toolId = toNumber(tool.id);
-      console.log("开始获取工具详情，工具ID:", toolId);
       try {
         await scoreStore.ToolsDetailGet(toolId);
-        console.log("获取到的工具详情:", scoreStore.toolsDetail);
-        console.log("获取到的评分标准:", scoreStore.rateStandards);
       } catch (detailError: any) {
-        console.error("获取工具详情失败:", detailError);
-        console.error("错误详情:", {
-          message: detailError?.message || "未知错误",
-          stack: detailError?.stack,
-          toolId: toolId,
-        });
+        ElMessage.error("获取工具详情失败:", detailError);
         throw detailError;
       }
     }
@@ -209,12 +149,7 @@ onMounted(async () => {
       max.value = Math.max(0, innerRef.value.clientHeight - scrollHeight.value);
     }
   } catch (error: any) {
-    console.error("初始化失败:", error);
-    console.error("完整错误信息:", {
-      name: error?.name || "未知错误类型",
-      message: error?.message || "未知错误信息",
-      stack: error?.stack,
-    });
+    ElMessage.error("初始化失败:", error);
     showMessage("初始化失败，请刷新页面重试", "error");
   }
 });
@@ -233,26 +168,18 @@ const submitRating = debounceStore.debounce(handleSubmitRating, DEBOUNCE_DELAY);
   <div class="main-container">
     <div class="main-score-container">
       <div class="title">
-        <el-icon><Checked /></el-icon>评分模块
+        <el-icon>
+          <Checked />
+        </el-icon>评分模块
       </div>
       <div class="content">
         <div class="rating-container">
-          <el-popover
-            v-for="(standard, index) in scoreStore.rateStandards"
-            :key="index"
-            :width="400"
-            placement="right"
-            trigger="hover"
-          >
+          <el-popover v-for="(standard, index) in scoreStore.rateStandards" :key="index" :width="400" placement="right"
+            trigger="hover">
             <template #reference>
               <div class="rating-item">
                 <span class="rating-title">{{ standard.name }}：</span>
-                <el-rate
-                  v-model="standard.score"
-                  :max="RATE_MAX"
-                  allow-half
-                  :colors="RATE_COLORS"
-                />
+                <el-rate v-model="standard.score" :max="RATE_MAX" allow-half :colors="RATE_COLORS" />
                 <span class="score-label">{{ standard.score }} 分</span>
               </div>
             </template>
@@ -269,32 +196,17 @@ const submitRating = debounceStore.debounce(handleSubmitRating, DEBOUNCE_DELAY);
           </el-popover>
         </div>
         <div class="comment">
-          <el-input
-            type="textarea"
-            placeholder="留下您的宝贵评价，帮助其他用户了解此工具 （每个工具每日仅限一次评价）"
-            class="comment-input"
-            :autosize="{ minRows: 3, maxRows: 6 }"
-            maxlength="500"
-            v-model="scoreStore.rate.comment"
-            :disabled="!canSubmit"
-          />
+          <el-input type="textarea" placeholder="留下您的宝贵评价，帮助其他用户了解此工具 （每个工具每日仅限一次评价）" class="comment-input"
+            :autosize="{ minRows: 3, maxRows: 6 }" maxlength="500" v-model="scoreStore.rate.comment"
+            :disabled="!canSubmit" />
           <p v-if="inputLess" class="input-less">
             输入的字符数少于{{ MIN_COMMENT_LENGTH }}个!
           </p>
         </div>
         <div class="submit-wrapper">
           <div class="submit-buttons">
-            <el-icon @click="startSpeechRecognition" class="mic-icon"
-              ><Microphone
-            /></el-icon>
-            <el-button
-              type="primary"
-              @click="submitRating"
-              class="submit-btn"
-              :disabled="!canSubmit"
-              :loading="debounceStore.isSubmitting"
-              ref="submitRef"
-            >
+            <el-button type="primary" @click="submitRating" class="submit-btn" :disabled="!canSubmit"
+              :loading="debounceStore.isSubmitting" ref="submitRef">
               {{ submitButtonText }}
             </el-button>
           </div>
@@ -306,32 +218,24 @@ const submitRating = debounceStore.debounce(handleSubmitRating, DEBOUNCE_DELAY);
     </div>
     <div class="main-upload-container">
       <div class="score-title title">
-        <el-icon><ChatDotRound /></el-icon>用户评价
+        <el-icon>
+          <ChatDotRound />
+        </el-icon>用户评价
       </div>
-      <el-scrollbar
-        class="tool-details"
-        always
-        @scroll="scroll"
-        ref="scrollbarRef"
-        :height="`${scrollHeight}px`"
-      >
+      <el-scrollbar class="tool-details" always @scroll="scroll" ref="scrollbarRef" :height="`${scrollHeight}px`">
         <div ref="innerRef">
           <template v-if="reversedRates && reversedRates.length > 0">
-            <div
-              class="score-content"
-              v-for="score in reversedRates"
-              :key="score.id"
-              v-show="score.comment && score.comment.trim()"
-            >
+            <div class="score-content" v-for="score in reversedRates" :key="score.id"
+              v-show="score.comment && score.comment.trim()">
               <div class="score-content-item">
                 <div class="score-header">
                   <div class="score-content-item-title">
                     <el-avatar :size="24" class="user-avatar">
                       {{ score.user.charAt(0) }}
                     </el-avatar>
-                    <span class="user-nickname"
-                      >@{{ score.user || "未设置昵称用户" }}</span
-                    >
+                    <span class="user-nickname">@{{ score.user || "未设置昵称用户" }}</span>
+                    <span class="user-nickname"> {{ score.cno || "-" }}</span>
+                    <span class="user-nickname"> &nbsp;&nbsp;{{ score.rate_time.replace("T", " ") || "-" }}</span>
                   </div>
                   <div class="score-content-item-score">
                     <span>评分：</span>{{ score.rating }} ⭐
@@ -345,20 +249,17 @@ const submitRating = debounceStore.debounce(handleSubmitRating, DEBOUNCE_DELAY);
           </template>
           <template v-else>
             <div class="no-comments">
-              <el-icon class="icon"><ChatDotRound /></el-icon>
+              <el-icon class="icon">
+                <ChatDotRound />
+              </el-icon>
               <div class="message">暂无用户评价</div>
               <div class="sub-message">成为第一个评价此工具的用户吧</div>
             </div>
           </template>
         </div>
       </el-scrollbar>
-      <el-slider
-        v-if="max > 0 && reversedRates && reversedRates.length > 0"
-        v-model="value"
-        :max="max"
-        :format-tooltip="formatTooltip"
-        @input="inputSlider"
-      />
+      <el-slider v-if="max > 0 && reversedRates && reversedRates.length > 0" v-model="value" :max="max"
+        :format-tooltip="formatTooltip" @input="inputSlider" />
     </div>
   </div>
 </template>
@@ -381,9 +282,10 @@ $text-secondary: #909399;
 
 @mixin hover-effect {
   transition: all $transition-duration ease;
+
   &:hover {
     box-shadow: 0 8px 20px rgba($gradient-start, 0.12);
-    transform: translateY(-3px);
+    transform: translateY(-1px);
   }
 }
 
@@ -587,17 +489,15 @@ $text-secondary: #909399;
       transition: all $transition-duration ease;
 
       &:hover:not(:disabled) {
-        transform: translateY(-2px);
+        transform: translateY(-1px);
         box-shadow: 0 6px 15px rgba($gradient-start, 0.4);
       }
 
       &:disabled {
         opacity: 0.7;
-        background: linear-gradient(
-          135deg,
-          rgba($gradient-start, 0.6),
-          rgba($gradient-end, 0.6)
-        );
+        background: linear-gradient(135deg,
+            rgba($gradient-start, 0.6),
+            rgba($gradient-end, 0.6));
       }
     }
   }
@@ -639,7 +539,7 @@ $text-secondary: #909399;
     min-height: auto;
 
     &:hover {
-      transform: translateY(-2px);
+      transform: translateY(-1px);
       box-shadow: 0 8px 16px rgba($gradient-start, 0.1);
       background: rgba($gradient-start, 0.05);
     }

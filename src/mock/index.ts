@@ -21,9 +21,9 @@ export const initMockService = async (): Promise<void> => {
 
   try {
     await import("./mockData");
-    console.log("🚀 Mock start up success");
+    console.log("Mock start up success");
   } catch (error) {
-    console.error("🚫 Mock start up failed:", error);
+    console.error("Mock start up failed:", error);
   }
 };
 

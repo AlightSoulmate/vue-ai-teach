@@ -567,7 +567,7 @@
 
 // 分类区域样式
 .category-section {
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     scroll-margin-top: 80px;
 
     .category-header {
@@ -615,7 +615,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill,
             minmax(160px, 1fr));
-    gap: 10px;
+    gap: 18px;
     padding: 5px 2px;
 }
 
@@ -638,8 +638,8 @@
 }
 
 .tool-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     border-color: rgba(var(--el-color-primary-rgb), 0.3);
 }
 
@@ -679,7 +679,6 @@
 
 .tool-logo .tool-name {
     font-size: 13px;
-    /* 减小标题字号 */
     font-weight: 600;
     color: var(--text-color);
     flex: 1;
@@ -757,6 +756,7 @@
         font-size: 11px;
         line-height: 1.3;
         min-height: calc(11px * 1.3 * 2);
+        line-clamp: 2;
         -webkit-line-clamp: 2;
     }
 
@@ -769,76 +769,6 @@
     }
 }
 
-// 加载更多按钮样式优化
-.load-more {
-    grid-column: 1 / -1;
-    background: linear-gradient(145deg,
-            rgba(var(--el-color-primary-rgb), 0.1),
-            rgba(var(--el-color-primary-rgb), 0.05));
-    border: 1px dashed rgba(var(--el-color-primary-rgb), 0.3);
-    border-radius: 12px;
-    padding: 14px;
-    text-align: center;
-    color: var(--el-color-primary);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-    font-size: 15px;
-    font-weight: 500;
-
-    &::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg,
-                rgba(var(--el-color-primary-rgb), 0.15),
-                transparent);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    &:hover {
-        background: linear-gradient(145deg,
-                rgba(var(--el-color-primary-rgb), 0.15),
-                rgba(var(--el-color-primary-rgb), 0.1));
-        box-shadow: 0 4px 15px rgba(var(--el-color-primary-rgb), 0.2);
-        transform: translateY(-2px);
-
-        &::before {
-            opacity: 1;
-        }
-    }
-
-    span {
-        margin-right: 8px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .load-more-icon {
-        transition: transform 0.3s ease;
-        position: relative;
-        z-index: 1;
-    }
-
-    &:hover .load-more-icon {
-        transform: translateY(3px);
-    }
-
-    &:active {
-        transform: translateY(1px);
-    }
-}
-
-// 页脚样式
 .footer {
     margin-top: 40px;
     padding: 40px 20px;
@@ -956,80 +886,6 @@
     to {
         opacity: 1;
         transform: translateY(0);
-    }
-}
-
-// 加载中的分类
-.loading-category {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 30px;
-    min-height: 200px;
-
-    .loading-spinner {
-        margin-bottom: 15px;
-        position: relative;
-        width: 60px;
-        height: 60px;
-
-        .spinner-circle {
-            width: 100%;
-            height: 100%;
-            border: 3px solid rgba(var(--el-color-primary-rgb), 0.2);
-            border-top-color: var(--el-color-primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        .spinner-progress {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--el-color-primary);
-        }
-    }
-
-    .loading-text {
-        font-size: 14px;
-        color: var(--text-color-light);
-        margin-top: 10px;
-        text-align: center;
-    }
-
-    .loading-details {
-        margin-top: 5px;
-        font-size: 12px;
-        color: var(--text-color-lighter);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 5px;
-
-        .loading-progress {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-
-            .progress-bar {
-                width: 200px;
-                height: 4px;
-                background-color: rgba(var(--el-color-primary-rgb), 0.1);
-                border-radius: 2px;
-                overflow: hidden;
-
-                .progress-fill {
-                    height: 100%;
-                    background-color: var(--el-color-primary);
-                    border-radius: 2px;
-                    transition: width 0.3s ease;
-                }
-            }
-        }
     }
 }
 

@@ -3,7 +3,6 @@ import { ref } from "vue";
 import {
   Menu as IconMenu,
   Location,
-  Setting,
   Memo,
   Expand,
   Fold,
@@ -17,10 +16,13 @@ const activeMenu = ref(
     if (authStore.user.role === "admin") {
       return "/admin";
     }
+    if (authStore.user.role === "teacher") {
+      return "/teacherCourse";
+    }
     return "/home";
   })
 );
-const isCollapse = ref<boolean>(true);
+const isCollapse = ref<boolean>(false);
 
 const role = computed(() => ({
   isStudent: authStore.user.role === "student",
@@ -30,17 +32,14 @@ const role = computed(() => ({
 
 const paths = ref<Record<any, string>>({
   tools: "/home",
-  history: "/history",
-  forum: "/forum",
   admin: "/admin",
   toolList: "/toolList",
   stuList: "/stuList",
   teaList: "/teaList",
-  teacherCrouse: "/teacherCourse",
-  teacherInbox: "/teacherInbox",
-  studentCrouse: "/studentCourse",
-  studentInbox: "/studentInbox",
-  setup: "/setup",
+  teacherCourse: "/teacherCourse",
+  teacherEvals: "/teacherEvals",
+  studentCourse: "/studentCourse",
+  studentEvals: "/studentEvals",
 });
 
 const toggleCollapse = (): void => {
@@ -54,12 +53,7 @@ const emit = defineEmits(["collapse"]);
 <template>
   <div class="menu-container">
     <div class="collapse-trigger">
-      <el-button
-        class="collapse-btn"
-        type="primary"
-        @click="toggleCollapse"
-        text
-      >
+      <el-button class="collapse-btn" type="primary" @click="toggleCollapse" text>
         <el-icon class="collapse-icon" v-if="isCollapse" title="展开">
           <Expand />
         </el-icon>
@@ -68,58 +62,54 @@ const emit = defineEmits(["collapse"]);
         </el-icon>
       </el-button>
     </div>
-    <el-menu
-      :default-active="activeMenu"
-      class="el-menu-vertical-demo"
-      :collapse="isCollapse"
-      router
-    >
-      <template v-if="!role.isAdmin">
-        <el-sub-menu index="1">
-          <template #title>
-            <el-icon><Location /></el-icon>
-            <span>热门AI工具</span>
-          </template>
-          <el-menu-item :index="paths.tools">工具集</el-menu-item>
-          <el-menu-item :index="paths.history">历史评价记录</el-menu-item>
-          <el-menu-item :index="paths.forum">论坛</el-menu-item>
-        </el-sub-menu>
+    <el-menu :default-active="activeMenu" class="el-menu-vertical-demo" :collapse="isCollapse" router>
+      <template v-if="role.isStudent">
+        <el-menu-item :index="paths.tools">
+          <el-icon>
+            <Location />
+          </el-icon>
+          工具集
+        </el-menu-item>
       </template>
 
       <template v-if="role.isAdmin">
         <el-menu-item :index="paths.toolList">
-          <el-icon><IconMenu /></el-icon>
+          <el-icon>
+            <IconMenu />
+          </el-icon>
           <span>工具管理</span>
         </el-menu-item>
         <el-menu-item :index="paths.stuList">
-          <el-icon><IconMenu /></el-icon>
+          <el-icon>
+            <IconMenu />
+          </el-icon>
           <span>学生管理</span>
         </el-menu-item>
         <el-menu-item :index="paths.teaList">
-          <el-icon><IconMenu /></el-icon>
+          <el-icon>
+            <IconMenu />
+          </el-icon>
           <span>教师管理</span>
         </el-menu-item>
       </template>
 
-      <el-menu-item :index="paths.teacherCrouse" v-if="role.isTeacher">
-        <el-icon><IconMenu /></el-icon>
-        <span>我的课程（老师）</span>
+      <el-menu-item :index="paths.teacherCourse" v-if="role.isTeacher">
+        <el-icon>
+          <IconMenu />
+        </el-icon>
+        <span>课程管理</span>
       </el-menu-item>
-      <el-menu-item :index="paths.teacherInbox" v-if="role.isTeacher">
-        <el-icon><Memo /></el-icon>
-        <span>收件箱（老师）</span>
+      <el-menu-item :index="paths.studentCourse" v-if="role.isStudent">
+        <el-icon>
+          <IconMenu />
+        </el-icon>
+        <span>评价记录</span>
       </el-menu-item>
-      <el-menu-item :index="paths.studentCrouse" v-if="role.isStudent">
-        <el-icon><IconMenu /></el-icon>
-        <span>我的课程（学生）</span>
-      </el-menu-item>
-      <el-menu-item :index="paths.studentInbox" v-if="role.isStudent">
-        <el-icon><Memo /></el-icon>
-        <span>收件箱（学生）</span>
-      </el-menu-item>
-      <el-menu-item :index="paths.setup">
-        <el-icon><Setting /></el-icon>
-        <span>个性化设置</span>
+      <el-menu-item :index="paths.studentEvals" v-if="role.isStudent">
+        <el-icon>
+          <Memo />
+        </el-icon>
+        <span>作业记录</span>
       </el-menu-item>
     </el-menu>
   </div>

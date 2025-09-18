@@ -6,6 +6,7 @@ export interface User {
   id: number;
   nickname: any;
   username: any;
+  cno: string;
   role: string;
   token: string;
 }
@@ -14,6 +15,7 @@ export interface queryUser {
   id: number;
   nickname: string;
   username: string;
+  cno: string;
   role: string;
   message: string;
 }
@@ -23,6 +25,7 @@ export interface Student {
   id: number;
   nickname: string;
   username: string;
+  cno: string;
 }
 
 // 教师列表

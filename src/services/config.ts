@@ -6,7 +6,7 @@ import { ElMessage } from "element-plus";
 // 创建axios实例
 const service = axios.create({
   baseURL: getBaseUrl(),
-  timeout: 8000,
+  timeout: 12000,
 });
 
 // 请求拦截器
@@ -28,11 +28,10 @@ service.interceptors.response.use(
     return response;
   },
   (error) => {
-    // 处理错误响应
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          ElMessage.error("登录状态过期，请重新登录!");
+          // ElMessage.error("登录状态过期，请重新登录!");
           localStorage.removeItem("user");
           router.push("/form");
           break;
@@ -48,10 +47,6 @@ service.interceptors.response.use(
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }

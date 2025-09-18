@@ -16,12 +16,12 @@ export function isDevMode(): boolean {
   return getEnvValue("VITE_APP_ENV") === "development";
 }
 
-console.log("🔍 环境初始化检查：", {
+console.log("🔍 环境初始化：", {
   env: getEnvValue("VITE_APP_TITLE"),
   mode: getEnvValue("VITE_APP_ENV"),
   mockStatus: getEnvValue("VITE_APP_MOCK_ENABLE"),
-  mockApi: getEnvValue("VITE_APP_MOCK_API") ?? "无",
-  baseApi: getEnvValue("VITE_APP_BASE_API"),
+  mock_url: getEnvValue("VITE_APP_MOCK_API") ?? "无",
+  base_url: getEnvValue("VITE_APP_BASE_API"),
 });
 
 export function isProdMode(): boolean {
@@ -38,7 +38,6 @@ export function getBaseUrl(): string {
 
 export function getBooleanEnv(key: keyof ImportMetaEnv): boolean {
   const value = import.meta.env[key];
-  // console.log(`getBooleanEnv(${key}):`, value, typeof value);
 
   if (value === true) return true;
   if (typeof value === "string") {

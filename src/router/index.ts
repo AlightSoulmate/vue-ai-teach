@@ -29,24 +29,14 @@ const router = createRouter({
           component: () => import("@/components/main/index.vue"),
         },
         {
-          path: "history",
-          name: "History",
-          component: () => import("@/pages/tool/historyPage.vue" as any) ,
-        },
-        {
-          path: "forum",
-          name: "Forum",
-          component: () => import("@/pages/tool/forumPage.vue"),
-        },
-        {
           path: "studentCourse",
           name: "StudentCourse",
           component: () => import("@/pages/student/course.vue"),
         },
         {
-          path: "studentInbox",
-          name: "StudentInbox",
-          component: () => import("@/pages/student/inbox.vue"),
+          path: "studentEvals",
+          name: "StudentEvals",
+          component: () => import("@/pages/student/evals.vue"),
         },
         {
           path: "teacherCourse",
@@ -54,9 +44,9 @@ const router = createRouter({
           component: () => import("@/pages/teacher/course.vue"),
         },
         {
-          path: "teacherInbox",
-          name: "TeacherInbox",
-          component: () => import("@/pages/teacher/inbox.vue"),
+          path: "teacherEvals",
+          name: "TeacherEvals",
+          component: () => import("@/pages/teacher/evals.vue"),
         },
         {
           path: "stuList",
@@ -73,17 +63,22 @@ const router = createRouter({
           name: "ToolList",
           component: () => import("@/pages/admin/toolList.vue"),
         },
-        {
-          path: "setup",
-          name: "Setup",
-          component: () => import("@/pages/setupPage.vue"),
-        },
       ],
     },
     {
       path: "/detail",
       name: "Detail",
       component: () => import("@/pages/tool/detailPage.vue"),
+    },
+    {
+      path: "/result",
+      name: "EvalResult",
+      component: () => import("@/pages/tool/evalResultPage.vue"),
+    },
+    {
+      path: "/persona",
+      name: "Persona",
+      component: () => import("@/components/course/persona.vue"),
     },
   ],
 });
@@ -124,7 +119,9 @@ router.beforeEach((to, from) => {
   } else if (authed && loginPage.to && !loginPage.from) {
     if (authStore.currentRole === "admin") {
       return { name: "StuList" };
-    } else {
+    } else if (authStore.currentRole === "teacher") {
+      return { name: "TeacherCourse" };
+    } else if (authStore.currentRole === "student") {
       return { name: "Home" };
     }
   } else if (
@@ -134,11 +131,14 @@ router.beforeEach((to, from) => {
     if (authStore.currentRole === "admin") {
       return { name: "StuList" };
     } else if (to.path === "/" || to.name === "Index") {
-      return { name: "Home" };
+      if (authStore.currentRole === "teacher") {
+        return { name: "TeacherCourse" };
+      } else if (authStore.currentRole === "student") {
+        return { name: "Home" };
+      }
     }
+    return true;
   }
-
-  return true;
 });
 
 export default router;

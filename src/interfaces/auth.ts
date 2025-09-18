@@ -6,6 +6,7 @@ export interface AuthUser {
   id: number;
   nickname: string;
   username: string;
+  cno: string;
   role: string;
   message: string;
 }
@@ -17,6 +18,7 @@ export interface AuthLoginUser {
   id: number;
   nickname: any;
   username: any;
+  cno: string;
   role: string;
   message: string;
   is_fresh: number;

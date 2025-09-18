@@ -172,7 +172,7 @@
           @click="selectRole('teacher')"
         >
           <div class="role-icon teacher-icon"></div>
-          <span>老师</span>
+          <span>教师</span>
         </div>
         <div
           class="role-option"
@@ -188,7 +188,7 @@
 </template>
 <script lang="ts" setup>
 import { useAuthStore } from "@/stores/useAuthStore";
-import { watch, defineEmits, onMounted, ref } from "vue";
+import { watch, defineEmits, ref } from "vue";
 
 const emit = defineEmits(["usernameChange"]);
 const authStore = useAuthStore();

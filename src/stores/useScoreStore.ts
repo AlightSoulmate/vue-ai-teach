@@ -5,12 +5,18 @@ import { ElMessage } from "element-plus";
 import {
   uploadRate,
   getDetail,
+  deleteARate,
   uploadEvaluationFileByFileId,
   getEvaluationResult,
-  generateAndDownloadReport,
+  getMyHistoryRates,
 } from "@/services";
 import type { Eval, ReportHistory } from "@/interfaces";
+import { useRouter } from "vue-router";
+import { useSelectedToolStore } from "./useSelectedToolStore";
 export const useScoreStore = defineStore("score", () => {
+  const route = useRouter();
+  const theselectedTool = useSelectedToolStore();
+  const evalData = ref<any>("");
   const userFile = ref<File | null>(null);
   const uploading = ref(false);
   const userFileName = ref("");
@@ -140,22 +146,23 @@ export const useScoreStore = defineStore("score", () => {
 
   // 点击上传
   const handleUpload = async () => {
-    if (!userFile.value) {
-      ElMessage.warning("请选择文件");
-      return;
-    }
-
-    //节流检查
-    if (!checkThrottle(userFile.value.name)) {
-      return;
-    }
-
-    const Authorization = JSON.parse(
-      localStorage.getItem("user") as string
-    ).token;
-    uploading.value = true;
-
     try {
+      uploading.value = true;
+
+      if (!userFile.value) {
+        ElMessage.warning("请选择文件");
+        return;
+      }
+
+      //节流检查
+      if (!checkThrottle(userFile.value.name)) {
+        return;
+      }
+
+      const Authorization = JSON.parse(
+        localStorage.getItem("user") as string
+      ).token;
+
       lastUploadRecord.value = {
         timestamp: Date.now(),
         fileName: userFile.value.name,
@@ -172,63 +179,68 @@ export const useScoreStore = defineStore("score", () => {
         formData.append("fileSum", String(fileSum));
         response = await uploadEvaluationFileByFileId(formData, i + 1);
         progress.value = Math.round(((i + 1) / fileSum) * 100);
+        if (i === chunks.length - 1) {
+          lastMessage = response.message;
+        }
       }
 
       if (lastMessage) {
+        const MAX_ATTEMPTS = 60; // 最大轮询次数 (60次 * 3秒 = 180秒)
+        let attempts = 0;
+
         // 轮询函数
         const pollEvaluation = async () => {
           try {
-            const resp = await getEvaluationResult(Authorization);
-
+            const thisToolId = JSON.parse(localStorage.getItem("selectedTool") as any).id;
+            const resp = await getEvaluationResult(Authorization, thisToolId);
             if (resp.status === 200) {
-              uploading.value = false;
-              progress.value = 0;
-              const originalText = resp.message;
-              const reportText = JSON.parse(
-                '"' + originalText.replace(/\\\\/g, "\\") + '"'
-              );
-              console.log(reportText);
-
-              const user = JSON.parse(localStorage.getItem("user") as string);
-
-              await generateAndDownloadReport(reportText, user.username);
-
+              ElMessage.info("评估结果获取成功");
+              evalData.value = JSON.parse(resp.message);
               return true;
             } else {
               progress.value = 100;
-              ElMessage.info("正在轮询");
+              ElMessage.info(`正在解析结果，请稍候`);
               return false;
             }
           } catch (e) {
-            ElMessage.warning("未知错误,继续轮询");
+            console.log("轮询出错，继续尝试");
             return false;
           }
         };
 
-        // 轮询 每2.5秒
+        // 轮询 每3秒
         const interval = setInterval(async () => {
+          attempts++;
           const isComplete = await pollEvaluation();
+
           if (isComplete) {
             ElMessage.success("评估完成");
             clearInterval(interval);
+            uploading.value = false;
+            gotoResult();
+          } else if (attempts >= MAX_ATTEMPTS) {
+            clearInterval(interval);
+            uploading.value = false;
+            ElMessage.error("评估超时，请缩减文件大小");
           }
-        }, 2500);
-      } else {
-        ElMessage.error(lastMessage as any);
+        }, 3000);
       }
     } catch (error) {
       console.error(error);
-    } finally {
       uploading.value = false;
+      ElMessage.error("上传过程中发生错误");
     }
   };
-
+  const gotoResult = () => {
+    setTimeout(() => {
+      route.push('/result')
+    }, 700);
+  };
   const toolsDetail = ref<any>({});
 
   // 评分传后端
   const evaluationTransmission = async (toolId: number) => {
     const score = calculateWeightedAverage();
-    console.log(score);
     const rateValue = {
       rating: score,
       comment: rate.value.comment,
@@ -264,6 +276,67 @@ export const useScoreStore = defineStore("score", () => {
     return parseFloat(weightedSum.toFixed(1));
   };
 
+  const historyRates = ref<any[]>([]);
+  const formatHistoryRates = async () => {
+    try {
+      await Promise.all(
+        historyRates.value.map(async (rate) => {
+          rate.rate_time = rate.rate_time.replace("T", " ");
+          const toolDetail = await getDetail(Number(rate.tool_id)) as { name?: string; category?: string };
+          rate.tool_name = toolDetail.name || "未知工具";
+          rate.tool_category = toolDetail.category || "未知类别";
+          return {
+            ...rate
+          };
+        })
+      );
+    } catch (error) {
+      ElMessage.error("格式化历史评分记录失败");
+    }
+  };
+  const fetchHistoryRates = async () => {
+    const token = JSON.parse(localStorage.getItem("user") as string).token;
+    loadingHistory.value = true;
+    try {
+      const response = await getMyHistoryRates(token);
+      historyRates.value = response.rates;
+      console.log(historyRates.value);
+      await formatHistoryRates();
+      loadingHistory.value = false;
+      console.log("历史评分记录获取成功");
+    } catch (error: any) {
+      ElMessage.error("历史评分记录获取失败");
+    }
+  };
+
+  // 撤回评论
+  const deleteRate = async (rate_id: number) => {
+    const token = JSON.parse(localStorage.getItem("user") as string).token;
+    try {
+      let resp = await deleteARate(token, rate_id);
+      if (resp?.message === "删除成功") {
+        ElMessage.success("评论撤回成功");
+      }
+      await fetchHistoryRates();
+    } catch (error: any) {
+      ElMessage.error("评论撤回失败");
+    }
+  };
+
+  // 添加检查上传次数的方法
+  const checkUploadCount = (toolId: number): boolean => {
+    const uploadHistory = JSON.parse(localStorage.getItem('uploadHistory') || '{}')
+    const userUploads = uploadHistory[toolId] || 0
+    return userUploads < 2
+  }
+
+  // 记录上传次数
+  const recordUpload = (toolId: number) => {
+    const uploadHistory = JSON.parse(localStorage.getItem('uploadHistory') || '{}')
+    uploadHistory[toolId] = (uploadHistory[toolId] || 0) + 1
+    localStorage.setItem('uploadHistory', JSON.stringify(uploadHistory))
+  }
+
   return {
     rateStandards,
     rate,
@@ -275,11 +348,17 @@ export const useScoreStore = defineStore("score", () => {
     reportHistory,
     loadingHistory,
     lastUploadRecord,
+    historyRates,
+    evalData,
     checkThrottle,
     handleUpload,
     handleUserFileChange,
     ToolsDetailGet,
+    deleteRate,
+    fetchHistoryRates,
     evaluationTransmission,
     calculateWeightedAverage,
+    checkUploadCount,
+    recordUpload
   };
 });

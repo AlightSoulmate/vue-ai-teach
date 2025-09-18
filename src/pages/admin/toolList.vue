@@ -352,7 +352,7 @@ const sortOrder = ref<{
 
 // 获取工具列表
 const toolsList = computed(() => {
-  return Object.values(toolsStore.toolsByCategory || {}).flat();
+  return Object.values(toolsStore.currentCategoryTools || {}).flat();
 });
 
 // 获取分类
@@ -685,7 +685,7 @@ const querySearchAsync = (
   const results = queryString
     ? toolsList.value.filter(createFilter(queryString))
     : toolsList.value;
-  const formattedResults = results.map((tool) => ({
+  const formattedResults = results.map((tool: any) => ({
     value: tool.name,
     ...tool,
   }));
@@ -948,7 +948,7 @@ onMounted(async () => {
   &:focus-within {
     box-shadow: 0 0 0 1px var(--el-color-primary) inset,
       0 0 10px rgba(64, 158, 255, 0.2) !important;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 }
 </style>

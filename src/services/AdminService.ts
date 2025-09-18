@@ -6,8 +6,6 @@ import router from "@/router";
 // Get users
 export const GetUsers = async (Authorization: string) => {
   try {
-    console.log("发送GetUsers请求");
-    console.log(Authorization);
     const response = await service.get("/auth", {
       headers: {
         Authorization,
@@ -36,28 +34,26 @@ export const GetUsers = async (Authorization: string) => {
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }
 };
 
-// Update users' info
+// 1.7 管理员修改用户信息 Update users' info
 export const UpdateUser = async (
   id: number,
   role: string,
   Authorization: string,
   password: string,
   nickname: string,
-  username: string
+  username: string,
 ) => {
+  let cno = ""; // 班级不修改，硬编入传空
   const user = {
+    password,
     nickname,
     username,
-    password,
+    cno,
   };
   try {
     const response = await service.put(
@@ -73,7 +69,6 @@ export const UpdateUser = async (
         },
       }
     );
-    console.log(response.data);
     return response.data;
   } catch (error: any) {
     if (error.response) {
@@ -95,23 +90,18 @@ export const UpdateUser = async (
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }
 };
 
-// Delete users
+// 1.8 管理员删除用户 Delete users
 export const DeleteUser = async (
   id: number,
   role: string,
   Authorization: string
 ) => {
   try {
-    console.log(Authorization);
     const response = await service.delete("/auth", {
       headers: {
         Authorization,
@@ -143,16 +133,12 @@ export const DeleteUser = async (
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }
 };
 
-// Add users
+// 1.6 管理员新增用户 Add users
 export const AddUser = async (
   Authorization: string,
   nickname: string,
@@ -199,16 +185,12 @@ export const AddUser = async (
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }
 };
 
-// Query users
+// 1.9 管理员查询用户 Query users
 export const QueryUser = async (
   Authorization: string,
   username: string,
@@ -248,16 +230,12 @@ export const QueryUser = async (
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }
 };
 
-// Update tools' info
+// 2.3 获取工具详情 Update tools' info
 export const UpdateTool = async (
   Authorization: string,
   tool: object,
@@ -289,16 +267,12 @@ export const UpdateTool = async (
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }
 };
 
-// Delete tools
+// 2.6 删除工具（管理员） Delete tools
 export const DeleteTool = async (Authorization: string, toolId: number) => {
   try {
     const response = await service.delete(`/tools/${toolId}`, {
@@ -327,16 +301,12 @@ export const DeleteTool = async (Authorization: string, toolId: number) => {
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }
 };
 
-// Add tools
+// 2.4 添加新工具（管理员） Add tools
 export const AddTool = async (
   Authorization: string,
   name: string,
@@ -378,10 +348,6 @@ export const AddTool = async (
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }

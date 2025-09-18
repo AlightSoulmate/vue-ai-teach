@@ -26,7 +26,9 @@
 import { onMounted, ref } from "vue";
 import Loading from "@/components/use/loading.vue";
 import EnterDialog from "@/components/use/enter.vue";
+import { useAuthStore } from "@/stores/useAuthStore";
 
+const authStore = useAuthStore();
 const isLoading = ref<boolean>(true);
 const currentUsername = ref<string>("");
 let debounceTimer: number | null = null;
@@ -46,6 +48,7 @@ onMounted(() => {
   setTimeout(() => {
     isLoading.value = false;
   }, 500);
+  // authStore.fetchClassList();
 });
 </script>
 <style lang="scss" scoped>

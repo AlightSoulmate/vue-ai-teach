@@ -3,7 +3,7 @@ import service from "./config";
 import { ElMessage } from "element-plus";
 import router from "@/router";
 
-// Get categories
+// 2.2 获取工具类别列表 Get categories
 export const getCategories = async (): Promise<{ categories: string[] }> => {
   try {
     const response = await service.get("/tools/categories");
@@ -28,16 +28,12 @@ export const getCategories = async (): Promise<{ categories: string[] }> => {
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }
 };
 
-// Get tools by category
+// 2.1 获取某一类别下的工具列表 Get tools by category
 export const getTools = async (category: string): Promise<{ tools: [] }> => {
   try {
     const response = await service.get(`/tools`, {
@@ -64,16 +60,12 @@ export const getTools = async (category: string): Promise<{ tools: [] }> => {
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }
 };
 
-// Upload A tool's rate/comment
+// 2.7 工具评分 Upload A tool's rate/comment
 export const uploadRate = async (
   Authorization: string,
   rate: any,
@@ -105,16 +97,12 @@ export const uploadRate = async (
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }
 };
 
-// Get A tool
+// 2.3 获取工具详情 Get A tool
 export const getDetail = async (toolId: number): Promise<{}> => {
   try {
     const response = await service.get(`/tools/${toolId}`);
@@ -139,11 +127,76 @@ export const getDetail = async (toolId: number): Promise<{}> => {
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }
 };
+
+// 4.2 获得个人历史评价记录
+export const getMyHistoryRates = async (
+  Authorization: string
+): Promise<any> => {
+  try {
+    const response = await service.get("/ratings", {
+      headers: { Authorization }
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          ElMessage.error("登录状态过期，请重新登录!");
+          localStorage.removeItem("user");
+          router.push("/form");
+          break;
+        case 403:
+          ElMessage.error("没有权限访问");
+          break;
+        case 404:
+          ElMessage.error("请求的资源不存在");
+          break;
+        case 500:
+          ElMessage.error("服务器内部错误");
+          break;
+        default:
+          ElMessage.error(`请求失败: ${error.message}`);
+      }
+    }
+    return Promise.reject(error);
+  }
+}
+
+// 4.3 删除个人某条评论
+export const deleteARate = async (
+  Authorization: string,
+  rate_id: number
+): Promise<{ message: string }> => {
+  try {
+    const response = await service.delete(`/ratings/${rate_id}`, {
+      headers: { Authorization },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      switch (error.response.status) {
+        case 401:
+          ElMessage.error("登录状态过期，请重新登录!");
+          localStorage.removeItem("user");
+          router.push("/form");
+          break;
+        case 403:
+          ElMessage.error("没有权限访问");
+          break;
+        case 404:
+          ElMessage.error("请求的资源不存在");
+          break;
+        case 500:
+          ElMessage.error("服务器内部错误");
+          break;
+        default:
+          ElMessage.error(`请求失败: ${error.message}`);
+      }
+    }
+    return Promise.reject(error);
+  }
+}

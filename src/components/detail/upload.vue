@@ -1,20 +1,103 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch, h, onMounted } from "vue";
 import { Upload, UploadFilled } from "@element-plus/icons-vue";
 import { useScoreStore } from "@/stores/useScoreStore";
+import { ElNotification } from 'element-plus';
 
 const scoreStore = useScoreStore();
 const description = ref<string>(
-  "在这里，你可以提交关于该AI工具的详细评价报告，请确保您的报告包含完整的使用体验，建议根据评分模块的类目分别进行评价。"
+  "在这里，你可以提交关于该AI工具的详细评价报告，请确保您的报告包含完整的使用体验，建议根据评分模块的类目分别进行评价。此外，对于每个工具，只能上传2次作业，请谨慎提交！"
 );
 const uploadFileSupport = ref<string[]>([".docx", ".doc"]);
 const FilenameDefault = ref<string>("点击或拖拽文件到此处上传");
+
+const isThatTenTools = ref<boolean>(false);
+// 检查是否是十个工具之一
+const checkIfThatTenTools = (toolId: number) => {
+  const tenTools = [
+    25, 26, 60, 61, 98,
+    99, 138, 139, 157, 158
+  ];
+  isThatTenTools.value = tenTools.includes(toolId);
+};
+onMounted(() => {
+  let toolId = JSON.parse(localStorage.getItem("selectedTool") || "{}").id;
+  checkIfThatTenTools(Number(toolId));
+})
+// 添加notification的引用
+import type { NotificationHandle } from 'element-plus'
+const uploadNotification = ref<NotificationHandle | null>(null)
+
+// 监听上传进度的变化
+watch(
+  () => scoreStore.uploading,
+  (newValue) => {
+    if (newValue) {
+      // 开始上传时显示notification
+      uploadNotification.value = ElNotification({
+        title: '文件上传进度',
+        message: h('div', { class: 'upload-progress-notification' }, [
+          h('el-progress', {
+            percentage: scoreStore.progress,
+            status: scoreStore.progress === 100 ? 'success' : '',
+            strokeWidth: 8,
+          }),
+          h('p', { class: 'progress-text' },
+            scoreStore.progress < 100
+              ? `正在上传文件: ${scoreStore.progress}%`
+              : '等待结果返回，请稍后...'
+          )
+        ]),
+        duration: 0,
+        position: 'bottom-right',
+        showClose: false,
+      })
+    } else if (uploadNotification.value) {
+      // 上传完成后关闭notification
+      uploadNotification.value.close()
+    }
+  }
+)
+
+const isUploadLimitReached = ref(false)
+const toolId = ref(0)
+
+onMounted(() => {
+  toolId.value = Number(JSON.parse(localStorage.getItem("selectedTool") || "{}").id)
+  checkIfThatTenTools(toolId.value)
+  // 检查上传次数
+  isUploadLimitReached.value = !scoreStore.checkUploadCount(toolId.value)
+})
+
+// 修改上传处理方法
+const handleUpload = async () => {
+  if (isUploadLimitReached.value) {
+    ElNotification({
+      title: '上传失败',
+      message: '您已达到该工具的最大上传次数(2次)',
+      type: 'error',
+    })
+    return
+  }
+
+  try {
+    await scoreStore.handleUpload()
+    // 上传成功后记录次数
+    scoreStore.recordUpload(toolId.value)
+    // 重新检查上传限制
+    isUploadLimitReached.value = !scoreStore.checkUploadCount(toolId.value)
+  } catch (error) {
+    console.error('上传失败:', error)
+  }
+}
 </script>
 
 <template>
   <div class="upload-container">
     <div class="header">
-      <el-icon><Upload /></el-icon>
+      <el-icon>
+        <Upload />
+      </el-icon>
       <span>提交评价报告</span>
     </div>
 
@@ -25,17 +108,18 @@ const FilenameDefault = ref<string>("点击或拖拽文件到此处上传");
       </div>
 
       <div class="upload-section">
-        <div class="file-input">
-          <div
-            class="input-wrapper"
-            :class="{ 'has-file': scoreStore.userFileName }"
-          >
-            <el-icon class="upload-icon"><UploadFilled /></el-icon>
-            <input
-              type="file"
-              accept=".docx"
-              @change="(e) => scoreStore.handleUserFileChange(e)"
-            />
+        <!-- 添加提示信息 -->
+        <div v-if="!isThatTenTools" class="upload-warning">
+          当前工具不在开放作业上传的工具列表中，请使用以下工具：<a href="https://a1.x914.com/alight/i/2025/06/06/41le.png"
+            target="_blank">查看开放工具列表</a>
+        </div>
+
+        <div class="file-input" :class="{ 'disabled': !isThatTenTools }">
+          <div class="input-wrapper" :class="{ 'has-file': scoreStore.userFileName }">
+            <el-icon class="upload-icon">
+              <UploadFilled />
+            </el-icon>
+            <input type="file" accept=".docx" @change="(e) => scoreStore.handleUserFileChange(e)" />
             <span class="file-name">
               {{ scoreStore.userFileName || FilenameDefault }}
             </span>
@@ -45,40 +129,22 @@ const FilenameDefault = ref<string>("点击或拖拽文件到此处上传");
           </div>
         </div>
 
-        <el-button
-          type="primary"
-          @click="scoreStore.handleUpload"
-          :loading="scoreStore.uploading"
-          class="upload-btn"
-        >
-          <el-icon><Upload /></el-icon>
-          {{ scoreStore.uploading ? "上传中..." : "开始上传" }}
+        <!-- 修改上传按钮禁用条件 -->
+        <el-button type="primary" @click="handleUpload" :loading="scoreStore.uploading"
+          :disabled="!isThatTenTools || isUploadLimitReached" class="upload-btn">
+          <el-icon>
+            <Upload />
+          </el-icon>
+          {{ !isThatTenTools
+            ? "当前工具不开放上传作业"
+            : (isUploadLimitReached
+              ? "达到单个工具作业上传次数限制，后续不可上传"
+              : (scoreStore.uploading ? "上传中..." : "开始上传"))
+          }}
         </el-button>
       </div>
     </div>
   </div>
-
-  <!-- 添加进度弹窗 -->
-  <el-dialog
-    v-model="scoreStore.uploading"
-    title="文件上传进度"
-    width="30%"
-    :close-on-click-modal="false"
-    :close-on-press-escape="false"
-    :show-close="false"
-  >
-    <div class="progress-content">
-      <el-progress
-        :percentage="scoreStore.progress"
-        :status="scoreStore.progress === 100 ? 'success' : ''"
-        :stroke-width="15"
-      />
-      <p class="progress-text" v-if="scoreStore.progress < 100">
-        正在上传文件: {{ scoreStore.progress }}%
-      </p>
-      <p class="progress-text" v-else>评估处理中，请耐心等待...</p>
-    </div>
-  </el-dialog>
 </template>
 
 <style scoped lang="scss">
@@ -164,7 +230,7 @@ $box-shadow: 0 8px 20px rgba($gradient-start, 0.08);
 
   &:hover {
     box-shadow: 0 12px 28px rgba($gradient-start, 0.12);
-    transform: translateY(-3px);
+    transform: translateY(-1px);
   }
 }
 
@@ -247,12 +313,7 @@ $box-shadow: 0 8px 20px rgba($gradient-start, 0.08);
   box-shadow: 0 6px 12px rgba($gradient-start, 0.3);
 
   &:hover {
-    transform: translateY(-2px);
     box-shadow: 0 8px 16px rgba($gradient-start, 0.4);
-  }
-
-  &:active {
-    transform: translateY(0);
   }
 
   .el-icon {
@@ -260,18 +321,41 @@ $box-shadow: 0 8px 20px rgba($gradient-start, 0.08);
   }
 }
 
-.progress-content {
-  padding: 20px;
-  text-align: center;
+// 添加notification相关样式
+:deep(.upload-progress-notification) {
+  .el-progress {
+    margin: 10px 0;
+  }
 
   .progress-text {
-    margin-top: 15px;
+    margin-top: 8px;
+    font-size: 13px;
     color: #606266;
-    font-size: 14px;
   }
 }
 
-.el-progress {
-  margin: 10px 0;
+// 添加提示信息样式
+.upload-warning {
+  color: #f56c6c;
+  background: rgba(#f56c6c, 0.1);
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  border-left: 3px solid #f56c6c;
+}
+
+.file-input.disabled .input-wrapper {
+  opacity: 0.6;
+  cursor: not-allowed;
+
+  &:hover {
+    border-color: rgba($gradient-start, 0.3);
+    background-color: rgba($gradient-start, 0.02);
+  }
+
+  input[type="file"] {
+    pointer-events: none;
+  }
 }
 </style>

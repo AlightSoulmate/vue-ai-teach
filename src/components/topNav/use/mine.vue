@@ -35,12 +35,12 @@ const passwordRules = reactive<FormRules>({
   confirmPassword: [
     { required: true, message: "请确认新密码", trigger: "blur" },
     {
-      validator: (rule, value, callback) => {
+      // @ts-ignore
+      validator: async (_rule, value) => {
         if (value !== passwordForm.newPassword) {
-          callback(new Error("两次输入的密码不一致"));
-        } else {
-          callback();
+          throw new Error("两次输入的密码不一致");
         }
+        return true;  // 验证通过时需要返回 true
       },
       trigger: "blur",
     },
@@ -96,11 +96,11 @@ onMounted(() => {
   authStore.user = userInfo
     ? JSON.parse(userInfo)
     : {
-        id: 0,
-        username: "未登录",
-        role: "未登录",
-        token: "未登录",
-      };
+      id: 0,
+      username: "未登录",
+      role: "未登录",
+      token: "未登录",
+    };
 });
 </script>
 
@@ -115,68 +115,61 @@ onMounted(() => {
     <template #dropdown>
       <el-dropdown-menu>
         <el-dropdown-item>
-          <el-icon><User /></el-icon>ID: {{ authStore.user.id }}
+          <el-icon>
+            <User />
+          </el-icon>UID: {{ authStore.user.id }}
         </el-dropdown-item>
         <el-dropdown-item>
-          <el-icon><Avatar /></el-icon>账号：{{ authStore.user.username }}
+          <el-icon>
+            <Avatar />
+          </el-icon>昵称：{{ authStore.user.nickname }}
         </el-dropdown-item>
         <el-dropdown-item>
-          <el-icon><UserFilled /></el-icon>
-          身份: {{ authStore.currentRoleCN }}
+          <el-icon>
+            <Avatar />
+          </el-icon>账号：{{ authStore.user.username }}
         </el-dropdown-item>
-        <el-dropdown-item @click="handleModifyNickname">
-          <el-icon><EditPen /></el-icon>修改昵称
+        <el-dropdown-item v-if="authStore.user.cno">
+          <el-icon>
+            <Avatar />
+          </el-icon>班级：{{ authStore.user.cno }}
+        </el-dropdown-item>
+        <el-dropdown-item>
+          <el-icon>
+            <UserFilled />
+          </el-icon>
+          身份: &nbsp; {{ authStore.currentRoleCN }}
+        </el-dropdown-item>
+        <el-dropdown-item @click="handleModifyNickname" v-if="authStore.user.role === 'student'">
+          <el-icon>
+            <EditPen />
+          </el-icon>修改昵称
         </el-dropdown-item>
         <el-dropdown-item @click="passwordDialogVisible = true">
-          <el-icon><Key /></el-icon>修改密码
+          <el-icon>
+            <Key />
+          </el-icon>修改密码
         </el-dropdown-item>
         <el-dropdown-item @click="handleLogout" divided>
-          <el-icon><Logout /></el-icon>退出登录
+          <el-icon>
+            <Logout />
+          </el-icon>退出登录
         </el-dropdown-item>
       </el-dropdown-menu>
     </template>
   </el-dropdown>
 
-  <el-dialog
-    v-model="passwordDialogVisible"
-    title="修改密码"
-    width="400px"
-    center
-    destroy-on-close
-    append-to-body
-    :modal-append-to-body="true"
-    class="password-dialog"
-  >
-    <el-form
-      :model="passwordForm"
-      :rules="passwordRules"
-      ref="passwordFormRef"
-      label-width="100px"
-      status-icon
-    >
+  <el-dialog v-model="passwordDialogVisible" title="修改密码" width="400px" center destroy-on-close append-to-body
+    :modal-append-to-body="true" class="password-dialog">
+    <el-form :model="passwordForm" :rules="passwordRules" ref="passwordFormRef" label-width="100px" status-icon>
       <el-form-item label="旧密码" prop="oldPassword">
-        <el-input
-          v-model="passwordForm.oldPassword"
-          type="password"
-          show-password
-          placeholder="请输入旧密码"
-        />
+        <el-input v-model="passwordForm.oldPassword" type="password" show-password placeholder="请输入旧密码" />
       </el-form-item>
       <el-form-item label="新密码" prop="newPassword">
-        <el-input
-          v-model="passwordForm.newPassword"
-          type="password"
-          show-password
-          placeholder="请输入新密码"
-        />
+        <el-input v-model="passwordForm.newPassword" type="password" show-password placeholder="请输入新密码" />
       </el-form-item>
       <el-form-item label="确认密码" prop="confirmPassword">
-        <el-input
-          v-model="passwordForm.confirmPassword"
-          type="password"
-          show-password
-          placeholder="请确认新密码"
-        />
+        <el-input v-model="passwordForm.confirmPassword" type="password" show-password placeholder="请确认新密码" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -203,9 +196,11 @@ onMounted(() => {
   outline: none !important;
   box-shadow: none !important;
 }
+
 .user-dropdown:hover {
   border: none;
 }
+
 :deep(.el-dropdown) {
   outline: none !important;
 }
@@ -234,6 +229,7 @@ onMounted(() => {
   transition: background-color 0.2s;
   outline: none !important;
 }
+
 .user-info:hover {
   background-color: var(--el-fill-color-light);
 }

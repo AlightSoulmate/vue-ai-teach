@@ -36,10 +36,6 @@ export const uploadEvaluationFile = async (
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }
@@ -81,20 +77,17 @@ export const uploadEvaluationFileByFileId = async (
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
   }
 };
 // 获取评价结果
 export const getEvaluationResult = async (
-  Authorization: string
+  Authorization: string,
+  toolId:number
 ): Promise<{ message: string; status: number }> => {
   try {
-    const response = await service.post("/evaluation", {
+    const response = await service.post(`/evaluation/${toolId}`, {
       Authorization,
     });
     return {
@@ -121,39 +114,7 @@ export const getEvaluationResult = async (
         default:
           ElMessage.error(`请求失败: ${error.message}`);
       }
-    } else if (error.code === "ECONNABORTED") {
-      ElMessage.error("请求超时，请检查网络连接");
-    } else {
-      ElMessage.error("网络错误，请检查网络连接");
     }
     return Promise.reject(error);
-  }
-};
-
-// 生成并下载评价报告
-export const generateAndDownloadReport = async (
-  reportText: string,
-  username: string
-): Promise<void> => {
-  try {
-    // 创建Word文档并下载
-    const paragraphs = reportText
-      .split("\n")
-      .map((line: string | IParagraphOptions) => new Paragraph(line));
-
-    const doc = new Document({
-      sections: [
-        {
-          properties: {},
-          children: paragraphs,
-        },
-      ],
-    });
-
-    const blob = await Packer.toBlob(doc);
-    saveAs(blob, `${username}的评测报告.docx`);
-  } catch (e: any) {
-    ElMessage.error("报告生成失败");
-    throw new Error("生成报告失败");
   }
 };

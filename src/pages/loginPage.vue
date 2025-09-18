@@ -27,10 +27,8 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import TopNav from "@/components/topnav/login/index.vue";
+import TopNav from "@/components/topNav/login/index.vue";
 import Enter from "@/components/use/newButton.vue";
-// @ts-ignore
-import Slip from "@/components/use/textSlip.vue";
 import Carousel from "@/components/use/carousel.vue";
 
 const router = useRouter();
@@ -70,11 +68,9 @@ const handleLogin = () => {
 .circle {
   position: absolute;
   border-radius: 50%;
-  background: linear-gradient(
-    45deg,
-    rgba(255, 121, 45, 0.1),
-    rgba(255, 77, 77, 0.1)
-  );
+  background: linear-gradient(45deg,
+      rgba(255, 121, 45, 0.1),
+      rgba(255, 77, 77, 0.1));
   animation: float 6s ease-in-out infinite;
 
   &.circle-1 {
@@ -164,6 +160,7 @@ const handleLogin = () => {
     letter-spacing: -1px;
     animation: slideUp 1s ease-out;
     background: linear-gradient(45deg, #ff792d, #ff4d4d);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     line-height: 1.2;
@@ -211,6 +208,7 @@ const handleLogin = () => {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -221,27 +219,32 @@ const handleLogin = () => {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
 }
 
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-20px);
   }
 }
 
 @keyframes pulse {
+
   0%,
   100% {
     transform: scale(1);
     opacity: 0.3;
   }
+
   50% {
     transform: scale(1.5);
     opacity: 0.5;
@@ -253,6 +256,7 @@ const handleLogin = () => {
     width: 0;
     opacity: 0;
   }
+
   to {
     width: 60px;
     opacity: 1;
@@ -266,6 +270,7 @@ const handleLogin = () => {
   }
 
   .title {
+
     .front,
     .end {
       font-size: 3.5rem;
@@ -298,6 +303,7 @@ const handleLogin = () => {
 
 @media (max-width: 768px) {
   .title {
+
     .front,
     .end {
       font-size: 2.5rem;
@@ -311,6 +317,7 @@ const handleLogin = () => {
 
 @media (max-width: 480px) {
   .title {
+
     .front,
     .end {
       font-size: 2rem;

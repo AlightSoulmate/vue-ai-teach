@@ -55,7 +55,7 @@ onMounted(() => {
           <div class="name">{{ tool.name }}</div>
           <div class="score-badge">
             <span class="score-value">{{ tool.score }}</span>
-            <span class="score-stars">⭐</span>
+            <span class="score-stars"><svg class="icon" viewBox="0 0 1300 720" version="1.1" xmlns="http://www.w3.org/2000/svg" width="29" height="29"><path d="M512.009505 25.054894l158.199417 320.580987 353.791078 51.421464L767.995248 646.579761l60.432101 352.365345-316.417844-166.354615-316.436854 166.354615 60.432101-352.365345L0 397.057345l353.791078-51.421464z" fill="#EFCE4A" p-id="2289" data-spm-anchor-id="a313x.search_index.0.i1.672b3a81KYHDAp" class="selected"></path></svg></span>
           </div>
         </div>
 
@@ -107,7 +107,7 @@ $box-shadow-hover: 0 15px 35px rgba($gradient-start, 0.15);
 @mixin hover-effect {
   transition: all $transition-duration ease;
   &:hover {
-    transform: translateY(-5px);
+    transform: translateY(-1px);
     box-shadow: $box-shadow-hover;
   }
 }
@@ -218,6 +218,7 @@ $box-shadow-hover: 0 15px 35px rgba($gradient-start, 0.15);
         font-weight: 800;
         color: var(--text-color);
         background: linear-gradient(135deg, $gradient-start, $gradient-end);
+        background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         line-height: 1.2;
@@ -233,7 +234,7 @@ $box-shadow-hover: 0 15px 35px rgba($gradient-start, 0.15);
         rgba($gradient-end, 0.1)
       );
       padding: 12px 16px;
-      border-radius: 50px;
+      border-radius: 20px;
 
       .score-value {
         font-size: 28px;
@@ -292,7 +293,7 @@ $box-shadow-hover: 0 15px 35px rgba($gradient-start, 0.15);
 
             &:hover {
               background: rgba($primary-color, 0.2);
-              transform: translateY(-2px);
+              transform: translateY(-1px);
             }
           }
 
@@ -311,7 +312,7 @@ $box-shadow-hover: 0 15px 35px rgba($gradient-start, 0.15);
                 rgba($gradient-start, 0.2),
                 rgba($gradient-end, 0.2)
               );
-              transform: translateY(-2px);
+              transform: translateY(-1px);
             }
           }
         }
@@ -355,7 +356,7 @@ $box-shadow-hover: 0 15px 35px rgba($gradient-start, 0.15);
         }
 
         &:hover {
-          transform: translateY(-3px);
+          transform: translateY(-1px);
           box-shadow: 0 12px 20px rgba($gradient-start, 0.5);
           background: linear-gradient(135deg, #4aafff, $gradient-end);
 
@@ -433,7 +434,7 @@ $box-shadow-hover: 0 15px 35px rgba($gradient-start, 0.15);
   border: 1px solid rgba($gradient-start, 0.05);
 
   &:hover {
-    transform: translateY(-5px);
+    transform: translateY(-1px);
   }
 }
 

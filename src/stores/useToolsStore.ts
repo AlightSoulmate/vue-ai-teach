@@ -1,6 +1,8 @@
 // @/stores/useToolsStore.ts
 import { defineStore } from "pinia";
+import { ref, computed } from "vue";
 import { getCategories, getTools } from "@/services";
+import { ElMessage } from "element-plus";
 
 interface Tool {
   id: number;
@@ -13,159 +15,75 @@ interface Tool {
   category: string;
 }
 
-export const useToolsStore = defineStore("tools", {
-  state: () => ({
-    categories: [] as string[],
-    toolsByCategory: {} as Record<string, Tool[]>,
-    isLoading: false,
-    loadedCategories: new Set<string>(),
-    loadedToolsCount: 0,
-    totalToolsCount: 0,
-    CACHE_TIME: 10 * 1000, // 缓存10s
-  }),
+export const useToolsStore = defineStore('tools', () => {
+  const categories = ref<string[]>([]);
+  const currentCategoryTools = ref<Tool[]>([]);
+  const isLoading = ref(false);
+  const loadedCategory = ref("");
+  const loadedToolsCount = ref(0);
 
-  actions: {
-    // 从缓存加载数据
-    async loadFromCache() {
-      const cachedCategories = localStorage.getItem("toolCategories");
-      const cachedTools = localStorage.getItem("toolsByCategory");
-
-      if (cachedCategories && cachedTools) {
-        try {
-          const parsedCategories = JSON.parse(cachedCategories);
-          const parsedTools = JSON.parse(cachedTools);
-
-          if (!parsedCategories?.length) return false;
-
-          this.categories = parsedCategories;
-          this.toolsByCategory = parsedTools;
-          this.loadedCategories = new Set(parsedCategories);
-          this.loadedToolsCount = Object.values(this.toolsByCategory).reduce(
-            (total, tools) => total + tools.length,
-            0
-          );
-          this.totalToolsCount = Object.values(this.toolsByCategory).reduce(
-            (total, tools) => total + tools.length,
-            0
-          );
-          return true;
-        } catch (e) {
-          console.error("缓存数据解析失败:", e);
-        }
+  const loadCategoryTools = async (category: string) => {
+    if (!categories.value.length) return;
+    isLoading.value = true;
+    try {
+      const response = await getTools(category);
+      if (response?.tools) {
+        localStorage.setItem("activeName", JSON.stringify(category));
+        currentCategoryTools.value = response.tools.map(mapTool);
+        loadedCategory.value = category;
+        loadedToolsCount.value = response.tools.length;
       }
-      return false;
-    },
+    } catch (error) {
+      ElMessage.error("工具数据获取异常");
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  };
 
-    // 保存数据到缓存
-    saveToCache() {
-      try {
-        if (this.categories.length > 0) {
-          localStorage.setItem(
-            "toolCategories",
-            JSON.stringify(this.categories)
-          );
-          localStorage.setItem(
-            "toolsByCategory",
-            JSON.stringify(this.toolsByCategory)
-          );
-          localStorage.setItem("toolsCacheTime", Date.now().toString());
+  const fetchCategory = async () => {
+    try {
+      isLoading.value = true;
+      const data = await getCategories();
+      if (data?.categories) {
+        categories.value = data.categories;
+        loadedCategory.value = JSON.parse(localStorage.getItem("activeName") || '""');
+        if (!loadedCategory.value) {
+          loadedCategory.value = categories.value[0];
+          localStorage.setItem("activeName", categories.value[0]);
         }
-      } catch (e) {
-        console.error("保存缓存失败:", e);
+        await loadCategoryTools(loadedCategory.value);
       }
-    },
+    } catch (e) {
+      ElMessage.error("数据获取异常");
+    } finally {
+      isLoading.value = false;
+    }
+  };
 
-    // 检查缓存是否过期
-    isCacheExpired() {
-      const cacheTime = localStorage.getItem("toolsCacheTime");
-      return !cacheTime || Date.now() - parseInt(cacheTime) > this.CACHE_TIME;
-    },
+  const mapTool = (tool: any): Tool => {
+    return {
+      id: tool.id,
+      name: tool.name,
+      logo_url: tool.logo_url,
+      url: tool.url,
+      description: tool.description,
+      score: tool.score,
+      ratingCount: tool.ratingCount,
+      category: tool.category,
+    };
+  };
 
-    // 加载指定类别的工具
-    async loadToolsForCategories(
-      categoriesToLoad: string[],
-      isBackground = false
-    ) {
-      if (!isBackground) {
-        this.isLoading = true;
-      }
+  const currentTools = computed(() => currentCategoryTools.value);
 
-      try {
-        for (const category of categoriesToLoad) {
-          if (!this.loadedCategories.has(category)) {
-            const response = await getTools(category);
-            if (response?.tools) {
-              this.toolsByCategory[category] = response.tools.map(this.mapTool);
-              this.loadedCategories.add(category);
-              this.loadedToolsCount += response.tools.length;
-              this.totalToolsCount = Object.values(this.toolsByCategory).reduce(
-                (total, tools) => total + tools.length,
-                0
-              );
-              if (!isBackground) this.saveToCache();
-            }
-          }
-        }
-      } catch (error) {
-        console.error("加载工具失败:", error);
-        throw error;
-      } finally {
-        if (!isBackground) {
-          this.isLoading = false;
-        }
-      }
-    },
-
-    // 加载首屏类别
-    async loadInitialCategories() {
-      if (!this.categories.length) return;
-      await this.loadToolsForCategories(this.categories.slice(0, 2));
-    },
-
-    // 加载剩余类别
-    async loadRemainingCategories() {
-      if (!this.categories.length) return;
-      await this.loadToolsForCategories(this.categories.slice(2), true);
-      if (Object.keys(this.toolsByCategory).length === this.categories.length) {
-        this.saveToCache();
-      }
-    },
-
-    // 获取类别和工具数据
-    async fetchCategory() {
-      try {
-        this.isLoading = true;
-
-        if (!this.isCacheExpired() && (await this.loadFromCache())) {
-          return;
-        }
-
-        const data = await getCategories();
-        if (data?.categories) {
-          this.categories = data.categories;
-          await this.loadInitialCategories();
-          await this.loadRemainingCategories();
-        }
-      } catch (e) {
-        console.error("获取数据异常:", e);
-        await this.loadFromCache(); // 失败时尝试使用缓存
-      } finally {
-        this.isLoading = false;
-      }
-    },
-
-    // 数据映射
-    mapTool(tool: any): Tool {
-      return {
-        id: tool.id,
-        name: tool.name,
-        logo_url: tool.logo_url,
-        url: tool.url,
-        description: tool.description,
-        score: tool.score,
-        ratingCount: tool.ratingCount,
-        category: tool.category,
-      };
-    },
-  },
+  return {
+    categories,
+    currentTools,
+    isLoading,
+    loadedCategory,
+    loadedToolsCount,
+    currentCategoryTools,
+    loadCategoryTools,
+    fetchCategory,
+  };
 });
