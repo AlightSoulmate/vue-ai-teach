@@ -1,0 +1,15 @@
+/* src/styles/dark-theme.scss */
+// :root
+html[data-theme='dark'] {
+    --background-color: #{$dark-background};
+    --text-color: #{$dark-text};
+    --card-background: #{$dark-card-background};
+    --navbar-bottom-border-color: #{$dark-navbar-bottom-border-color};
+    --border-color: #{$dark-border-color};
+    --hover-color: #{$dark-hover-color};
+    --active-background-color: #{$dark-active-background-color};
+    --box-shadow: #{$dark-box-shadow};
+    --active-text-color: #{$dark-active-text-color};
+    --score-title-icon-color: #{$dark-score-title-icon-color};
+    --card-content-border-color: #{$dark-card-content-border-color};
+}

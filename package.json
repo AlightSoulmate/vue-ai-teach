@@ -1,0 +1,51 @@
+{
+  "name": "aiteach",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --mode development",
+    "build": "vite build --mode production",
+    "staging": "vite --mode staging",
+    "build:staging": "vite build --mode staging",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@types/markdown-it": "^14.1.2",
+    "axios": "^1.7.9",
+    "axios-mock-adapter": "^2.1.0",
+    "docx": "^9.1.1",
+    "element-plus": "^2.9.3",
+    "file-saver": "^2.0.5",
+    "markdown-it": "^14.1.0",
+    "mockjs": "^1.1.0",
+    "pinia": "^2.3.1",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.0",
+    "@types/axios-mock-adapter": "^1.9.0",
+    "@types/file-saver": "^2.0.7",
+    "@types/mockjs": "^1.0.10",
+    "@types/node": "^22.10.7",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/tsconfig": "^0.7.0",
+    "consola": "^3.4.0",
+    "npm-run-all2": "^7.0.2",
+    "rollup-plugin-visualizer": "^5.14.0",
+    "sass": "^1.84.0",
+    "sass-loader": "^16.0.4",
+    "terser": "^5.39.0",
+    "typescript": "~5.7.3",
+    "vite": "^6.0.11",
+    "vite-plugin-compression": "^0.5.1",
+    "vite-plugin-style-import": "^2.0.0",
+    "vite-plugin-svg-icons": "^2.0.1",
+    "vite-plugin-vue-devtools": "^7.7.0",
+    "vue-tsc": "^2.2.0"
+  }
+}
