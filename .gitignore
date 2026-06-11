@@ -6,17 +6,18 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+.codex-write-check
 
 node_modules
-package-lock.json
 .DS_Store
 .vscode
 dist
 dist-ssr
 coverage
 *.local
-status.html
+stats.html
 # backup
+
 
 /cypress/videos/
 /cypress/screenshots/
