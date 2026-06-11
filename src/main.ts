@@ -5,6 +5,7 @@ import router from "./router";
 import ElementPlus from "element-plus";
 import { useThemeStore } from "./stores/useThemeStore";
 import { isMockEnabled, isDevMode } from "./utils/env";
+import { setupRuntimeMonitoring } from "./utils/monitoring";
 
 import "element-plus/dist/index.css";
 import "@/styles/light-theme.scss";
@@ -15,4 +16,5 @@ if (isDevMode() && isMockEnabled()) import("@/mock");
 const app = createApp(App);
 app.use(createPinia()).use(router).use(ElementPlus);
 useThemeStore().initTheme();
+setupRuntimeMonitoring();
 app.mount("#app");

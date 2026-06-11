@@ -27,16 +27,25 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { defaultRouteByRole, isAppRole } from "@/constants/permissions";
 import TopNav from "@/components/topNav/login/index.vue";
 import Enter from "@/components/use/newButton.vue";
 import Carousel from "@/components/use/carousel.vue";
 
 const router = useRouter();
+const authStore = useAuthStore();
 const TitleFront = ref("浙江外国语学院");
 const TitleEnd = ref("AI智能教学平台");
 
 const handleLogin = () => {
-  router.push("/home");
+  authStore.checkAuth();
+  const role = authStore.user.role || authStore.currentRole;
+  if (authStore.isAuthenticated && isAppRole(role)) {
+    router.push(defaultRouteByRole[role]);
+    return;
+  }
+  router.push("/form");
 };
 </script>
 <style scoped lang="scss">

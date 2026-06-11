@@ -5,6 +5,7 @@ import { register, login, change, getAllClasses } from "@/services";
 import { useRouter } from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
 import type { User } from "@/interfaces";
+import { hasPermission, isAppRole, type AppRole, type PermissionCode } from "@/constants/permissions";
 
 export const useAuthStore = defineStore("auth", () => {
   const router = useRouter();
@@ -13,8 +14,8 @@ export const useAuthStore = defineStore("auth", () => {
   const password = ref<string>("");
   const isLogin = ref<boolean>(true);
   const isFresh = ref<number>(0);
-  const roles = ref<string[]>(["admin", "teacher", "student"]);
-  const currentRole = ref<string>("student");
+  const roles = ref<AppRole[]>(["admin", "teacher", "student"]);
+  const currentRole = ref<AppRole>("student");
   const currentRoleCN = computed(() => {
     return currentRole.value === "admin"
       ? "管理员"
@@ -67,10 +68,22 @@ export const useAuthStore = defineStore("auth", () => {
   // 检查登录状态
   const checkAuth = () => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      Object.assign(user.value, JSON.parse(storedUser));
+    if (!storedUser) return;
+
+    try {
+      const parsedUser = JSON.parse(storedUser) as User;
+      if (!parsedUser?.token || !isAppRole(parsedUser.role)) return;
+      Object.assign(user.value, parsedUser);
       isAuthenticated.value = true;
+      currentRole.value = parsedUser.role;
+    } catch {
+      localStorage.removeItem("user");
+      isAuthenticated.value = false;
     }
+  };
+
+  const can = (permission: PermissionCode) => {
+    return hasPermission(currentRole.value || user.value.role, permission);
   };
 
   // 找回密码等
@@ -188,7 +201,9 @@ export const useAuthStore = defineStore("auth", () => {
       };
       isAuthenticated.value = true;
       isFresh.value = data.user.is_fresh;
-      currentRole.value = user.value.role;
+      if (isAppRole(user.value.role)) {
+        currentRole.value = user.value.role;
+      }
       localStorage.setItem("user", JSON.stringify(user.value));
       localStorage.setItem("isFresh", JSON.stringify(isFresh.value));
       ElMessage.success("登录成功");
@@ -213,7 +228,9 @@ export const useAuthStore = defineStore("auth", () => {
       };
       isAuthenticated.value = true;
       isFresh.value = data.user.is_fresh;
-      currentRole.value = user.value.role;
+      if (isAppRole(user.value.role)) {
+        currentRole.value = user.value.role;
+      }
       localStorage.setItem("user", JSON.stringify(user.value));
       localStorage.setItem("isFresh", JSON.stringify(isFresh.value));
       ElMessage.success("登录成功");
@@ -244,7 +261,9 @@ export const useAuthStore = defineStore("auth", () => {
         token: data.Authorization,
       };
       isAuthenticated.value = true;
-      currentRole.value = data.user.role;
+      if (isAppRole(data.user.role)) {
+        currentRole.value = data.user.role;
+      }
       localStorage.setItem("user", JSON.stringify(user.value));
 
       ElMessage.success("注册成功");
@@ -293,7 +312,7 @@ export const useAuthStore = defineStore("auth", () => {
   };
 
   const setRole = (role: string) => {
-    if (roles.value.includes(role)) {
+    if (isAppRole(role) && roles.value.includes(role)) {
       currentRole.value = role;
       localStorage.setItem("currentRole", currentRole.value);
     }
@@ -314,6 +333,7 @@ export const useAuthStore = defineStore("auth", () => {
     registerForm,
     registerErrors,
     isAuthenticated,
+    can,
     open,
     logout,
     checkAuth,

@@ -1,47 +1,17 @@
 <script lang="ts" setup>
 import { ref } from "vue";
-import {
-  Menu as IconMenu,
-  Location,
-  Memo,
-  Expand,
-  Fold,
-  DocumentChecked,
-} from "@element-plus/icons-vue";
+import { Expand, Fold } from "@element-plus/icons-vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { computed } from "vue";
+import { defaultRouteByRole, getMenusByRole, isAppRole } from "@/constants/permissions";
 
 const authStore = useAuthStore();
+const menus = computed(() => getMenusByRole(authStore.user.role || authStore.currentRole));
 const activeMenu = computed(() => {
-  if (authStore.user.role === "admin") {
-    return "/home/stuList";
-  }
-  if (authStore.user.role === "teacher") {
-    return "/home"; // 教师默认激活AI工具页面
-  }
-  return "/home";
+  const role = authStore.user.role || authStore.currentRole;
+  return isAppRole(role) ? defaultRouteByRole[role] : "/home";
 });
 const isCollapse = ref<boolean>(false);
-
-const role = computed(() => ({
-  isStudent: authStore.user.role === "student",
-  isTeacher: authStore.user.role === "teacher",
-  isAdmin: authStore.user.role === "admin",
-}));
-
-const paths = ref<Record<any, string>>({
-  tools: "/home",
-  toolList: "/home/toolList",
-  stuList: "/home/stuList",
-  teaList: "/home/teaList",
-  teacherCourse: "/home/teacherCourse",
-  teacherEvals: "/home/teacherEvals",
-  teacherAssignments: "/home/teacherAssignments",
-  teacherGrading: "/home/teacherGrading",
-  studentCourse: "/home/studentCourse",
-  studentEvals: "/home/studentEvals",
-  studentInbox: "/home/studentInbox",
-});
 
 const toggleCollapse = (): void => {
   isCollapse.value = !isCollapse.value;
@@ -64,72 +34,11 @@ const emit = defineEmits(["collapse"]);
       </el-button>
     </div>
     <el-menu :default-active="activeMenu" class="el-menu-vertical-demo" :collapse="isCollapse" router>
-      <!-- <template v-if="role.isStudent"> -->
-      <template>
-        <el-menu-item :index="paths.tools">
-          <el-icon>
-            <Location />
-          </el-icon>
-          <span class="menu-label">工具集</span>
-        </el-menu-item>
-      </template>
-
-      <template v-if="role.isAdmin">
-        <el-menu-item :index="paths.toolList">
-          <el-icon>
-            <IconMenu />
-          </el-icon>
-          <span class="menu-label">工具管理</span>
-        </el-menu-item>
-        <el-menu-item :index="paths.stuList">
-          <el-icon>
-            <IconMenu />
-          </el-icon>
-          <span class="menu-label">学生管理</span>
-        </el-menu-item>
-        <el-menu-item :index="paths.teaList">
-          <el-icon>
-            <IconMenu />
-          </el-icon>
-          <span class="menu-label">教师管理</span>
-        </el-menu-item>
-      </template>
-
-      <el-menu-item :index="paths.teacherCourse" v-if="role.isTeacher">
+      <el-menu-item v-for="item in menus" :key="item.path" :index="item.path">
         <el-icon>
-          <IconMenu />
+          <component :is="item.icon" />
         </el-icon>
-        <span class="menu-label">课程管理</span>
-      </el-menu-item>
-      <el-menu-item :index="paths.teacherAssignments" v-if="role.isTeacher">
-        <el-icon>
-          <Memo />
-        </el-icon>
-        <span class="menu-label">作业管理</span>
-      </el-menu-item>
-      <el-menu-item :index="paths.teacherGrading" v-if="role.isTeacher">
-        <el-icon>
-          <DocumentChecked />
-        </el-icon>
-        <span class="menu-label">智能教学</span>
-      </el-menu-item>
-      <el-menu-item :index="paths.studentCourse" v-if="role.isStudent">
-        <el-icon>
-          <IconMenu />
-        </el-icon>
-        <span class="menu-label">评价记录</span>
-      </el-menu-item>
-      <el-menu-item :index="paths.studentEvals" v-if="role.isStudent">
-        <el-icon>
-          <Memo />
-        </el-icon>
-        <span class="menu-label">作业记录</span>
-      </el-menu-item>
-      <el-menu-item :index="paths.studentInbox" v-if="role.isStudent">
-        <el-icon>
-          <Memo />
-        </el-icon>
-        <span class="menu-label">收件箱</span>
+        <span class="menu-label">{{ item.title }}</span>
       </el-menu-item>
     </el-menu>
   </div>

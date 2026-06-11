@@ -1,9 +1,35 @@
 <template>
   <div class="form-container">
-    <div v-if="authStore.isLogin" class="auth-section">
-      <p class="title" :title="authStore.currentRole">
-        {{ authStore.currentRoleCN }}登录
-      </p>
+    <div class="card-head">
+      <p class="eyebrow">{{ authStore.isLogin ? "账号登录" : "账号注册" }}</p>
+      <h2>{{ authStore.currentRoleCN }}{{ authStore.isLogin ? "登录" : "注册" }}</h2>
+      <span>{{ authStore.isLogin ? "请选择身份并输入账号信息" : "请填写账号信息完成注册" }}</span>
+    </div>
+
+    <div class="role-selector">
+      <button
+        v-for="role in roleOptions"
+        :key="role.value"
+        type="button"
+        class="role-option"
+        :class="{ active: authStore.currentRole === role.value }"
+        @click="selectRole(role.value)"
+      >
+        <span class="role-dot"></span>
+        {{ role.label }}
+      </button>
+    </div>
+
+    <div v-if="showDevLoginTip && authStore.isLogin" class="dev-login-tip">
+      <div>
+        <strong>本地开发账号</strong>
+        <span>{{ currentDevAccount.username }} / {{ currentDevAccount.password }}</span>
+      </div>
+      <button type="button" @click="fillDevAccount">填入示例</button>
+    </div>
+
+    <transition name="form-fade" mode="out-in">
+    <div v-if="authStore.isLogin" class="auth-section" key="login">
       <form class="form" @submit.prevent="authStore.enterLogin">
         <div class="input-group">
           <label for="username">账号</label>
@@ -71,8 +97,7 @@
         >
       </p>
     </div>
-    <div v-else class="auth-section">
-      <p class="title">{{ authStore.currentRoleCN }}注册</p>
+    <div v-else class="auth-section" key="register">
       <form class="form" @submit.prevent="authStore.enterRegister">
         <div class="input-group">
           <label for="username">账号</label>
@@ -154,46 +179,32 @@
         >
       </p>
     </div>
-
-    <div class="role-selector">
-      <div class="role-selector-label">选择身份：</div>
-      <div class="role-options">
-        <div
-          class="role-option"
-          :class="{ active: authStore.currentRole === 'student' }"
-          @click="selectRole('student')"
-        >
-          <div class="role-icon student-icon"></div>
-          <span>学生</span>
-        </div>
-        <div
-          class="role-option"
-          :class="{ active: authStore.currentRole === 'teacher' }"
-          @click="selectRole('teacher')"
-        >
-          <div class="role-icon teacher-icon"></div>
-          <span>教师</span>
-        </div>
-        <div
-          class="role-option"
-          :class="{ active: authStore.currentRole === 'admin' }"
-          @click="selectRole('admin')"
-        >
-          <div class="role-icon admin-icon"></div>
-          <span>管理员</span>
-        </div>
-      </div>
-    </div>
+    </transition>
   </div>
 </template>
 <script lang="ts" setup>
 import { useAuthStore } from "@/stores/useAuthStore";
-import { watch, defineEmits, ref } from "vue";
+import { watch, defineEmits, ref, computed } from "vue";
+import { isDevMode, isMockEnabled } from "@/utils/env";
 
 const emit = defineEmits(["usernameChange"]);
 const authStore = useAuthStore();
 
 const showPassword = ref<boolean>(false);
+const roleOptions = [
+  { label: "学生", value: "student" },
+  { label: "教师", value: "teacher" },
+  { label: "管理员", value: "admin" },
+];
+const devAccounts: Record<string, { username: string; password: string }> = {
+  student: { username: "23080501001", password: "123456" },
+  teacher: { username: "23080501011", password: "123456" },
+  admin: { username: "admin", password: "123456" },
+};
+const showDevLoginTip = isDevMode() && isMockEnabled();
+const currentDevAccount = computed(() => {
+  return devAccounts[authStore.currentRole] || devAccounts.student;
+});
 
 const selectRole = (role: string) => {
   authStore.setRole(role);
@@ -201,6 +212,11 @@ const selectRole = (role: string) => {
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value;
+};
+
+const fillDevAccount = () => {
+  authStore.loginForm.username = currentDevAccount.value.username;
+  authStore.loginForm.password = currentDevAccount.value.password;
 };
 
 watch(
@@ -220,19 +236,47 @@ watch(
 <style lang="scss" scoped>
 .form-container {
   text-align: left;
-  width: inherit;
-  border-radius: 16px;
-  background-color: rgba(26, 31, 54, 0.7);
-  padding: 2.5rem 3rem;
-  color: #fff;
+  width: 100%;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.88);
+  padding: 30px;
+  color: #111827;
   position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.6s ease-out;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+  animation: cardEnter 0.42s ease-out both;
 
   &:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.15);
+  }
+}
+
+.card-head {
+  margin-bottom: 22px;
+
+  .eyebrow {
+    margin: 0 0 8px;
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 800;
+  }
+
+  span {
+    display: block;
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 14px;
   }
 }
 
@@ -242,192 +286,116 @@ watch(
 }
 
 .role-selector {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(75, 85, 99, 0.3);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 6px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
   position: relative;
   z-index: 2;
 }
 
-.role-selector-label {
-  font-size: 0.95rem;
-  color: rgba(209, 213, 219, 0.9);
-  margin-bottom: 0.75rem;
-  text-align: center;
-}
-
-.role-options {
-  display: flex;
-  justify-content: center;
-  gap: 1.2rem;
-}
-
 .role-option {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
+  gap: 6px;
   cursor: pointer;
-  padding: 0.75rem 1rem;
+  min-height: 38px;
+  padding: 0 10px;
   border-radius: 8px;
   transition: all 0.2s ease;
-  border: 1px solid transparent;
-  animation: slideIn 0.3s ease-out forwards;
-
-  span {
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: rgba(209, 213, 219, 0.8);
-    transition: all 0.2s ease;
-  }
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-
-    span {
-      color: white;
-    }
+    color: #2563eb;
+    background-color: rgba(255, 255, 255, 0.72);
   }
 
   &.active {
-    span {
-      color: white;
-      font-weight: 600;
-    }
-  }
-
-  &:nth-child(1) {
-    animation-delay: 0.1s;
-  }
-
-  &:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-
-  &:nth-child(3) {
-    animation-delay: 0.3s;
+    color: #0f172a;
+    background: #ffffff;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
   }
 }
 
-.role-option.active[class*="student"] {
-  background-color: rgba(139, 92, 246, 0.1);
-  border-color: rgba(139, 92, 246, 0.3);
-
-  .role-icon {
-    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
-  }
-}
-
-.role-option.active[class*="teacher"] {
-  background-color: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.3);
-
-  .role-icon {
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
-  }
-}
-
-.role-option.active[class*="admin"] {
-  background-color: rgba(245, 158, 11, 0.1);
-  border-color: rgba(245, 158, 11, 0.3);
-
-  .role-icon {
-    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
-  }
-}
-
-.role-icon {
-  width: 36px;
-  height: 36px;
+.role-dot {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
+  background: #93c5fd;
+}
+
+.dev-login-tip {
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  position: relative;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -4px 0 18px;
+  padding: 12px 13px;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 8px;
+  background: rgba(239, 246, 255, 0.72);
 
-  &::before {
-    font-size: 1.5rem;
-    position: absolute;
+  strong,
+  span {
+    display: block;
   }
-}
 
-.student-icon {
-  background: linear-gradient(135deg, #a78bfa, #8b5cf6);
-
-  &::before {
-    content: "👨‍🎓";
+  strong {
+    color: #1e3a8a;
+    font-size: 13px;
+    margin-bottom: 4px;
   }
-}
 
-.teacher-icon {
-  background: linear-gradient(135deg, #60a5fa, #2563eb);
-
-  &::before {
-    content: "👨‍🏫";
+  span {
+    color: #475569;
+    font-size: 13px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
-}
 
-.admin-icon {
-  background: linear-gradient(135deg, #fbbf24, #d97706);
+  button {
+    flex: 0 0 auto;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    border-radius: 8px;
+    background: #ffffff;
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
 
-  &::before {
-    content: "👨‍💼";
+    &:hover {
+      background: #f8fbff;
+      transform: translateY(-1px);
+    }
   }
-}
-
-.title {
-  text-align: center;
-  font-size: 2rem;
-  line-height: 2.5rem;
-  font-weight: 700;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  color: #ffffff;
-  letter-spacing: 1px;
-  margin-bottom: 2rem;
-  position: relative;
-
-  &::after {
-    content: "";
-    position: absolute;
-    width: 50px;
-    height: 3px;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    transition: all 0.3s ease;
-  }
-}
-
-.title[title="student"]::after {
-  background-color: #a78bfa;
-}
-.title[title="teacher"]::after {
-  background-color: #3b82f6;
-}
-.title[title="admin"]::after {
-  background-color: #f59e0b;
 }
 
 .form {
-  margin-top: 1.5rem;
-  margin-inline: 40px;
+  margin: 0;
 }
 
 .input-group {
-  margin-top: 1.5rem;
+  margin-top: 16px;
   font-size: 0.875rem;
   line-height: 1.25rem;
 
   label {
     display: block;
-    color: rgba(209, 213, 219, 1);
-    margin-bottom: 8px;
+    color: #334155;
+    margin-bottom: 7px;
     font-weight: 500;
-    font-size: 1rem;
+    font-size: 14px;
   }
 }
 
@@ -438,9 +406,9 @@ watch(
 
   .icon {
     position: absolute;
-    left: 12px;
-    color: #6b7280;
-    font-size: 1.25rem;
+    left: 14px;
+    color: #94a3b8;
+    font-size: 1rem;
     display: inline-block;
     width: 20px;
     height: 20px;
@@ -448,65 +416,82 @@ watch(
 
   .password-toggle {
     left: auto;
-    right: 12px;
+    right: 14px;
+    width: 34px;
+    height: 20px;
     cursor: pointer;
     transition: color 0.3s ease;
 
     &:hover {
-      color: #a78bfa;
+      color: #2563eb;
     }
   }
 
   .icon-user::before {
-    content: "👤";
+    content: "";
+    display: block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
   }
 
   .icon-lock::before {
-    content: "🔒";
+    content: "";
+    display: block;
+    width: 14px;
+    height: 10px;
+    margin-top: 5px;
+    border: 2px solid currentColor;
+    border-radius: 3px;
   }
 
   .icon-eye::before {
-    content: "◐";
-    font-size: 1.1rem;
+    content: "显示";
+    font-size: 12px;
+    font-style: normal;
+    white-space: nowrap;
   }
 
   .icon-eye-slash::before {
-    content: "◑";
-    font-size: 1.1rem;
+    content: "隐藏";
+    font-size: 12px;
+    font-style: normal;
+    white-space: nowrap;
   }
 }
 
 .input-group input {
   width: 100%;
   border-radius: 8px;
-  border: 1px solid rgba(75, 85, 99, 1);
+  border: 1px solid #dbe4ef;
   outline: 0;
-  background-color: rgba(31, 41, 55, 0.8);
-  padding: 0.85rem 1rem 0.85rem 2.5rem;
-  color: rgba(243, 244, 246, 1);
-  font-size: 1rem;
+  background-color: #ffffff;
+  padding: 0.86rem 4rem 0.86rem 2.6rem;
+  color: #0f172a;
+  font-size: 15px;
   transition: all 0.3s ease;
 
   &::placeholder {
-    color: rgba(156, 163, 175, 0.7);
+    color: #94a3b8;
   }
 
   &:hover {
-    border-color: rgba(107, 114, 128, 1);
+    border-color: #bfdbfe;
   }
 }
 
 .input-group input[title="student"]:focus {
-  border-color: rgba(167, 139, 250, 1);
-  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
 }
 .input-group input[title="teacher"]:focus {
-  border-color: rgba(59, 130, 246, 1);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
 }
 .input-group input[title="admin"]:focus {
-  border-color: rgba(245, 158, 11, 1);
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12);
 }
 
 .forgot {
@@ -514,20 +499,20 @@ watch(
   justify-content: flex-end;
   font-size: 0.85rem;
   line-height: 1rem;
-  color: rgba(156, 163, 175, 1);
-  margin: 10px 4px 0 0;
+  color: #64748b;
+  margin: 10px 0 0;
   cursor: pointer;
 }
 
 .forgot a,
 .signup a {
-  color: rgba(209, 213, 219, 1);
+  color: #2563eb;
   text-decoration: none;
   font-size: 0.95rem;
   transition: all 0.2s ease;
 
   &:hover {
-    color: #ffffff;
+    color: #1d4ed8;
   }
 }
 
@@ -563,9 +548,9 @@ watch(
   color: #ffffff;
   border: none;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 15px;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -592,28 +577,32 @@ watch(
 }
 
 .sign[title="student"] {
-  background: linear-gradient(135deg, #a78bfa, #8b5cf6);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.22);
 }
 .sign[title="teacher"] {
-  background: linear-gradient(135deg, #60a5fa, #2563eb);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  box-shadow: 0 12px 24px rgba(14, 165, 233, 0.22);
 }
 .sign[title="admin"] {
-  background: linear-gradient(135deg, #fbbf24, #d97706);
-  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.4);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 12px 24px rgba(217, 119, 6, 0.22);
+}
+
+.sign:hover {
+  transform: translateY(-1px);
 }
 
 .signup {
   text-align: center;
   font-size: 0.95rem;
   line-height: 1rem;
-  color: rgba(156, 163, 175, 1);
+  color: #64748b;
   margin-top: 1.5rem;
 }
 
 .error-message {
-  color: #f87171;
+  color: #dc2626;
   font-size: 0.8rem;
   margin-top: 6px;
   display: block;
@@ -632,34 +621,45 @@ watch(
 }
 
 .password-hint {
-  color: rgba(156, 163, 175, 1);
+  color: #94a3b8;
   font-size: 0.8rem;
   margin-left: 4px;
 }
 
-@keyframes pulse {
-  0% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.05);
-  }
-  100% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
+.form-fade-enter-active,
+.form-fade-leave-active {
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-@keyframes slideIn {
+.form-fade-enter-from,
+.form-fade-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+@keyframes cardEnter {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 560px) {
+  .form-container {
+    padding: 22px;
+  }
+
+  .role-selector {
+    grid-template-columns: 1fr;
+  }
+
+  .dev-login-tip {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 </style>

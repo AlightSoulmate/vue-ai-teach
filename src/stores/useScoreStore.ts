@@ -13,6 +13,14 @@ import {
 import type { Eval, ReportHistory } from "@/interfaces";
 import { useRouter } from "vue-router";
 import { useSelectedToolStore } from "./useSelectedToolStore";
+import {
+  aggregateUploadProgress,
+  calculateFileHash,
+  splitFileIntoChunks,
+  withRetry,
+} from "@/utils/fileUpload";
+import { calculateWeightedScore } from "@/utils/scoring";
+
 export const useScoreStore = defineStore("score", () => {
   const route = useRouter();
   const theselectedTool = useSelectedToolStore();
@@ -20,6 +28,7 @@ export const useScoreStore = defineStore("score", () => {
   const userFile = ref<File | null>(null);
   const uploading = ref(false);
   const userFileName = ref("");
+  const currentFileHash = ref("");
   const reportHistory = ref<ReportHistory[]>([]);
   const loadingHistory = ref(false);
   const rateStandards = ref([
@@ -132,18 +141,6 @@ export const useScoreStore = defineStore("score", () => {
 
   const progress = ref(0); // 进度状态
   // 文件读取与分片
-  const CHUNK_SIZE = 1 * 1024 * 1024; // 每片 1MB
-  function splitFile(file: File): Blob[] {
-    const chunks: Blob[] = [];
-    let start = 0;
-    while (start < file.size) {
-      const end = Math.min(start + CHUNK_SIZE, file.size);
-      chunks.push(file.slice(start, end));
-      start = end;
-    }
-    return chunks;
-  }
-
   // 点击上传
   const handleUpload = async () => {
     try {
@@ -168,17 +165,27 @@ export const useScoreStore = defineStore("score", () => {
         fileName: userFile.value.name,
       };
 
+      currentFileHash.value = await calculateFileHash(userFile.value);
       let response = null;
       let lastMessage = null;
-      const chunks = splitFile(userFile.value);
+      const chunks = splitFileIntoChunks(userFile.value);
       const fileSum = chunks.length;
       for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
         const formData = new FormData();
         formData.append("Authorization", Authorization);
-        formData.append("file", chunks[i]);
+        formData.append("file", chunk.blob);
+        formData.append("fileName", userFile.value.name);
+        formData.append("fileHash", currentFileHash.value);
         formData.append("fileSum", String(fileSum));
-        response = await uploadEvaluationFileByFileId(formData, i + 1);
-        progress.value = Math.round(((i + 1) / fileSum) * 100);
+        formData.append("chunkIndex", String(chunk.index));
+        formData.append("chunkStart", String(chunk.start));
+        formData.append("chunkEnd", String(chunk.end));
+        response = await withRetry(
+          () => uploadEvaluationFileByFileId(formData, chunk.index),
+          { retries: 2, delayMs: 800 },
+        );
+        progress.value = aggregateUploadProgress(i + 1, fileSum).percentage;
         if (i === chunks.length - 1) {
           lastMessage = response.message;
         }
@@ -268,12 +275,7 @@ export const useScoreStore = defineStore("score", () => {
 
   // 平均分计算
   const calculateWeightedAverage = (): number => {
-    const WEIGHTS = [0.3, 0.25, 0.25, 0.1, 0.1];
-    let weightedSum = 0;
-    rateStandards.value.forEach((standard, index) => {
-      weightedSum += standard.score * WEIGHTS[index];
-    });
-    return parseFloat(weightedSum.toFixed(1));
+    return calculateWeightedScore(rateStandards.value);
   };
 
   const historyRates = ref<any[]>([]);
@@ -348,6 +350,7 @@ export const useScoreStore = defineStore("score", () => {
     reportHistory,
     loadingHistory,
     lastUploadRecord,
+    currentFileHash,
     historyRates,
     evalData,
     checkThrottle,

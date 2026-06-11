@@ -14,12 +14,10 @@ import {
   pollHomeworkReview,
   submitBatchHomeworkForAIReview,
   pollBatchHomeworkReview,
-  submitHomeworkStandardFile,
 } from "@/services";
 import { useAuthStore } from "./useAuthStore";
 import { ElMessage } from "element-plus";
 import router from "@/router";
-import { tr } from "element-plus/es/locales.mjs";
 
 export const useTeacherStore = defineStore("teacherCourse", () => {
   const authStore = useAuthStore();
@@ -33,7 +31,6 @@ export const useTeacherStore = defineStore("teacherCourse", () => {
     id: number;
     course: string;
     description: string;
-    // cno: string[];
     cno: string;
   }
   const courseList = ref<Course[]>([]);
@@ -47,7 +44,6 @@ export const useTeacherStore = defineStore("teacherCourse", () => {
     }
     const resp = await getAllCourses(token);
     courseList.value = resp;
-    console.log("课程列表", courseList.value);
     return resp;
   };
 
@@ -67,7 +63,6 @@ export const useTeacherStore = defineStore("teacherCourse", () => {
     return resp;
   };
 
-  // 3.5 update course
   const changeCourse = async (
     course_id: number,
     course: string,
@@ -86,41 +81,7 @@ export const useTeacherStore = defineStore("teacherCourse", () => {
   }
 
   const rates = ref<any[]>([]);
-  // 3.12 获得该课程班级学生的所有历史评价记录
-  const fetchRateHistory = async (course_id: number): Promise<any> => {
-    // const token = authStore.user.token || "";
-    // if (!token) {
-    //   ElMessage.error("Token失效，请重新登录");
-    //   localStorage.removeItem("user");
-    //   router.push("/form");
-    //   return;
-    // }
-    // const resp = await getRateRecords(token, course_id);
-    // if (resp?.rates) {
-    //   rates.value = resp.rates;
-    //   await formatHistoryRates();
-    // } else {
-    //   ElMessage.error("获取历史评分记录失败");
-    // }
-    // return resp;
-  };
-  const formatHistoryRates = async () => {
-    // try {
-    //   await Promise.all(
-    //     rates.value.map(async (rate) => {
-    //       rate.rate_time = rate.rate_time.replace("T", " ");
-    //       const toolDetail = await getDetail(Number(rate.tool_id)) as { name?: string; category?: string };
-    //       rate.tool_name = toolDetail.name || "未知工具";
-    //       rate.tool_category = toolDetail.category || "未知类别";
-    //       return {
-    //         ...rate
-    //       };
-    //     })
-    //   );
-    // } catch (error) {
-    //   ElMessage.error("格式化历史评分记录失败");
-    // }
-  };
+
   // 1.14 获取班级内学生的评价和报告数量
   const fetchHistoryByClass = async (cno1: number) => {
     const token = authStore.user.token || "";
@@ -133,88 +94,19 @@ export const useTeacherStore = defineStore("teacherCourse", () => {
     try {
       const resp = await getHistoryByClass(token, cno1);
       if (resp.message === "查询成功") {
-        console.log("班级内学生的评价和报告数量", resp.users);
         rates.value = resp.users;
       }
     } catch (error) {
-      ElMessage.error("获取成功");
+      ElMessage.error("获取班级历史数据失败");
     }
   }
   // 筛选班级id
   const filterClassId = (className: string) => {
-    console.log("filterClassName", className);
-    let thisClass = classList.value.filter((item) => item.name === className);
-    let ID = thisClass[0]?.id || 100;
-    return ID;
+    const matchedClass = classList.value.find((item) => item.name === className);
+    return matchedClass?.id || 100;
   };
 
   // ================= 作业管理 =================
-  interface AssignmentItem {
-    id: number;
-    title: string;
-    description: string;
-    type: string;
-    status: string;
-    courseId: number;
-    courseName?: string;
-    classId: number;
-    className?: string;
-    dueDate?: string;
-    maxScore: number;
-    requirements: string;
-    createdAt?: string;
-    updatedAt?: string;
-  }
-
-  const assignments = ref<AssignmentItem[]>([]);
-  const assignmentStats = ref<any>({});
-
-  // const fetchAssignments = async () => {
-  //   const token = authStore.user.token || "";
-  //   if (!token) {
-  //     ElMessage.error("Token失效，请重新登录");
-  //     localStorage.removeItem("user");
-  //     router.push("/form");
-  //     return;
-  //   }
-  //   const resp = await getTeacherAssignments(token);
-  //   // 后端返回结构兼容处理
-  //   assignments.value = resp.assignments || resp || [];
-  //   return assignments.value;
-  // };
-
-  // const fetchAssignmentStats = async () => {
-  //   const token = authStore.user.token || "";
-  //   if (!token) {
-  //     ElMessage.error("Token失效，请重新登录");
-  //     localStorage.removeItem("user");
-  //     router.push("/form");
-  //     return;
-  //   }
-  //   const resp = await getAssignmentStats(token);
-  //   // 如果后端暂无实现，前端基于 assignments 计算统计
-  //   if (!resp || Object.keys(resp).length === 0) {
-  //     const list = assignments.value || [];
-  //     const totalAssignments = list.length;
-  //     const publishedAssignments = list.filter((a: any) => String(a.status).includes("发布")).length;
-  //     const draftAssignments = list.filter((a: any) => String(a.status).includes("草稿")).length;
-  //     const closedAssignments = list.filter((a: any) => String(a.status).includes("关闭") || String(a.status).includes("已截止")).length;
-  //     const totalSubmissions = list.reduce((sum: number, a: any) => sum + (Number((a as any).submissionCount) || 0), 0);
-  //     const gradedSubmissions = list.reduce((sum: number, a: any) => sum + (Number((a as any).gradedCount) || 0), 0);
-  //     assignmentStats.value = {
-  //       totalAssignments,
-  //       publishedAssignments,
-  //       draftAssignments,
-  //       closedAssignments,
-  //       totalSubmissions,
-  //       gradedSubmissions,
-  //     };
-  //   } else {
-  //     assignmentStats.value = resp;
-  //   }
-  //   return assignmentStats.value;
-  // };
-
   // 发布作业（对齐文档 5.1）
   const publishAssignment = async (
     courseId: number,
@@ -222,7 +114,6 @@ export const useTeacherStore = defineStore("teacherCourse", () => {
     description: string,
     pushDate: string,
     endDate: string,
-    // className?: string,
     file : File
   ) => {
     const token = authStore.user.token || "";
@@ -244,7 +135,6 @@ export const useTeacherStore = defineStore("teacherCourse", () => {
     }
     formData.append("homework_data", JSON.stringify(info));
     formData.append("standard_file", file);
-    console.log(file)
     const resp = await createAssignment(formData,token);
     if(resp.ok){
       ElMessage.success("作业发布成功");
@@ -380,25 +270,6 @@ const pollBatchReviewStatus = async (mission_uid: string): Promise<any> => {
   }
 };
 
-// 提交作业标准文件（对齐文档 5.10）
-  const publishStandardFileAssignment = async (
-    homeworkId : number,
-    file : File
-  ) => {
-    const token = authStore.user.token || "";
-    if (!token) {
-      ElMessage.error("Token失效，请重新登录");
-      localStorage.removeItem("user");
-      router.push("/form");
-      return;
-    }
-    await submitHomeworkStandardFile(token, file, homeworkId);
-    ElMessage.success("作业发布成功");
-    // // 发布成功后刷新作业列表
-    // await fetchHomeworks(courseId);
-  };
-
-
   return { 
     fetchHistoryByClass, 
     classList, 
@@ -408,10 +279,7 @@ const pollBatchReviewStatus = async (mission_uid: string): Promise<any> => {
     changeCourse, 
     createCourse, 
     filterClassId, 
-    fetchRateHistory, 
     rates,
-    assignments,
-    assignmentStats,
     publishAssignment,
     homeworks,
     fetchHomeworks,

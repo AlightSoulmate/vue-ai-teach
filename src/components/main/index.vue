@@ -161,9 +161,10 @@ const submitPasswordChange = () => {
 onMounted(async () => {
   // 1. 检查是否已登录
   authStore.checkAuth();
-  if (authStore.isFresh === 1 && authStore.user.role === "student") {
-    passwordDialogVisible.value = true;
-  }
+  // 暂停首次登录强制修改密码弹窗，避免本地演示和简历项目体验被打断。
+  // if (authStore.isFresh === 1 && authStore.user.role === "student") {
+  //   passwordDialogVisible.value = true;
+  // }
 
   // 2. 加载工具列表
   initialLoading.value = true;
@@ -311,9 +312,9 @@ const resetCategoryOrder = () => {
               </div>
             </div>
           </div>
-          <div style="width: inherit; margin-top:10px">
+          <!-- <div style="width: inherit; margin-top:10px">
             如需上传报告作业，请使用以下工具：<a href="https://a1.x914.com/alight/i/2025/06/06/41le.png" target="_blank">查看开放工具列表</a>
-          </div>
+          </div> -->
         </div>
       </div>
 

@@ -1,6 +1,5 @@
 import { ElMessage } from "element-plus";
 import service from "./config";
-import type { promises } from "dns";
 
 // 3.1 get all courses
 export const getAllCourses = async (Authorization: string): Promise<any> => {
@@ -358,8 +357,6 @@ export const submitHomeworkForAIReview = async (
 	try {
 		const formData = new FormData();
 		formData.append('submit_record_id', submit_record_id.toString());
-		console.log(formData.get('submit_record_id'))
-		// 发送请求
 		const response = await service.post('/homework/review', formData, {
 			headers: {
 				Authorization
@@ -449,7 +446,6 @@ export const submitBatchHomeworkForAIReview = async (
 		submit_record_ids.forEach(id => {
 			formData.append('submit_record_id', id.toString());
 		});
-		console.log(formData.get('submit_record_id'))
 		const response = await service.post('/homeworks/review', formData, {
 			headers: {
 				Authorization,
@@ -575,4 +571,3 @@ export const submitHomeworkStandardFile = async (
 		return Promise.reject(error);
 	}
 };
-

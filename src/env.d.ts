@@ -6,6 +6,7 @@ interface ImportMetaEnv {
   readonly VITE_APP_MOCK_ENABLE: boolean;
   readonly VITE_APP_MOCK_API?: string;
   readonly VITE_APP_TITLE: string;
+  readonly VITE_APP_MONITOR_ENABLE?: string | boolean;
 }
 
 interface ImportMeta {

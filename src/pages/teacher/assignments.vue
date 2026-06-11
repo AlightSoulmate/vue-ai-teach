@@ -153,17 +153,17 @@
             <div style="display: flex; align-items: center; gap: 12px;">
                 <el-button 
                   type="primary"
-                  :loading="isBatchReviewing || isBatchPolling"
-                  :disabled="isBatchReviewing || isBatchPolling"
+                  :loading="aiGradingStore.isBatchRunning"
+                  :disabled="aiGradingStore.isBatchRunning"
                   @click="handleBatchAIReview"
                 >
-                  {{ isBatchReviewing ? '上传中...' : isBatchPolling ? '批改中...' : '批量AI批改' }}
+                  {{ aiGradingStore.isBatchRunning ? '批改中...' : '批量AI批改' }}
                 </el-button>
-              <div v-if="isBatchPolling" style="display: flex; align-items: center; gap: 8px;">
+              <div v-if="aiGradingStore.batchTask" style="display: flex; align-items: center; gap: 8px;">
                 <el-icon class="is-loading" style="animation: rotating 2s linear infinite;">
                   <Loading />
                 </el-icon>
-                <span style="color: #409eff; font-size: 14px;">{{ batchProgress }}</span>
+                <span style="color: #409eff; font-size: 14px;">{{ aiGradingStore.batchTask.message }}</span>
               </div>
             </div>
           </div>
@@ -194,19 +194,17 @@
                 <el-button
                   size="small"
                   :type="row.is_reviewed ? 'warning' : 'primary'"
-                  :loading="reviewingMap[row.submit_record_id] || pollingMap[row.submit_record_id]"
-                  :disabled="reviewingMap[row.submit_record_id] || pollingMap[row.submit_record_id]"
+                  :loading="isSingleTaskRunning(row.submit_record_id)"
+                  :disabled="isSingleTaskRunning(row.submit_record_id)"
                   @click="handleAIReview(row)"
                 >
                   {{
-                    reviewingMap[row.submit_record_id]
-                      ? '提交中...'
-                      : pollingMap[row.submit_record_id]
+                    isSingleTaskRunning(row.submit_record_id)
                         ? '批改中...'
                         : (row.is_reviewed ? '重新批改' : 'AI批改')
                   }}
                 </el-button>
-                <el-icon v-if="pollingMap[row.submit_record_id]" class="is-loading" style="animation: rotating 2s linear infinite;">
+                <el-icon v-if="isSingleTaskRunning(row.submit_record_id)" class="is-loading" style="animation: rotating 2s linear infinite;">
                   <Loading />
                 </el-icon>
               </div>
@@ -223,12 +221,13 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import type { UploadRawFile } from 'element-plus'
 import { Calendar, Clock, Document, Refresh, Loading } from '@element-plus/icons-vue'
 import { useTeacherStore } from '@/stores/useTeacherStore'
+import { useAiGradingStore } from '@/stores/useAiGradingStore'
 import type { UploadProps, UploadUserFile } from 'element-plus'
 
 const teacherStore = useTeacherStore()
+const aiGradingStore = useAiGradingStore()
 
 const loading = ref(false)
 const dialogVisible = ref(false)
@@ -285,21 +284,14 @@ const isFullyReviewed = (homework: any) => {
 const subDialogVisible = ref(false)
 const subLoading = ref(false)
 const students = ref<any[]>([])
-const reviewingMap = ref<Record<number, boolean>>({})
-const pollingMap = ref<Record<number, boolean>>({})
-const pollingIntervals = ref<Record<number, number>>({})
 
 // 批量批改相关状态
 const selectedStudents = ref<any[]>([])
 const tableRef = ref<any>(null)
-const isBatchReviewing = ref(false)
-const isBatchPolling = ref(false)
-const batchPollingInterval = ref<number | null>(null)
-const batchUuid = ref<string | null>(null)
-const batchProgress = ref('')
-const totalBatchTasks = ref(0)
-const completedBatchTasks = ref(0)
-const batchResults = ref<any[]>([])
+const isSingleTaskRunning = (submitRecordId: number) => {
+  const task = aiGradingStore.singleTasks[submitRecordId]
+  return task?.status === 'pending' || task?.status === 'running'
+}
 
 // 查看作业提交详情（悬浮窗）
 const viewSubmissions = async (homework: any) => {
@@ -323,108 +315,18 @@ const handleAIReview = async (student: any) => {
     return
   }
 
-  // 幂等保护：防止重复提交
-  if (pollingMap.value[recordId]) {
-    ElMessage.warning('正在批改中，请勿重复提交')
-    return
-  }
+  const result = await aiGradingStore.submitSingle(recordId)
+  if (!result?.score && result?.score !== 0) return
 
-  reviewingMap.value[recordId] = true
-
-  try {
-    const uuid = await teacherStore.submitToAIReview(recordId)
-
-    if (!uuid) {
-      throw new Error('AI批改任务创建失败')
-    }
-
-    pollingMap.value[recordId] = true
-    startPolling(recordId, uuid, student)
-  } catch (err: any) {
-    ElMessage.error(err?.message ?? '提交失败')
-  } finally {
-    reviewingMap.value[recordId] = false
-  }
-}
-
-// 开始轮询批改结果
-const startPolling = (submit_record_id: number, uuid: string, student: any) => {
-  // 清除之前的轮询
-  if (pollingIntervals.value[submit_record_id]) {
-    clearTimeout(pollingIntervals.value[submit_record_id])
-    delete pollingIntervals.value[submit_record_id]
-  }
-
-  let pollCount = 0
-  const maxPollCount = 100        // 最多轮询次数
-  const intervalMs = 3000         // 每次轮询间隔
-
-  const poll = async () => {
-    try {
-      pollCount++
-      console.log(`[轮询] 第${pollCount}次查询批改状态，UUID: ${uuid}`)
-
-      const result = await teacherStore.pollReviewStatus(uuid)
-      console.log(`[轮询] 查询结果:`, result)
-
-      if (result) {
-        // 任务仍在处理
-        if (result.status === 202 || result.message === '正在处理') {
-          console.log(`[轮询] 批改进行中，继续等待...`)
-        }
-        // 任务完成（只要返回 score 就认为完成）
-        else if (result.score !== undefined && result.score !== null) {
-          console.log(`[轮询] 批改完成！得分: ${result.score}`)
-
-          const studentIdx = students.value.findIndex(s => s.submit_record_id === submit_record_id)
-          if (studentIdx >= 0) {
-            students.value[studentIdx].score = result.score
-            students.value[studentIdx].is_reviewed = true
-            ElMessage.success(`批改完成！得分：${result.score}分`)
-          }
-
-          pollingMap.value[submit_record_id] = false
-          await loadHomeworks()
-          return // 停止轮询
-        }
-        // 其他状态，可继续轮询
-        else {
-          console.log(`[轮询] 状态异常或未完成，继续轮询...`)
-        }
-      }
-    } catch (error) {
-      console.error('[轮询] 查询失败', error)
-    }
-
-    // 超过最大轮询次数，自动停止
-    if (pollCount >= maxPollCount) {
-      pollingMap.value[submit_record_id] = false
-      ElMessage.warning('批改超时，请稍后刷新查看结果')
-      return
-    }
-
-    // 递归下一次轮询
-    pollingIntervals.value[submit_record_id] = setTimeout(poll, intervalMs) as unknown as number
-  }
-
-  // 立即执行一次轮询
-  poll()
+  student.score = result.score
+  student.is_reviewed = true
+  ElMessage.success(`批改完成！得分：${result.score}分`)
+  await loadHomeworks()
 }
 
 // 对话框关闭时的处理（不清理正在进行的轮询，让其继续在后台运行）
 const handleDialogClose = () => {
-  // 注意：不清理 pollingIntervals 和 batchPollingInterval，让轮询继续在后台运行
-  // 这样即使关闭对话框，AI批改也能继续进行
-  
-  // 仅清理UI相关的状态
   selectedStudents.value = []
-  isBatchReviewing.value = false
-  // 不清理 isBatchPolling，让用户知道还有批改在进行
-  batchUuid.value = null
-  batchProgress.value = ''
-  totalBatchTasks.value = 0
-  completedBatchTasks.value = 0
-  batchResults.value = []
 }
 
 // 判断行是否可选（允许已批改的作业重新批改）
@@ -461,141 +363,19 @@ const handleBatchAIReview = async () => {
     return
   }
 
-  isBatchReviewing.value = true
-
-  try {
-    const uuid = await teacherStore.submitBatchToAIReview(submitRecordIds)
-
-    if (!uuid) {
-      throw new Error('批量AI任务创建失败')
+  const result = await aiGradingStore.submitBatch(submitRecordIds)
+  result?.result?.forEach((item: any) => {
+    const student = students.value.find(s => s.submit_record_id === item.submit_record_id)
+    if (student) {
+      student.score = item.score
+      student.is_reviewed = true
     }
-
-    // 初始化批量状态
-    batchUuid.value = uuid
-    totalBatchTasks.value = submitRecordIds.length
-    completedBatchTasks.value = 0
-    batchResults.value = []
-    batchProgress.value = `0/${totalBatchTasks.value}`
-
-    isBatchPolling.value = true
-    await startBatchPolling(uuid)
-  } catch (err: any) {
-    ElMessage.error(err?.message ?? '批量提交失败')
-  } finally {
-    isBatchReviewing.value = false
+  })
+  if (result) {
+    ElMessage.success(`批量批改完成！共批改 ${submitRecordIds.length} 份作业`)
+    await loadHomeworks()
+    clearSelection()
   }
-}
-
-
-// 开始批量轮询批改结果
-const startBatchPolling = (uuid: string) => {
-  // 清除之前的轮询
-  if (batchPollingInterval.value) {
-    clearInterval(batchPollingInterval.value)
-  }
-  
-  let pollCount = 0
-  
-  const poll = async () => {
-    try {
-      pollCount++
-      console.log(`[批量轮询] 第${pollCount}次查询批改状态，UUID: ${uuid}`)
-      
-      const result = await teacherStore.pollBatchReviewStatus(uuid)
-      console.log(`[批量轮询] 第${pollCount}次查询结果:`, result)
-      
-      if (result) {
-        // 202状态码表示正在处理
-        if (result.status === 202 || result.message === '正在处理') {
-          // 继续轮询
-          console.log(`[批量轮询] 批改进行中，继续等待...`)
-          return
-        }
-        
-        // 200状态码表示有结果返回（根据接口文档，格式为：message包含"本次轮询查找到x个已经完成的任务,进度12/40"）
-        if (result.message && (result.message.includes('本次轮询') || result.message.includes('已完成') || result.message.includes('进度'))) {
-          // 解析进度信息（格式：进度12/40）
-          if (result.message.includes('进度')) {
-            const progressMatch = result.message.match(/进度\s*(\d+)\/(\d+)/)
-            if (progressMatch) {
-              completedBatchTasks.value = parseInt(progressMatch[1])
-              // 只在总任务数为0时更新（避免覆盖初始值）
-              if (totalBatchTasks.value === 0) {
-                totalBatchTasks.value = parseInt(progressMatch[2])
-              } else {
-                // 确保总任务数与后端返回的一致
-                const newTotal = parseInt(progressMatch[2])
-                if (newTotal > totalBatchTasks.value) {
-                  totalBatchTasks.value = newTotal
-                }
-              }
-            }
-          }
-          
-          // 更新已完成的任务结果
-          if (result.result && Array.isArray(result.result)) {
-            result.result.forEach((item: any) => {
-              const studentIdx = students.value.findIndex(
-                s => s.submit_record_id === item.submit_record_id
-              )
-              if (studentIdx >= 0) {
-                students.value[studentIdx].score = item.score
-                students.value[studentIdx].is_reviewed = true
-              }
-              
-              // 添加到结果列表（避免重复）
-              if (!batchResults.value.find(r => r.submit_record_id === item.submit_record_id)) {
-                batchResults.value.push(item)
-                // 更新已完成任务数
-                completedBatchTasks.value = batchResults.value.length
-              }
-            })
-          }
-          
-          // 更新进度显示
-          batchProgress.value = `${completedBatchTasks.value}/${totalBatchTasks.value}`
-          
-          // 检查是否全部完成
-          if (completedBatchTasks.value >= totalBatchTasks.value && totalBatchTasks.value > 0) {
-            // 所有任务完成
-            if (batchPollingInterval.value) {
-              clearInterval(batchPollingInterval.value)
-              batchPollingInterval.value = null
-            }
-            isBatchPolling.value = false
-            ElMessage.success(`批量批改完成！共批改 ${totalBatchTasks.value} 份作业`)
-            
-            // 刷新作业列表
-            await loadHomeworks()
-            
-            // 清空选择
-            clearSelection()
-          } else {
-            // 还有未完成的任务，继续轮询
-            console.log(`[批量轮询] 进度: ${completedBatchTasks.value}/${totalBatchTasks.value}`)
-          }
-        }
-      }
-    } catch (error) {
-      console.error('[批量轮询] 查询失败', error)
-    }
-  }
-  
-  // 立即执行一次
-  poll()
-  
-  // 每3秒轮询一次（更频繁地检查结果）
-  batchPollingInterval.value = window.setInterval(poll, 3000)
-  
-  // 最多轮询100次，共300秒（3秒 * 100次）后自动停止轮询（防止无限轮询）
-  setTimeout(() => {
-    if (batchPollingInterval.value) {
-      clearInterval(batchPollingInterval.value)
-      batchPollingInterval.value = null
-      isBatchPolling.value = false
-      ElMessage.warning('批量批改超时，请稍后刷新查看结果')
-    }
-  }, 100000) // 300秒 = 3秒 * 100次
 }
 
 // 课程切换
@@ -634,12 +414,12 @@ const openCreate = () => {
 const fileList = ref<UploadUserFile[]>([])
 
 
-const handleRemove: UploadProps['onRemove'] = (file, uploadFiles) => {
-  console.log(file, uploadFiles)
+const handleRemove: UploadProps['onRemove'] = () => {
+  fileList.value = []
 }
 
 const handlePreview: UploadProps['onPreview'] = (uploadFile) => {
-  console.log(uploadFile)
+  ElMessage.info(`已选择：${uploadFile.name}`)
 }
 
 const handleExceed: UploadProps['onExceed'] = (files, uploadFiles) => {
@@ -658,13 +438,6 @@ const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
     () => false
   )
 }
-// const handleUploadFile = (file : File) => {
-//   uploadedStandardFile.value = file
-//   console.log("file: ", file)
-//   console.log("uploadedStandardFile.value: ", uploadedStandardFile.value)
-//   // uploadedStandardFileName.value = file.name
-// }
-
 const handleSubmit = async () => {
   if (!form.value.title || !form.value.courseId) {
     ElMessage.warning('请填写标题和课程')
