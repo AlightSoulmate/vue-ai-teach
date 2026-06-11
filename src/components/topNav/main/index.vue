@@ -1,7 +1,5 @@
 <script lang="ts" setup>
-import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useThemeStore } from "@/stores/useThemeStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import Icon from "../use/icon.vue";
 import Mine from "../use/mine.vue";
@@ -10,16 +8,7 @@ import Theme from "../use/theme.vue";
 import Github from "../use/github.vue";
 
 const router = useRouter();
-const themeStore = useThemeStore();
 const authStore = useAuthStore();
-const logo = ref("https://a1.x914.com/alight/i/AITeach/white-zisu-logo.png");
-const logoDark = ref(
-  "https://a1.x914.com/alight/i/AITeach/black-zisu-logo.png"
-);
-
-const handleSchoolLogoClick = () => {
-  window.open("https://www.zisu.edu.cn/", "_blank");
-};
 
 const goToLogin = (role: string) => {
   router.push(`/auth/${role}`);
@@ -31,12 +20,6 @@ const goToLogin = (role: string) => {
     <div class="glass-effect">
       <div class="nav-left">
         <Icon />
-        <img
-          :src="themeStore.isDarkTheme ? logoDark : logo"
-          alt="logo"
-          class="logo"
-          @click="handleSchoolLogoClick"
-        />
       </div>
       <div class="nav-right">
         <Illustrate />
@@ -78,17 +61,6 @@ const goToLogin = (role: string) => {
   display: flex;
   align-items: center;
   gap: 20px;
-}
-
-.logo {
-  padding: 1px 10px 0 10px;
-  width: 190px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.logo:hover {
-  transform: scale(1.02);
 }
 
 .glass-effect {

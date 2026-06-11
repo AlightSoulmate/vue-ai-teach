@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { ref } from "vue";
-import { Expand, Fold } from "@element-plus/icons-vue";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { computed } from "vue";
 import { defaultRouteByRole, getMenusByRole, isAppRole } from "@/constants/permissions";
@@ -23,16 +22,6 @@ const emit = defineEmits(["collapse"]);
 
 <template>
   <div class="menu-container">
-    <div class="collapse-trigger">
-      <el-button class="collapse-btn" type="primary" @click="toggleCollapse" text>
-        <el-icon class="collapse-icon" v-if="isCollapse" title="展开">
-          <Expand />
-        </el-icon>
-        <el-icon class="collapse-icon" v-else title="折叠">
-          <Fold />
-        </el-icon>
-      </el-button>
-    </div>
     <el-menu :default-active="activeMenu" class="el-menu-vertical-demo" :collapse="isCollapse" router>
       <el-menu-item v-for="item in menus" :key="item.path" :index="item.path">
         <el-icon>
@@ -41,6 +30,17 @@ const emit = defineEmits(["collapse"]);
         <span class="menu-label">{{ item.title }}</span>
       </el-menu-item>
     </el-menu>
+    <div class="collapse-trigger" :class="{ collapsed: isCollapse }">
+      <button
+        class="collapse-btn"
+        type="button"
+        :title="isCollapse ? '展开' : '收起'"
+        @click="toggleCollapse"
+      >
+        <span class="collapse-mark" :class="{ collapsed: isCollapse }"></span>
+        <span v-if="!isCollapse" class="collapse-text">收起</span>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -48,42 +48,69 @@ const emit = defineEmits(["collapse"]);
 .menu-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  position: relative;
+  height: calc(100vh - #{$top-nav-height});
   background-color: var(--background-color);
   border-right: 1px solid var(--border-color);
   z-index: 100;
 }
 
 .collapse-trigger {
-  position: absolute;
-  right: 8px;
-  top: 8px;
-  z-index: 100;
-}
-
-.collapse-btn {
-  width: 32px;
-  height: 32px;
-  padding: 0;
+  flex: 0 0 64px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  padding: 10px 12px;
+  margin-top: auto;
+  // border-top: 1px solid var(--border-color);
+}
+
+.collapse-trigger.collapsed {
+  padding-inline: 0;
+}
+
+.collapse-btn {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
   color: var(--text-color);
   cursor: pointer;
-  transition: all 0.3s;
-  background-color: transparent;
-  z-index: 100;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  background-color: var(--background-color);
 }
 
 .collapse-btn:hover {
-  background-color: var(--collapse-hover-color) !important;
-  color: var(--active-text-color) !important;
+  background-color: var(--hover-color) !important;
+  color: var(--el-color-primary) !important;
 }
 
-.collapse-icon {
-  font-size: 27px !important;
+.collapse-trigger.collapsed .collapse-btn {
+  width: 40px;
+  padding: 0;
+}
+
+.collapse-mark {
+  width: 9px;
+  height: 9px;
+  display: inline-block;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.collapse-mark.collapsed {
+  transform: rotate(225deg);
+}
+
+.collapse-text {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .el-icon {
@@ -96,10 +123,18 @@ const emit = defineEmits(["collapse"]);
   width: 200px;
   min-height: 400px;
   background-color: var(--background-color);
+  border-right: 1px solid var(--border-color);
+}
+
+.el-menu-vertical-demo.el-menu--collapse {
+  width: 64px;
 }
 
 .el-menu {
+  flex: 1 1 auto;
   background-color: var(--background-color);
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 ::deep(.el-menu-item) {
@@ -146,11 +181,17 @@ const emit = defineEmits(["collapse"]);
 
 /* 折叠态：隐藏文字、图标居中，避免重叠 */
 ::deep(.el-menu--collapse .el-menu-item) {
+  width: 64px !important;
   justify-content: center;
+  padding: 0 !important;
 }
 
 ::deep(.el-menu--collapse .el-menu-item .el-icon) {
   margin-right: 0;
+}
+
+::deep(.el-menu--collapse .el-menu-item span) {
+  display: none;
 }
 
 ::deep(.el-menu--collapse .el-menu-item .menu-label) {

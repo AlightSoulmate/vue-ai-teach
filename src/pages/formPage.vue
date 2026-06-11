@@ -6,9 +6,9 @@
 
     <main v-else class="content-container">
       <section class="brand-section">
-        <div class="brand-mark">ZISU AI Teach</div>
+        <div class="brand-mark">AI Teach</div>
         <h1 class="brand-title">AI 智能教学平台</h1>
-        <p class="brand-subtitle">浙江外国语学院教学服务入口</p>
+        <p class="brand-subtitle">高校教学服务入口</p>
 
         <div class="campus-panel" aria-hidden="true">
           <div class="panel-toolbar">

@@ -67,9 +67,13 @@ onMounted(() => {
 
 .el-aside {
   margin-top: $top-nav-height;
+  position: sticky;
+  top: $top-nav-height;
+  align-self: flex-start;
   transition: all 0.3s;
   background-color: var(--background-color);
-  min-height: calc(100vh - #{$top-nav-height});
+  height: calc(100vh - #{$top-nav-height});
+  min-height: unset;
   flex-shrink: 0;
   overflow: hidden;
 }

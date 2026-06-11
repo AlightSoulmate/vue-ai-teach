@@ -1,14 +1,6 @@
 <script lang="ts" setup>
-import { ref } from "vue";
 import Icon from "../use/icon.vue";
 import Theme from "../use/theme.vue";
-import { useThemeStore } from "@/stores/useThemeStore";
-
-const themeStore = useThemeStore();
-const logo = ref("https://a1.x914.com/alight/i/AITeach/white-zisu-logo.png");
-const logoDark = ref(
-  "https://a1.x914.com/alight/i/AITeach/black-zisu-logo.png"
-);
 </script>
 
 <template>
@@ -16,11 +8,6 @@ const logoDark = ref(
     <div class="glass-effect">
       <div class="nav-left">
         <Icon />
-        <img
-          :src="themeStore.isDarkTheme ? logoDark : logo"
-          alt="logo"
-          class="logo"
-        />
       </div>
       <div class="nav-right">
         <Theme />
@@ -63,11 +50,6 @@ const logoDark = ref(
   display: flex;
   align-items: center;
   gap: 16px;
-}
-
-.logo {
-  padding: 1px 10px 0 10px;
-  width: 190px;
 }
 
 :deep(.el-button) {

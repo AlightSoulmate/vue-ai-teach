@@ -35,7 +35,7 @@ import Carousel from "@/components/use/carousel.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
-const TitleFront = ref("浙江外国语学院");
+const TitleFront = ref("AI 智能教学平台");
 const TitleEnd = ref("AI智能教学平台");
 
 const handleLogin = () => {

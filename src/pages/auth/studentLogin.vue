@@ -77,7 +77,7 @@
 
       <div class="toggle-box">
         <div class="toggle-panel toggle-left">
-          <h1>Hello, ZISU!</h1>
+          <h1>Hello, AI Teach!</h1>
           <p>Don't have an account?</p>
           <button class="btn register-btn" @click="switchToRegister">
             register
@@ -542,4 +542,3 @@ form {
   }
 }
 </style>
-
