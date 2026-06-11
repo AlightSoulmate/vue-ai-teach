@@ -185,7 +185,7 @@
 <script lang="ts" setup>
 import { useAuthStore } from "@/stores/useAuthStore";
 import { watch, defineEmits, ref, computed } from "vue";
-import { isDevMode, isMockEnabled } from "@/utils/env";
+import { isDemoMode, isDevMode, isMockEnabled } from "@/utils/env";
 
 const emit = defineEmits(["usernameChange"]);
 const authStore = useAuthStore();
@@ -201,7 +201,7 @@ const devAccounts: Record<string, { username: string; password: string }> = {
   teacher: { username: "23080501011", password: "123456" },
   admin: { username: "admin", password: "123456" },
 };
-const showDevLoginTip = isDevMode() && isMockEnabled();
+const showDevLoginTip = (isDevMode() && isMockEnabled()) || isDemoMode();
 const currentDevAccount = computed(() => {
   return devAccounts[authStore.currentRole] || devAccounts.student;
 });

@@ -34,6 +34,10 @@ export function isMockEnabled(): boolean {
   return getBooleanEnv("VITE_APP_MOCK_ENABLE");
 }
 
+export function isDemoMode(): boolean {
+  return getBooleanEnv("VITE_APP_DEMO_MODE");
+}
+
 export function getMockApi(): string | undefined {
   return getEnvValue("VITE_APP_MOCK_API");
 }

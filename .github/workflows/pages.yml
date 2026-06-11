@@ -39,6 +39,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_APP_DEMO_MODE: "true"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -60,4 +62,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-

@@ -10,7 +10,11 @@ import "element-plus/dist/index.css";
 import "@/styles/light-theme.scss";
 import "@/styles/dark-theme.scss";
 
-if (import.meta.env.DEV && import.meta.env.VITE_APP_MOCK_ENABLE === "true") {
+const shouldUseMock =
+  (import.meta.env.DEV && import.meta.env.VITE_APP_MOCK_ENABLE === "true") ||
+  import.meta.env.VITE_APP_DEMO_MODE === "true";
+
+if (shouldUseMock) {
   import("@/mock");
 }
 
