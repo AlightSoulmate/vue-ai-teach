@@ -56,7 +56,7 @@
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-style-import": "^2.0.0",
     "vite-plugin-svg-icons": "^2.0.1",
-    "vite-plugin-vue-devtools": "^7.7.0",
+    "vite-plugin-vue-devtools": "^8.1.2",
     "vitest": "^3.0.5",
     "typescript-eslint": "^8.24.0",
     "vue-tsc": "^2.2.0"
